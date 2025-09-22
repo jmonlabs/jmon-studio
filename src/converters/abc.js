@@ -403,7 +403,7 @@ export class ToAbc {
         const chunk = q(Math.min(remainingDuration, spaceLeft));
 
         if (chunk > EPS) {
-          let noteToken = isFirstPart ? token : token; // Could use tie notation later
+          let noteToken = token;
           noteToken += encodeDur(chunk);
 
           // Articulations (only on first part)
@@ -412,6 +412,11 @@ export class ToAbc {
             if (note.articulation === "accent") noteToken += ">";
             if (note.articulation === "tenuto") noteToken += "-";
             if (note.articulation === "marcato") noteToken += "^";
+          }
+
+          // Add tie if there's more duration remaining after this chunk
+          if (remainingDuration > chunk + EPS) {
+            noteToken += "-"; // tie to next part
           }
 
           emitToken(noteToken);

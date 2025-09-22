@@ -10240,7 +10240,7 @@ class ba {
         const D = v(t - a), V = v(Math.min(j, D));
         if (V > _) {
           let z = M;
-          z += S(V), L && i.showArticulations && (g.articulation === "staccato" && (z += "."), g.articulation === "accent" && (z += ">"), g.articulation === "tenuto" && (z += "-"), g.articulation === "marcato" && (z += "^")), m(z), a = v(a + V), j = v(j - V), L = !1;
+          z += S(V), L && i.showArticulations && (g.articulation === "staccato" && (z += "."), g.articulation === "accent" && (z += ">"), g.articulation === "tenuto" && (z += "-"), g.articulation === "marcato" && (z += "^")), j > V + _ && (z += "-"), m(z), a = v(a + V), j = v(j - V), L = !1;
         }
         h();
       }
