@@ -289,7 +289,7 @@ export class ToAbc {
       abcNotes += token + " ";
     };
     const emitBarsIfNeeded = () => {
-      while (currentMeasureBeat >= quarterNotesPerMeasure - 1e-9) {
+      while (currentMeasureBeat >= quarterNotesPerMeasure - EPS) {
         emitToken("|");
         currentMeasureBeat -= quarterNotesPerMeasure;
         measureCount++;
@@ -305,15 +305,17 @@ export class ToAbc {
     const emitRest = (dur, { forceVisible = false } = {}) => {
       // dur in quarter-note units; may span measures
       let remaining = dur;
-      while (remaining > 0) {
-        const spaceLeft = quarterNotesPerMeasure - currentMeasureBeat;
+      while (remaining > EPS) {
+        const spaceLeft = q(quarterNotesPerMeasure - currentMeasureBeat);
         const chunk = q(Math.min(remaining, spaceLeft));
-        let restToken = (opts.hideRests && !forceVisible) ? "x" : "z";
-        restToken += encodeDur(chunk);
-        emitToken(restToken);
-        currentMeasureBeat = q(currentMeasureBeat + chunk);
+        if (chunk > EPS) {
+          let restToken = (opts.hideRests && !forceVisible) ? "x" : "z";
+          restToken += encodeDur(chunk);
+          emitToken(restToken);
+          currentMeasureBeat = q(currentMeasureBeat + chunk);
+          remaining = q(remaining - chunk);
+        }
         emitBarsIfNeeded();
-        remaining = q(remaining - chunk);
       }
     };
 
@@ -392,21 +394,34 @@ export class ToAbc {
         token = opts.hideRests ? "x" : "z";
       }
 
-      // Duration annotation
-      let noteToken = token;
-      noteToken += encodeDur(duration);
+      // Handle notes that span across measures
+      let remainingDuration = duration;
+      let isFirstPart = true;
 
-      // Articulations
-      if (opts.showArticulations) {
-        if (note.articulation === "staccato") noteToken += ".";
-        if (note.articulation === "accent") noteToken += ">";
-        if (note.articulation === "tenuto") noteToken += "-";
-        if (note.articulation === "marcato") noteToken += "^";
+      while (remainingDuration > EPS) {
+        const spaceLeft = q(quarterNotesPerMeasure - currentMeasureBeat);
+        const chunk = q(Math.min(remainingDuration, spaceLeft));
+
+        if (chunk > EPS) {
+          let noteToken = isFirstPart ? token : token; // Could use tie notation later
+          noteToken += encodeDur(chunk);
+
+          // Articulations (only on first part)
+          if (isFirstPart && opts.showArticulations) {
+            if (note.articulation === "staccato") noteToken += ".";
+            if (note.articulation === "accent") noteToken += ">";
+            if (note.articulation === "tenuto") noteToken += "-";
+            if (note.articulation === "marcato") noteToken += "^";
+          }
+
+          emitToken(noteToken);
+          currentMeasureBeat = q(currentMeasureBeat + chunk);
+          remainingDuration = q(remainingDuration - chunk);
+          isFirstPart = false;
+        }
+
+        emitBarsIfNeeded();
       }
-
-      emitToken(noteToken);
-      currentMeasureBeat = q(currentMeasureBeat + duration);
-      emitBarsIfNeeded();
 
       lastEnd = q(start + duration);
     }

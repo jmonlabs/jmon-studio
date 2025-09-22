@@ -1,14 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "JMON Composition (Multi-Track, Extended)",
-  "description": "A declarative music format supporting synthesis, MIDI, score notation, key changes, arbitrary metadata, annotations, and custom presets. Time values use numeric format in quarter notes (e.g., 4.5) for MIDI compatibility and algorithmic processing. The bars:beats:ticks format is available for display and conversion purposes only.",
+  "title": "JSON Music Object Notation (JMON) Schema",
+  "description": "A human-readable, western-ish declarative music format based on JSON.",
   "type": "object",
-  "required": [
-    "format",
-    "version", 
-    "tempo",
-    "tracks"
-  ],
+  "required": ["format", "version", "tempo", "tracks"],
   "properties": {
     "format": {
       "type": "string",
@@ -39,12 +34,12 @@
         "properties": {
           "time": {
             "oneOf": [
-              { 
-                "type": "number", 
+              {
+                "type": "number",
                 "description": "Time in quarter notes (e.g., 8.0 for beat 1 of bar 3 in 4/4 time)."
               },
-              { 
-                "type": "string", 
+              {
+                "type": "string",
                 "pattern": "^\\d+:\\d+(\\.\\d+)?:\\d+$",
                 "description": "Optional: Musical time in bars:beats:ticks format for display (e.g., '2:0:0')."
               }
@@ -74,12 +69,12 @@
         "properties": {
           "time": {
             "oneOf": [
-              { 
-                "type": "number", 
+              {
+                "type": "number",
                 "description": "Time in quarter notes (e.g., 16.0 for beat 1 of bar 5 in 4/4 time)."
               },
-              { 
-                "type": "string", 
+              {
+                "type": "string",
                 "pattern": "^\\d+:\\d+(\\.\\d+)?:\\d+$",
                 "description": "Optional: Musical time in bars:beats:ticks format for display (e.g., '4:0:0')."
               }
@@ -102,12 +97,12 @@
       "properties": {
         "startOffset": {
           "oneOf": [
-            { 
-              "type": "number", 
+            {
+              "type": "number",
               "description": "Offset in quarter notes for when playback should start (e.g., 2.0 for beat 3)."
             },
-            { 
-              "type": "string", 
+            {
+              "type": "string",
               "pattern": "^\\d+:\\d+(\\.\\d+)?:\\d+$",
               "description": "Optional: Musical time in bars:beats:ticks format for display (e.g., '0:2:0')."
             }
@@ -120,12 +115,12 @@
         },
         "globalLoopEnd": {
           "oneOf": [
-            { 
-              "type": "number", 
+            {
+              "type": "number",
               "description": "End time in quarter notes where the global loop should end (e.g., 32.0 for bar 9 in 4/4)."
             },
-            { 
-              "type": "string", 
+            {
+              "type": "string",
               "pattern": "^\\d+:\\d+(\\.\\d+)?:\\d+$",
               "description": "Optional: Musical time in bars:beats:ticks format for display (e.g., '8:0:0')."
             }
@@ -200,7 +195,41 @@
           },
           "type": {
             "type": "string",
-            "enum": ["Synth", "PolySynth", "MonoSynth", "AMSynth", "FMSynth", "DuoSynth", "PluckSynth", "NoiseSynth", "Sampler", "Filter", "AutoFilter", "Reverb", "FeedbackDelay", "PingPongDelay", "Delay", "Chorus", "Phaser", "Tremolo", "Vibrato", "AutoWah", "Distortion", "Chebyshev", "BitCrusher", "Compressor", "Limiter", "Gate", "FrequencyShifter", "PitchShift", "JCReverb", "Freeverb", "StereoWidener", "MidSideCompressor", "Destination"],
+            "enum": [
+              "Synth",
+              "PolySynth",
+              "MonoSynth",
+              "AMSynth",
+              "FMSynth",
+              "DuoSynth",
+              "PluckSynth",
+              "NoiseSynth",
+              "Sampler",
+              "Filter",
+              "AutoFilter",
+              "Reverb",
+              "FeedbackDelay",
+              "PingPongDelay",
+              "Delay",
+              "Chorus",
+              "Phaser",
+              "Tremolo",
+              "Vibrato",
+              "AutoWah",
+              "Distortion",
+              "Chebyshev",
+              "BitCrusher",
+              "Compressor",
+              "Limiter",
+              "Gate",
+              "FrequencyShifter",
+              "PitchShift",
+              "JCReverb",
+              "Freeverb",
+              "StereoWidener",
+              "MidSideCompressor",
+              "Destination"
+            ],
             "description": "Type of audio node (Synth, Sampler, Effect, etc.)."
           },
           "options": {
@@ -290,7 +319,16 @@
             "if": {
               "properties": {
                 "type": {
-                  "enum": ["Synth", "PolySynth", "MonoSynth", "AMSynth", "FMSynth", "DuoSynth", "PluckSynth", "NoiseSynth"]
+                  "enum": [
+                    "Synth",
+                    "PolySynth",
+                    "MonoSynth",
+                    "AMSynth",
+                    "FMSynth",
+                    "DuoSynth",
+                    "PluckSynth",
+                    "NoiseSynth"
+                  ]
                 }
               }
             },
@@ -648,7 +686,7 @@
       }
     },
     "connections": {
-      "type": "array", 
+      "type": "array",
       "description": "Array of audio graph connections. Each is a two-element array [source, target]. If not provided, default connections will be created automatically.",
       "default": [["synth", "master"]],
       "items": {
@@ -683,7 +721,17 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["Synth", "PolySynth", "MonoSynth", "AMSynth", "FMSynth", "DuoSynth", "PluckSynth", "NoiseSynth", "Sampler"],
+                "enum": [
+                  "Synth",
+                  "PolySynth",
+                  "MonoSynth",
+                  "AMSynth",
+                  "FMSynth",
+                  "DuoSynth",
+                  "PluckSynth",
+                  "NoiseSynth",
+                  "Sampler"
+                ],
                 "description": "Type of synthesizer (Synth, Sampler, AMSynth, FMSynth, etc.)."
               },
               "options": {
@@ -716,33 +764,36 @@
               "properties": {
                 "pitch": {
                   "oneOf": [
-                    { "type": "number", "description": "MIDI note number (preferred)." },
-                    { "type": "string", "description": "Note name (e.g., 'C4', 'G#3')." },
+                    {
+                      "type": "number",
+                      "description": "MIDI note number (preferred)."
+                    },
+                    {
+                      "type": "string",
+                      "description": "Note name (e.g., 'C4', 'G#3')."
+                    },
                     {
                       "type": "array",
                       "description": "Chord (array of MIDI numbers or note names).",
                       "items": {
-                        "oneOf": [
-                          { "type": "number" },
-                          { "type": "string" }
-                        ]
+                        "oneOf": [{ "type": "number" }, { "type": "string" }]
                       }
                     }
                   ]
                 },
                 "time": {
                   "oneOf": [
-                    { 
-                      "type": "number", 
+                    {
+                      "type": "number",
                       "description": "Time in quarter notes (e.g., 4.5 for beat 1.5 of bar 2 in 4/4). Primary format for MIDI compatibility."
                     },
-                    { 
-                      "type": "string", 
+                    {
+                      "type": "string",
                       "pattern": "^(\\d+n|\\d+t)$",
                       "description": "Tone.js note values (e.g., '4n', '8t') for relative timing."
                     },
-                    { 
-                      "type": "string", 
+                    {
+                      "type": "string",
                       "pattern": "^\\d+:\\d+(\\.\\d+)?:\\d+$",
                       "description": "Optional: Musical time in bars:beats:ticks format for display (e.g., '0:2:0', '1:3.5:240')."
                     }
@@ -750,14 +801,14 @@
                 },
                 "duration": {
                   "oneOf": [
-                    { 
-                      "type": "string", 
+                    {
+                      "type": "string",
                       "pattern": "^(\\d+n|\\d+t|\\d+:\\d+(\\.\\d+)?:\\d+)$",
                       "description": "Musical duration using Tone.js note values (e.g., '4n', '8n', '2t') or bars:beats:ticks format (e.g., '1:0:0')."
                     },
-                    { 
-                      "type": "number", 
-                      "description": "Legacy: Duration in seconds (deprecated, use note values instead)." 
+                    {
+                      "type": "number",
+                      "description": "Legacy: Duration in seconds (deprecated, use note values instead)."
                     }
                   ]
                 },
@@ -766,7 +817,8 @@
                   "minimum": 0,
                   "maximum": 1,
                   "description": "Note velocity (0-1)."
-                },"articulation": {
+                },
+                "articulation": {
                   "type": "string",
                   "enum": ["staccato", "accent", "tenuto", "legato", "marcato"],
                   "description": "Performance instruction that affects how a note is played (e.g., 'staccato', 'accent')."
@@ -780,7 +832,13 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": ["grace_note", "trill", "mordent", "turn", "arpeggio"],
+                        "enum": [
+                          "grace_note",
+                          "trill",
+                          "mordent",
+                          "turn",
+                          "arpeggio"
+                        ],
                         "description": "Type of ornament"
                       },
                       "parameters": {
@@ -789,7 +847,9 @@
                         "oneOf": [
                           {
                             "if": {
-                              "properties": { "type": { "const": "grace_note" } }
+                              "properties": {
+                                "type": { "const": "grace_note" }
+                              }
                             },
                             "then": {
                               "properties": {
@@ -802,8 +862,14 @@
                                   "type": "array",
                                   "items": {
                                     "oneOf": [
-                                      { "type": "number", "description": "MIDI note number" },
-                                      { "type": "string", "description": "Note name (e.g., 'C4')" }
+                                      {
+                                        "type": "number",
+                                        "description": "MIDI note number"
+                                      },
+                                      {
+                                        "type": "string",
+                                        "description": "Note name (e.g., 'C4')"
+                                      }
                                     ]
                                   },
                                   "description": "Optional specific pitches for the grace note(s)"
@@ -917,14 +983,14 @@
                       },
                       "time": {
                         "oneOf": [
-                          { 
-                            "type": "string", 
+                          {
+                            "type": "string",
                             "pattern": "^(\\d+n|\\d+t|\\d+:\\d+(\\.\\d+)?:\\d+)$",
                             "description": "Relative time using note values (e.g., '8n') or bars:beats:ticks (e.g., '0:0:240')."
                           },
-                          { 
-                            "type": "number", 
-                            "description": "Legacy: Relative time in seconds (deprecated)." 
+                          {
+                            "type": "number",
+                            "description": "Legacy: Relative time in seconds (deprecated)."
                           }
                         ],
                         "description": "When this modulation event happens (relative to note start)."
@@ -938,10 +1004,7 @@
             }
           },
           "loop": {
-            "oneOf": [
-              { "type": "boolean" },
-              { "type": "string" }
-            ],
+            "oneOf": [{ "type": "boolean" }, { "type": "string" }],
             "description": "Whether this sequence loops, or string for musical duration."
           },
           "loopEnd": {
@@ -1026,14 +1089,14 @@
               },
               "time": {
                 "oneOf": [
-                  { 
-                    "type": "string", 
+                  {
+                    "type": "string",
                     "pattern": "^\\d+:\\d+(\\.\\d+)?:\\d+$",
                     "description": "Musical time in bars:beats:ticks format."
                   },
-                  { 
-                    "type": "number", 
-                    "description": "Legacy: Time in beats (deprecated)." 
+                  {
+                    "type": "number",
+                    "description": "Legacy: Time in beats (deprecated)."
                   }
                 ]
               },
@@ -1061,14 +1124,14 @@
           },
           "time": {
             "oneOf": [
-              { 
-                "type": "string", 
+              {
+                "type": "string",
                 "pattern": "^\\d+:\\d+(\\.\\d+)?:\\d+$",
                 "description": "Musical time in bars:beats:ticks format (e.g., '1:2:0')."
               },
-              { 
-                "type": "number", 
-                "description": "Legacy: Time in beats (deprecated)." 
+              {
+                "type": "number",
+                "description": "Legacy: Time in beats (deprecated)."
               }
             ]
           },
@@ -1078,14 +1141,14 @@
           },
           "duration": {
             "oneOf": [
-              { 
-                "type": "string", 
+              {
+                "type": "string",
                 "pattern": "^(\\d+n|\\d+t|\\d+:\\d+(\\.\\d+)?:\\d+)$",
                 "description": "Musical duration using note values (e.g., '4n') or bars:beats:ticks (e.g., '1:0:0')."
               },
-              { 
-                "type": "number", 
-                "description": "Legacy: Duration in seconds (deprecated)." 
+              {
+                "type": "number",
+                "description": "Legacy: Duration in seconds (deprecated)."
               }
             ],
             "description": "Optional duration for annotation (e.g., for lyrics or extended comments)."
@@ -1103,14 +1166,14 @@
         "properties": {
           "time": {
             "oneOf": [
-              { 
-                "type": "string", 
+              {
+                "type": "string",
                 "pattern": "^\\d+:\\d+(\\.\\d+)?:\\d+$",
                 "description": "Musical time in bars:beats:ticks format (e.g., '8:0:0')."
               },
-              { 
-                "type": "number", 
-                "description": "Legacy: Time in beats (deprecated)." 
+              {
+                "type": "number",
+                "description": "Legacy: Time in beats (deprecated)."
               }
             ],
             "description": "Time of the time signature change."
@@ -1129,8 +1192,18 @@
       "description": "Global synthesizer configuration that applies to all tracks unless overridden.",
       "properties": {
         "type": {
-          "type": "string", 
-          "enum": ["Synth", "PolySynth", "MonoSynth", "AMSynth", "FMSynth", "DuoSynth", "PluckSynth", "NoiseSynth", "Sampler"],
+          "type": "string",
+          "enum": [
+            "Synth",
+            "PolySynth",
+            "MonoSynth",
+            "AMSynth",
+            "FMSynth",
+            "DuoSynth",
+            "PluckSynth",
+            "NoiseSynth",
+            "Sampler"
+          ],
           "description": "Default synthesizer type (Synth, Sampler, AMSynth, FMSynth, etc.)."
         },
         "modulationTarget": {
@@ -1159,7 +1232,7 @@
                   "description": "Attack time in seconds"
                 },
                 "decay": {
-                  "type": "number", 
+                  "type": "number",
                   "minimum": 0,
                   "maximum": 2,
                   "default": 0.1,
@@ -1257,7 +1330,7 @@
           "description": "Unique identifier for this automation channel."
         },
         "name": {
-          "type": "string", 
+          "type": "string",
           "description": "Human-readable name for this automation channel."
         },
         "target": {

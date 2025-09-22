@@ -66,7 +66,7 @@ export function createPlayer(composition, options = {}) {
         font-family: 'PT Sans', sans-serif;
         background-color: ${colors.background};
         color: ${colors.text};
-        padding: 16px;
+        padding: 16px 16px 8px 16px;
         border-radius: 12px;
         width: 100%;
         max-width: ${PLAYER_DIMENSIONS.MAX_WIDTH}px;
