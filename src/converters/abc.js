@@ -458,6 +458,14 @@ export class ToAbc {
       measureCount++;
     }
 
+    // Fill current incomplete measure with rests
+    if (currentMeasureBeat > EPS) {
+      const remaining = q(quarterNotesPerMeasure - currentMeasureBeat);
+      if (remaining > EPS) {
+        emitRest(remaining, { forceVisible: true });
+      }
+    }
+
     // Final bar if needed
     const trimmed = abcNotes.trim();
     if (trimmed && !trimmed.endsWith("|")) abcNotes += "|";

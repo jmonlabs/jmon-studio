@@ -10267,6 +10267,10 @@ class ba {
       const g = v(t - a);
       g > _ && p(g, { forceVisible: !0 }), m("|"), a = 0, c++;
     }
+    if (a > _) {
+      const g = v(t - a);
+      g > _ && p(g, { forceVisible: !0 });
+    }
     const f = s.trim();
     return f && !f.endsWith("|") && (s += "|"), { abcNotesStr: s };
   }
