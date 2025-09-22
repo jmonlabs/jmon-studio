@@ -10097,7 +10097,11 @@ class ba {
           c,
           u,
           d,
-          { hideRests: v, showArticulations: S, padMeasures: p }
+          {
+            hideRests: v,
+            showArticulations: S,
+            padMeasures: m.length > 1 ? p : 0
+          }
         );
         L.trim() && (r += L + `
 `);
@@ -10134,7 +10138,11 @@ class ba {
         c,
         u,
         d,
-        { hideRests: v, showArticulations: S, padMeasures: p }
+        {
+          hideRests: v,
+          showArticulations: S,
+          padMeasures: m.length > 1 ? p : 0
+        }
       );
       w.trim() && (r += w + `
 `);
@@ -10146,7 +10154,11 @@ class ba {
           c,
           u,
           d,
-          { hideRests: v, showArticulations: S, padMeasures: p }
+          {
+            hideRests: v,
+            showArticulations: S,
+            padMeasures: m.length > 1 ? p : 0
+          }
         );
         $.trim() && (r += $ + `
 `);
@@ -10165,7 +10177,11 @@ class ba {
         c,
         u,
         d,
-        { hideRests: v, showArticulations: S, padMeasures: p }
+        {
+          hideRests: v,
+          showArticulations: S,
+          padMeasures: m.length > 1 ? p : 0
+        }
       );
       g.trim() && (r += g + `
 `);

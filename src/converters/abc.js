@@ -163,7 +163,11 @@ export class ToAbc {
           quarterNotesPerMeasure,
           measuresPerLine,
           lineBreaks,
-          { hideRests, showArticulations, padMeasures: totalMeasures },
+          {
+            hideRests,
+            showArticulations,
+            padMeasures: tracks.length > 1 ? totalMeasures : 0,
+          },
         );
 
         if (abcNotesStr.trim()) {
@@ -210,7 +214,11 @@ export class ToAbc {
         quarterNotesPerMeasure,
         measuresPerLine,
         lineBreaks,
-        { hideRests, showArticulations, padMeasures: totalMeasures },
+        {
+          hideRests,
+          showArticulations,
+          padMeasures: tracks.length > 1 ? totalMeasures : 0,
+        },
       );
       if (abcNotesStr.trim()) abc += abcNotesStr + "\n";
     } else if (renderMode === "single") {
@@ -227,7 +235,11 @@ export class ToAbc {
           quarterNotesPerMeasure,
           measuresPerLine,
           lineBreaks,
-          { hideRests, showArticulations, padMeasures: totalMeasures },
+          {
+            hideRests,
+            showArticulations,
+            padMeasures: tracks.length > 1 ? totalMeasures : 0,
+          },
         );
 
         if (abcNotesStr.trim()) {
@@ -254,7 +266,11 @@ export class ToAbc {
         quarterNotesPerMeasure,
         measuresPerLine,
         lineBreaks,
-        { hideRests, showArticulations, padMeasures: totalMeasures },
+        {
+          hideRests,
+          showArticulations,
+          padMeasures: tracks.length > 1 ? totalMeasures : 0,
+        },
       );
 
       if (abcNotesStr.trim()) {
@@ -414,7 +430,7 @@ export class ToAbc {
             if (note.articulation === "marcato") noteToken += "^";
           }
 
-          // Add tie if there's more duration remaining after this chunk
+          // Add tie if this chunk doesn't complete the note (more parts coming)
           if (remainingDuration > chunk + EPS) {
             noteToken += "-"; // tie to next part
           }
