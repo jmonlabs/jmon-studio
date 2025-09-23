@@ -88,63 +88,46 @@ export class ToAbc {
     }
     abc += `M:${composition.timeSignature || "4/4"}\n`;
 
-    // Get tracks first
+    // Choose L: value based on common durations to minimize fractions
+    // Get all durations from tracks to analyze
     const tracks = Array.isArray(composition.tracks)
       ? composition.tracks
       : Object.values(composition.tracks || {});
-    if (tracks.length === 0) return abc;
 
-    // Automatically choose the best L: value to minimize fractions
-    const allDurations = [];
+    let hasSmallDurations = false;
     tracks.forEach((track) => {
       const notes = track.notes || track;
       if (Array.isArray(notes)) {
         notes.forEach((note) => {
-          if (typeof note.duration === "number") {
-            allDurations.push(note.duration);
+          if (
+            typeof note.duration === "number" &&
+            (note.duration === 0.25 || note.duration === 0.5)
+          ) {
+            hasSmallDurations = true;
           }
         });
       }
     });
 
-    // Test different L: values and choose the one that minimizes fractions
-    const testLValues = [1 / 8, 1 / 4, 1 / 2]; // L:1/8, L:1/4, L:1/2
-    let bestL = 1 / 4;
-    let minFractions = Infinity;
+    // Use L:1/8 if there are many 0.25 and 0.5 durations, otherwise L:1/4
+    const useEighthNotes = hasSmallDurations;
+    const lValue = useEighthNotes ? 1 / 8 : 1 / 4;
+    const lStr = useEighthNotes ? "1/8" : "1/4";
+    const tempo = composition.tempo || composition.bpm || 120;
 
-    for (const lValue of testLValues) {
-      let fractionCount = 0;
-      for (const duration of allDurations) {
-        const normalized = duration / lValue;
-        // Count as fraction if it's not a whole number
-        if (Math.abs(normalized - Math.round(normalized)) > 0.001) {
-          fractionCount++;
-        }
-      }
-      if (fractionCount < minFractions) {
-        minFractions = fractionCount;
-        bestL = lValue;
-      }
-    }
-
-    // Format L: value
-    const lValueStr = bestL === 1 / 8 ? "1/8" : bestL === 1 / 4 ? "1/4" : "1/2";
-    abc += `L:${lValueStr}\n`;
-
-    // Adjust tempo marking based on L: value
-    const tempoNote = bestL === 1 / 8 ? "1/8" : bestL === 1 / 4 ? "1/4" : "1/2";
-    const tempoValue = (composition.tempo || composition.bpm || 120) *
-      (bestL / (1 / 4));
-    abc += `Q:${tempoNote}=${Math.round(tempoValue)}\n`;
+    abc += `L:${lStr}\n`;
+    abc += `Q:${lStr}=${Math.round(tempo * (useEighthNotes ? 2 : 1))}\n`;
     abc += `K:${composition.keySignature || "C"}\n`;
+
+    if (tracks.length === 0) return abc;
 
     // Parse time signature to get beats per measure
     const timeSignature = composition.timeSignature || "4/4";
     const [beatsPerMeasure, beatValue] = timeSignature.split("/").map(Number);
     const quarterNotesPerMeasure = beatsPerMeasure * (4 / beatValue); // Convert to quarter note units
 
-    // Store the chosen L: value for duration encoding
-    const lValue = bestL;
+    // Convert to L: value units for measure calculation
+    const lUnitsPerMeasure = quarterNotesPerMeasure / lValue;
 
     // Line break options
     const measuresPerLine = options.measuresPerLine || 4; // Default: 4 measures per line
