@@ -128,6 +128,7 @@ class VexFlowConverter {
             const vexFlowNote = {
               keys: pitches.map((p) => this.midiToVexFlow(p)),
               duration: this.durationToVexFlow(note.duration || 1),
+              time: note.time ?? 0,
             };
 
             // Add articulations if present
@@ -141,6 +142,7 @@ class VexFlowConverter {
             vexFlowNotes.push({
               keys: [],
               duration: this.durationToVexFlow(note.duration || 1),
+              time: note.time ?? 0,
               isRest: true,
             });
           }
@@ -337,15 +339,34 @@ class VexFlowConverter {
           // Split notes across measures and mark ties
           const measures = [];
           let cur = [];
-          let acc = 0;
+          let acc = (() => {
+            const notes = vexFlowData.tracks[0].notes || [];
+            const minTime = notes.reduce(
+              (m, n) => Math.min(m, n.time ?? 0),
+              Number.POSITIVE_INFINITY,
+            );
+            const base = minTime === Number.POSITIVE_INFINITY ? 0 : minTime;
+            // Convert beats to 32nd-note ticks (1 beat = 8 ticks)
+            return Math.round((base * 8) % measureCapacity);
+          })();
           const originalNotes = vexFlowData.tracks[0].notes;
+          const graceBuf = [];
           for (const nd of originalNotes) {
-            let t = durToTicks(nd.duration);
+            const ticks = durToTicks(nd.duration);
+            const isGrace = !!nd.grace;
+            if (isGrace) {
+              graceBuf.push(nd);
+              continue;
+            }
+            let t = ticks;
             let firstPart = true;
             while (t > 0) {
               const remaining = measureCapacity - acc;
               const slice = Math.min(t, remaining);
               const part = { ...nd, duration: ticksToDur(slice) };
+              if (firstPart && graceBuf.length) {
+                part.graceNotes = graceBuf.splice(0, graceBuf.length);
+              }
               if (!firstPart) part.tieFromPrev = true;
               if (slice < t) part.tieToNext = true;
               cur.push(part);
@@ -390,9 +411,13 @@ class VexFlowConverter {
             });
           });
           const median = allPitches.length
-            ? allPitches.sort((a, b) =>
-              a - b
-            )[Math.floor(allPitches.length / 2)]
+            ? (() => {
+              const arr = [...allPitches].sort((a, b) => a - b);
+              const mid = arr.length / 2;
+              return arr.length % 2
+                ? arr[Math.floor(mid)]
+                : (arr[mid - 1] + arr[mid]) / 2;
+            })()
             : 60;
           const detectedClef = median < 60 ? "bass" : "treble";
 
@@ -403,7 +428,7 @@ class VexFlowConverter {
               (vexFlowData.tracks &&
                 vexFlowData.tracks[0] &&
                 vexFlowData.tracks[0].clef) ||
-              detectedClef,
+              (detectedClef || "treble"),
           );
           if (vexFlowData.timeSignature) {
             stave.addTimeSignature(vexFlowData.timeSignature);
@@ -429,26 +454,46 @@ class VexFlowConverter {
                 keys: noteData.keys.map((k) => k.toLowerCase()),
                 duration: noteData.duration,
               });
+              // Grace notes (attach if present on this note)
+              if (
+                noteData.graceNotes && Flow.GraceNoteGroup && Flow.GraceNote
+              ) {
+                try {
+                  const gnotes = noteData.graceNotes.map((g) =>
+                    new Flow.GraceNote({
+                      keys: (g.keys || []).map((kk) =>
+                        String(kk).toLowerCase()
+                      ),
+                      duration: "16",
+                      slash: true,
+                    })
+                  );
+                  const ggroup = new Flow.GraceNoteGroup(gnotes, true);
+                  if (typeof ggroup.beamNotes === "function") {
+                    ggroup.beamNotes();
+                  }
+                  if (
+                    typeof ggroup.setContext === "function" &&
+                    typeof ggroup.attachToNote === "function"
+                  ) {
+                    ggroup.setContext(context);
+                    ggroup.attachToNote(note);
+                  }
+                } catch {}
+              }
               // Accidentals display (auto/always)
               if (Flow.Accidental) {
                 noteData.keys.forEach((origKey, idx2) => {
                   const k = origKey.toLowerCase();
-                  const letter = k[0];
-                  const acc = k.includes("#")
-                    ? "#"
-                    : (k.includes("b") ? "b" : "");
+                  const m = /^([a-g])(#{1,2}|b{1,2})?\/-?\d+$/.exec(k);
+                  const letter = m ? m[1] : k[0];
+                  const acc = m && m[2] ? (m[2].includes("#") ? "#" : "b") : "";
                   const sig = keyAccMap[letter] || "natural";
                   let glyph = null;
-                  if (accMode === "always") {
-                    if (acc === "#") glyph = "#";
-                    else if (acc === "b") glyph = "b";
-                    else if (sig !== "natural") glyph = "n";
-                  } else {
-                    if (acc === "#" && sig !== "sharp") glyph = "#";
-                    else if (acc === "b" && sig !== "flat") glyph = "b";
-                    else if (!acc && (sig === "sharp" || sig === "flat")) {
-                      glyph = "n";
-                    }
+                  if (acc === "#" && sig !== "sharp") {
+                    glyph = "#";
+                  } else if (acc === "b" && sig !== "flat") {
+                    glyph = "b";
                   }
                   if (glyph) {
                     if (typeof note.addAccidental === "function") {
@@ -560,20 +605,9 @@ class VexFlowConverter {
             ),
           );
 
-          const hasBarNote = allTickables.some((t) =>
-            typeof t.getMetrics !== "function"
-          );
-          if (
-            !hasBarNote &&
-            Flow.Formatter &&
-            typeof Flow.Formatter.FormatAndDraw === "function"
-          ) {
-            Flow.Formatter.FormatAndDraw(context, stave, allTickables);
-          } else {
-            const formatter = new Flow.Formatter().joinVoices([voice]);
-            formatter.format([voice], avail - 20);
-            voice.draw(context, stave);
-          }
+          const formatter = new Flow.Formatter().joinVoices([voice]);
+          formatter.format([voice], avail - 20);
+          voice.draw(context, stave);
 
           if (allBeams.length) {
             allBeams.forEach((b) => {
@@ -593,11 +627,7 @@ class VexFlowConverter {
             const pre = document.createElement("pre");
             pre.textContent = JSON.stringify(vexFlowData, null, 2);
             details.appendChild(pre);
-            if (div && div.parentNode) {
-              div.parentNode.insertBefore(details, div.nextSibling);
-            } else if (div) {
-              div.appendChild(details);
-            }
+            // VexFlow source details are appended in index.js. Do not duplicate here.
           } catch (_) {}
           // Draw simple ties when requested (tie to next note)
           if (createdNotes.length && Flow.StaveTie) {
@@ -754,15 +784,34 @@ class VexFlowConverter {
           // Split notes across measures and mark ties
           const measures = [];
           let cur = [];
-          let acc = 0;
+          let acc = (() => {
+            const notes = vexFlowData.tracks[0].notes || [];
+            const minTime = notes.reduce(
+              (m, n) => Math.min(m, n.time ?? 0),
+              Number.POSITIVE_INFINITY,
+            );
+            const base = minTime === Number.POSITIVE_INFINITY ? 0 : minTime;
+            // Convert beats to 32nd-note ticks (1 beat = 8 ticks)
+            return Math.round((base * 8) % measureCapacity);
+          })();
           const originalNotes = vexFlowData.tracks[0].notes;
+          const graceBuf = [];
           for (const nd of originalNotes) {
-            let t = durToTicks(nd.duration);
+            const ticks = durToTicks(nd.duration);
+            const isGrace = !!nd.grace;
+            if (isGrace) {
+              graceBuf.push(nd);
+              continue;
+            }
+            let t = ticks;
             let firstPart = true;
             while (t > 0) {
               const remaining = measureCapacity - acc;
               const slice = Math.min(t, remaining);
               const part = { ...nd, duration: ticksToDur(slice) };
+              if (firstPart && graceBuf.length) {
+                part.graceNotes = graceBuf.splice(0, graceBuf.length);
+              }
               if (!firstPart) part.tieFromPrev = true;
               if (slice < t) part.tieToNext = true;
               cur.push(part);
@@ -810,9 +859,13 @@ class VexFlowConverter {
             });
           });
           const fallbackMedian = fallbackPitches.length
-            ? fallbackPitches.sort((a, b) => a - b)[
-              Math.floor(fallbackPitches.length / 2)
-            ]
+            ? (() => {
+              const arr = [...fallbackPitches].sort((a, b) => a - b);
+              const mid = arr.length / 2;
+              return arr.length % 2
+                ? arr[Math.floor(mid)]
+                : (arr[mid - 1] + arr[mid]) / 2;
+            })()
             : 60;
           const detectedClef = fallbackMedian < 60 ? "bass" : "treble";
           // Single stave with internal barlines (renderer fallback)
@@ -822,7 +875,7 @@ class VexFlowConverter {
               (vexFlowData.tracks &&
                 vexFlowData.tracks[0] &&
                 vexFlowData.tracks[0].clef) ||
-              detectedClef,
+              (detectedClef || "treble"),
           );
           if (vexFlowData.timeSignature) {
             stave.addTimeSignature(vexFlowData.timeSignature);
@@ -847,26 +900,46 @@ class VexFlowConverter {
                 keys: noteData.keys.map((k) => k.toLowerCase()),
                 duration: noteData.duration,
               });
+              // Grace notes (attach if present on this note)
+              if (
+                noteData.graceNotes && Flow.GraceNoteGroup && Flow.GraceNote
+              ) {
+                try {
+                  const gnotes = noteData.graceNotes.map((g) =>
+                    new Flow.GraceNote({
+                      keys: (g.keys || []).map((kk) =>
+                        String(kk).toLowerCase()
+                      ),
+                      duration: "16",
+                      slash: true,
+                    })
+                  );
+                  const ggroup = new Flow.GraceNoteGroup(gnotes, true);
+                  if (typeof ggroup.beamNotes === "function") {
+                    ggroup.beamNotes();
+                  }
+                  if (
+                    typeof ggroup.setContext === "function" &&
+                    typeof ggroup.attachToNote === "function"
+                  ) {
+                    ggroup.setContext(context);
+                    ggroup.attachToNote(note);
+                  }
+                } catch {}
+              }
               // Accidentals display (auto/always)
               if (Flow.Accidental) {
                 noteData.keys.forEach((origKey, idx2) => {
                   const k = origKey.toLowerCase();
-                  const letter = k[0];
-                  const acc = k.includes("#")
-                    ? "#"
-                    : (k.includes("b") ? "b" : "");
+                  const m = /^([a-g])(#{1,2}|b{1,2})?\/-?\d+$/.exec(k);
+                  const letter = m ? m[1] : k[0];
+                  const acc = m && m[2] ? (m[2].includes("#") ? "#" : "b") : "";
                   const sig = keyAccMap[letter] || "natural";
                   let glyph = null;
-                  if (accMode === "always") {
-                    if (acc === "#") glyph = "#";
-                    else if (acc === "b") glyph = "b";
-                    else if (sig !== "natural") glyph = "n";
-                  } else {
-                    if (acc === "#" && sig !== "sharp") glyph = "#";
-                    else if (acc === "b" && sig !== "flat") glyph = "b";
-                    else if (!acc && (sig === "sharp" || sig === "flat")) {
-                      glyph = "n";
-                    }
+                  if (acc === "#" && sig !== "sharp") {
+                    glyph = "#";
+                  } else if (acc === "b" && sig !== "flat") {
+                    glyph = "b";
                   }
                   if (glyph) {
                     if (typeof note.addAccidental === "function") {
@@ -975,20 +1048,9 @@ class VexFlowConverter {
             ),
           );
 
-          const hasBarNote = allTickables.some((t) =>
-            typeof t.getMetrics !== "function"
-          );
-          if (
-            !hasBarNote &&
-            Flow.Formatter &&
-            typeof Flow.Formatter.FormatAndDraw === "function"
-          ) {
-            Flow.Formatter.FormatAndDraw(context, stave, allTickables);
-          } else {
-            const formatter = new Flow.Formatter().joinVoices([voice]);
-            formatter.format([voice], avail - 20);
-            voice.draw(context, stave);
-          }
+          const formatter = new Flow.Formatter().joinVoices([voice]);
+          formatter.format([voice], avail - 20);
+          voice.draw(context, stave);
 
           if (allBeams.length) {
             allBeams.forEach((b) => {
