@@ -81,6 +81,7 @@ class VexFlowConverter {
     const result = {
       timeSignature: composition.timeSignature || "4/4",
       keySignature: composition.keySignature || "C",
+      clef: composition.clef,
       tracks: [],
     };
 
@@ -121,6 +122,7 @@ class VexFlowConverter {
       result.tracks.push({
         name: track.name || `Track ${trackIndex + 1}`,
         notes: vexFlowNotes,
+        clef: track.clef,
       });
     });
 
@@ -341,10 +343,40 @@ class VexFlowConverter {
           );
           const mCount = Math.max(1, measures.length);
           const mWidth = Math.max(100, Math.floor(avail / mCount));
+          // Auto-detect clef based on median pitch across measures
+          const keyToMidi = (k) => {
+            const m = /^([a-g])(b|#)?\/(-?\d+)$/.exec(k);
+            if (!m) return 60; // default to middle C
+            const letters = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
+            const letter = letters[m[1]];
+            const acc = m[2] === "#" ? 1 : (m[2] === "b" ? -1 : 0);
+            const octave = parseInt(m[3], 10);
+            return (octave + 1) * 12 + letter + acc;
+          };
+          const allPitches = [];
+          measures.forEach((ms) => {
+            ms.forEach((n) => {
+              if (n && !n.isRest && Array.isArray(n.keys) && n.keys[0]) {
+                allPitches.push(keyToMidi(String(n.keys[0]).toLowerCase()));
+              }
+            });
+          });
+          const median = allPitches.length
+            ? allPitches.sort((a, b) =>
+              a - b
+            )[Math.floor(allPitches.length / 2)]
+            : 60;
+          const detectedClef = median < 60 ? "bass" : "treble";
 
           // Single stave with internal barlines
           const stave = new Flow.Stave(left, top, avail);
-          stave.addClef("treble");
+          stave.addClef(
+            vexFlowData.clef ||
+              (vexFlowData.tracks &&
+                vexFlowData.tracks[0] &&
+                vexFlowData.tracks[0].clef) ||
+              detectedClef,
+          );
           if (vexFlowData.timeSignature) {
             stave.addTimeSignature(vexFlowData.timeSignature);
           }
@@ -707,9 +739,41 @@ class VexFlowConverter {
           const mCount = Math.max(1, measures.length);
           const mWidth = Math.max(100, Math.floor(avail / mCount));
 
+          // Determine clef based on median pitch (renderer fallback)
+          const fallbackKeyToMidi = (k) => {
+            const m = /^([a-g])(b|#)?\/(-?\d+)$/.exec(k);
+            if (!m) return 60;
+            const letters = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
+            const letter = letters[m[1]];
+            const acc = m[2] === "#" ? 1 : (m[2] === "b" ? -1 : 0);
+            const octave = parseInt(m[3], 10);
+            return (octave + 1) * 12 + letter + acc;
+          };
+          const fallbackPitches = [];
+          measures.forEach((ms) => {
+            ms.forEach((n) => {
+              if (n && !n.isRest && Array.isArray(n.keys) && n.keys[0]) {
+                fallbackPitches.push(
+                  fallbackKeyToMidi(String(n.keys[0]).toLowerCase()),
+                );
+              }
+            });
+          });
+          const fallbackMedian = fallbackPitches.length
+            ? fallbackPitches.sort((a, b) => a - b)[
+              Math.floor(fallbackPitches.length / 2)
+            ]
+            : 60;
+          const detectedClef = fallbackMedian < 60 ? "bass" : "treble";
           // Single stave with internal barlines (renderer fallback)
           const stave = new Flow.Stave(left, top, avail);
-          stave.addClef("treble");
+          stave.addClef(
+            vexFlowData.clef ||
+              (vexFlowData.tracks &&
+                vexFlowData.tracks[0] &&
+                vexFlowData.tracks[0].clef) ||
+              detectedClef,
+          );
           if (vexFlowData.timeSignature) {
             stave.addTimeSignature(vexFlowData.timeSignature);
           }
