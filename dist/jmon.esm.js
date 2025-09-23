@@ -1,4 +1,4 @@
-class Dt {
+class _t {
   constructor() {
     console.warn(
       "[JMON] Using simplified browser validator. For full validation, use Node.js environment."
@@ -216,7 +216,7 @@ class me {
     return this.generate().map((r) => r % 12).includes(e);
   }
 }
-function Be(c) {
+function ze(c) {
   if (typeof c == "object" && !Array.isArray(c))
     return c;
   if (Array.isArray(c)) {
@@ -433,7 +433,7 @@ const en = {
   roundToList: pe,
   scaleList: We,
   setOffsetsAccordingToDurations: ge,
-  tracksToDict: Be,
+  tracksToDict: ze,
   tune: Qe
 }, Symbol.toStringTag, { value: "Module" }));
 class rn extends ct {
@@ -821,7 +821,7 @@ class Jt {
     ];
   }
 }
-const zt = {
+const Bt = {
   // Simple articulations
   staccato: {
     complex: !1,
@@ -884,7 +884,7 @@ const zt = {
     description: "Gradual volume decrease"
   }
 };
-class _t {
+class Dt {
   /**
    * Add articulation to a note in a sequence
    * @param {Array} sequence - The note sequence
@@ -903,7 +903,7 @@ class _t {
       return o.errors.push("Sequence must be an array"), o;
     if (n < 0 || n >= t.length)
       return o.errors.push(`Note index ${n} out of bounds (sequence length: ${t.length})`), o;
-    const i = zt[e];
+    const i = Bt[e];
     if (!i)
       return o.errors.push(`Unknown articulation type: ${e}`), o;
     const s = t[n];
@@ -1035,7 +1035,7 @@ class _t {
       return { success: !1, error: "Invalid note" };
     const r = n.articulation;
     if (delete n.articulation, delete n.glissTarget, n.modulations && r) {
-      const o = zt[r];
+      const o = Bt[r];
       o && o.complex && (n.modulations = n.modulations.filter((i) => i.subtype !== r), n.modulations.length === 0 && delete n.modulations);
     }
     return {
@@ -1084,7 +1084,7 @@ class _t {
    * Get available articulation types with descriptions
    */
   static getAvailableTypes() {
-    return Object.entries(zt).map(([t, e]) => ({
+    return Object.entries(Bt).map(([t, e]) => ({
       type: t,
       complex: e.complex,
       description: e.description,
@@ -1094,20 +1094,20 @@ class _t {
   }
 }
 function xe(c, t, e, n) {
-  return _t.addArticulation(c, t, e, n);
+  return Dt.addArticulation(c, t, e, n);
 }
 function ve(c, t) {
-  return _t.removeArticulation(c, t);
+  return Dt.removeArticulation(c, t);
 }
 function sn(c) {
-  return _t.validateSequence(c);
+  return Dt.validateSequence(c);
 }
 const an = xe, cn = ve, ln = {
   Scale: me,
   Progression: rn,
   Voice: on,
   Ornament: Jt,
-  Articulation: _t,
+  Articulation: Dt,
   addArticulation: xe,
   addOrnament: an,
   // Include the alias
@@ -1269,7 +1269,7 @@ class hn {
     ).sort((e, n) => e[1] - n[1]);
   }
 }
-function wt(c, t = 4, e = 480) {
+function bt(c, t = 4, e = 480) {
   const n = Math.floor(c / t), r = c - n * t, o = Math.floor(r), i = r - o, s = Math.round(i * e);
   return `${n}:${o}:${s}`;
 }
@@ -1309,13 +1309,13 @@ function Wt(c) {
       return {
         pitch: n,
         duration: r,
-        time: wt(o)
+        time: bt(o)
       };
     }
     if (typeof t == "object" && t !== null) {
       const { pitch: n, duration: r } = t;
       let o = "0:0:0";
-      return typeof t.time == "string" ? o = t.time : typeof t.time == "number" ? o = wt(t.time) : typeof t.offset == "number" && (o = wt(t.offset)), {
+      return typeof t.time == "string" ? o = t.time : typeof t.time == "number" ? o = bt(t.time) : typeof t.offset == "number" && (o = bt(t.offset)), {
         pitch: n,
         duration: r,
         time: o,
@@ -1339,7 +1339,7 @@ function mn(c) {
   return c.map(([t, e, n = 0]) => ({
     pitch: t,
     duration: e,
-    time: wt(n)
+    time: bt(n)
   }));
 }
 function pn(c) {
@@ -1355,7 +1355,7 @@ function fn(c, t = 1, e = 0) {
     const o = {
       pitch: r,
       duration: t,
-      time: wt(n)
+      time: bt(n)
     };
     return n += t, o;
   });
@@ -1363,7 +1363,7 @@ function fn(c, t = 1, e = 0) {
 function Te(c, t) {
   return c.map((e) => ({
     ...e,
-    time: wt(kt(e.time) + t)
+    time: bt(kt(e.time) + t)
   }));
 }
 function gn(c) {
@@ -1390,13 +1390,13 @@ function wn(c) {
     start: n,
     end: r,
     duration: r - n,
-    startTime: wt(n),
-    endTime: wt(r)
+    startTime: bt(n),
+    endTime: bt(r)
   };
 }
 const bn = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  beatsToTime: wt,
+  beatsToTime: bt,
   combineSequences: yn,
   concatenateSequences: gn,
   createComposition: dn,
@@ -1417,7 +1417,7 @@ function xn(c, t, e = {}) {
   return e.legacy ? a : a.map(([l, u, d]) => ({
     pitch: l,
     duration: u,
-    time: e.useStringTime ? wt(d) : d
+    time: e.useStringTime ? bt(d) : d
   }));
 }
 function vn(c, t) {
@@ -1443,7 +1443,7 @@ class kn {
   constructor() {
   }
 }
-class yt {
+class wt {
   data;
   // rows: number;
   // columns: number;
@@ -1456,10 +1456,10 @@ class yt {
       this.data = t.map((n) => [...n]), this.rows = this.data.length, this.columns = this.data[0]?.length || 0;
   }
   static zeros(t, e) {
-    return new yt(t, e);
+    return new wt(t, e);
   }
   static from2DArray(t) {
-    return new yt(t);
+    return new wt(t);
   }
   get(t, e) {
     if (t < 0 || t >= this.rows || e < 0 || e >= this.columns)
@@ -1486,22 +1486,22 @@ class yt {
     for (let e = 0; e < this.rows; e++)
       for (let n = 0; n < this.columns; n++)
         t[n][e] = this.data[e][n];
-    return new yt(t);
+    return new wt(t);
   }
   clone() {
-    return new yt(this.data);
+    return new wt(this.data);
   }
   toArray() {
     return this.data.map((t) => [...t]);
   }
 }
-function Bt(c) {
-  return Array.isArray(c[0]) ? yt.from2DArray(c) : yt.from2DArray([c]);
+function zt(c) {
+  return Array.isArray(c[0]) ? wt.from2DArray(c) : wt.from2DArray([c]);
 }
 function ke(c) {
   if (c.rows !== c.columns)
     throw new Error("Matrix must be square for Cholesky decomposition");
-  const t = c.rows, e = yt.zeros(t, t);
+  const t = c.rows, e = wt.zeros(t, t);
   for (let n = 0; n < t; n++)
     for (let r = 0; r <= n; r++)
       if (n === r) {
@@ -1525,7 +1525,7 @@ class Sn {
     this.params = { ...t };
   }
   call(t, e) {
-    const n = e || t, r = yt.zeros(t.rows, n.rows);
+    const n = e || t, r = wt.zeros(t.rows, n.rows);
     for (let o = 0; o < t.rows; o++)
       for (let i = 0; i < n.rows; i++)
         r.set(o, i, this.compute(t.getRow(o), n.getRow(i)));
@@ -1562,7 +1562,7 @@ class Se {
     this.kernel = t, this.alpha = e.alpha || 1e-10;
   }
   fit(t, e) {
-    this.XTrain = Bt(t), this.yTrain = [...e];
+    this.XTrain = zt(t), this.yTrain = [...e];
     const n = this.kernel.call(this.XTrain);
     for (let r = 0; r < n.rows; r++)
       n.set(r, r, n.get(r, r) + this.alpha);
@@ -1576,7 +1576,7 @@ class Se {
   predict(t, e = !1) {
     if (!this.XTrain || !this.yTrain || !this.L || !this.alphaVector)
       throw new Error("Model must be fitted before prediction");
-    const n = Bt(t), r = this.kernel.call(this.XTrain, n), o = new Array(n.rows);
+    const n = zt(t), r = this.kernel.call(this.XTrain, n), o = new Array(n.rows);
     for (let s = 0; s < n.rows; s++) {
       o[s] = 0;
       for (let a = 0; a < this.XTrain.rows; a++)
@@ -1592,7 +1592,7 @@ class Se {
   sampleY(t, e = 1) {
     if (!this.XTrain || !this.yTrain || !this.L || !this.alphaVector)
       throw new Error("Model must be fitted before sampling");
-    const n = Bt(t), r = this.predict(t, !0);
+    const n = zt(t), r = this.predict(t, !0);
     if (!r.std)
       throw new Error("Standard deviation computation failed");
     const o = [];
@@ -1687,7 +1687,7 @@ function En(c, t) {
   }
   return o;
 }
-const bt = {
+const xt = {
   timeSignature: [4, 4],
   // 4/4 time
   ticksPerQuarterNote: 480,
@@ -1695,11 +1695,11 @@ const bt = {
   beatsPerBar: 4
   // Derived from time signature
 };
-function At(c, t = bt) {
+function At(c, t = xt) {
   const { timeSignature: e, ticksPerQuarterNote: n } = t, [r, o] = e, i = r * 4 / o, s = Math.floor(c / i), a = c % i, l = Math.floor(a), u = a - l, d = Math.round(u * n);
   return `${s}:${l}:${d}`;
 }
-function Ht(c, t = bt) {
+function Ht(c, t = xt) {
   const { timeSignature: e, ticksPerQuarterNote: n } = t, [r, o] = e, i = c.split(":");
   if (i.length !== 3)
     throw new Error(`Invalid bars:beats:ticks format: ${c}`);
@@ -1709,7 +1709,7 @@ function Ht(c, t = bt) {
   const u = r * 4 / o;
   return s * u + a + l / n;
 }
-function Pn(c, t = bt, e = !0) {
+function Pn(c, t = xt, e = !0) {
   return c.map((n) => {
     const r = { ...n };
     if (n.offset !== void 0 && (r.time = n.offset, delete r.offset), typeof n.time == "string" && n.time.includes(":") && (r.time = Ht(n.time, t)), typeof n.duration == "number" && !e) {
@@ -1724,7 +1724,7 @@ function Nt(c, t = {}) {
     label: e = "track",
     midiChannel: n = 0,
     synth: r = { type: "Synth" },
-    timingConfig: o = bt,
+    timingConfig: o = xt,
     keepNumericDuration: i = !0
     // Default to numeric for MIDI consistency
   } = t, s = Pn(c, o, i);
@@ -1744,7 +1744,7 @@ class Cn {
   timingConfig;
   isFitted;
   gpr;
-  constructor(t = [], e = 1, n = 1, r = 0.1, o = !1, i = bt) {
+  constructor(t = [], e = 1, n = 1, r = 0.1, o = !1, i = xt) {
     this.data = [...t], this.lengthScale = e, this.amplitude = n, this.noiseLevel = r, this.walkAround = o, this.timingConfig = i, this.isFitted = !1, this.gpr = null;
   }
   generate(t = {}) {
@@ -1760,7 +1760,7 @@ class Cn {
     t.useStringTime;
     const s = [];
     for (let a = 0; a < n; a++) {
-      const l = Array.from({ length: e }, (f, C) => [C]), u = new yt(l), m = new he(r, o).call(u);
+      const l = Array.from({ length: e }, (f, P) => [P]), u = new wt(l), m = new he(r, o).call(u);
       for (let f = 0; f < m.rows; f++)
         m.set(f, f, m.get(f, f) + i);
       let p = new Array(e).fill(this.walkAround || 0);
@@ -1781,7 +1781,7 @@ class Cn {
     } catch (f) {
       throw new Error(`Failed to fit Gaussian Process: ${f.message}`);
     }
-    const l = Math.min(...this.data.map((f) => f[0])), d = (Math.max(...this.data.map((f) => f[0])) - l) / (e - 1), m = Array.from({ length: e }, (f, C) => [l + C * d]), p = this.gpr.sampleY(m, n), g = m.map((f) => f[0]);
+    const l = Math.min(...this.data.map((f) => f[0])), d = (Math.max(...this.data.map((f) => f[0])) - l) / (e - 1), m = Array.from({ length: e }, (f, P) => [l + P * d]), p = this.gpr.sampleY(m, n), g = m.map((f) => f[0]);
     return n === 1 ? [g, p[0]] : [g, p];
   }
   rbfKernel(t, e) {
@@ -1823,17 +1823,17 @@ class Cn {
     let u = 0;
     const d = Array.isArray(t[0]) ? t : [t], m = n || Array.from({ length: d[0].length }, (p, g) => g);
     for (let p = 0; p < d[0].length; p++) {
-      const g = e[p % e.length], f = n ? m[p] : u, C = d.map((et) => {
-        let O = et[p];
+      const g = e[p % e.length], f = n ? m[p] : u, P = d.map((nt) => {
+        let D = nt[p];
         if (i) {
-          const J = Math.min(...et), S = Math.max(...et) - J || 1, j = (O - J) / S, I = Math.floor(j * i.length), F = Math.max(0, Math.min(I, i.length - 1));
-          O = i[F];
+          const Y = Math.min(...nt), A = Math.max(...nt) - Y || 1, R = (D - Y) / A, I = Math.floor(R * i.length), F = Math.max(0, Math.min(I, i.length - 1));
+          D = i[F];
         } else {
-          const J = Math.min(...et), S = Math.max(...et) - J || 1, j = (O - J) / S;
-          O = s[0] + j * (s[1] - s[0]);
+          const Y = Math.min(...nt), A = Math.max(...nt) - Y || 1, R = (D - Y) / A;
+          D = s[0] + R * (s[1] - s[0]);
         }
-        return a && (O = Math.round(O)), O;
-      }), it = C.length === 1 ? C[0] : C;
+        return a && (D = Math.round(D)), D;
+      }), it = P.length === 1 ? P[0] : P;
       l.push({
         pitch: it,
         duration: g,
@@ -2853,7 +2853,7 @@ class jn {
   toJmonNotes(t = [1], e = {}) {
     const {
       useStringTime: n = !1,
-      timingConfig: r = bt,
+      timingConfig: r = xt,
       dimension: o = 0,
       mapToScale: i = null,
       scaleRange: s = [60, 72]
@@ -2863,8 +2863,8 @@ class jn {
       const m = t[d % t.length];
       let p = a[d];
       if (i) {
-        const g = Math.min(...a), C = Math.max(...a) - g || 1, it = (p - g) / C, et = Math.floor(it * i.length), O = Math.max(0, Math.min(et, i.length - 1));
-        p = i[O];
+        const g = Math.min(...a), P = Math.max(...a) - g || 1, it = (p - g) / P, nt = Math.floor(it * i.length), D = Math.max(0, Math.min(nt, i.length - 1));
+        p = i[D];
       } else
         p = this.mapToScale([a], i || [60, 62, 64, 65, 67, 69, 71])[0][d];
       l.push({
@@ -2903,7 +2903,7 @@ class $n {
   mergingProbability;
   timingConfig;
   constructor(t = {}) {
-    this.walkRange = t.walkRange || null, this.walkStart = t.walkStart !== void 0 ? t.walkStart : this.walkRange ? Math.floor((this.walkRange[1] - this.walkRange[0]) / 2) + this.walkRange[0] : 0, this.walkProbability = t.walkProbability || [-1, 0, 1], this.roundTo = t.roundTo !== void 0 ? t.roundTo : null, this.branchingProbability = t.branchingProbability || 0, this.mergingProbability = t.mergingProbability || 0, this.timingConfig = t.timingConfig || bt;
+    this.walkRange = t.walkRange || null, this.walkStart = t.walkStart !== void 0 ? t.walkStart : this.walkRange ? Math.floor((this.walkRange[1] - this.walkRange[0]) / 2) + this.walkRange[0] : 0, this.walkProbability = t.walkProbability || [-1, 0, 1], this.roundTo = t.roundTo !== void 0 ? t.roundTo : null, this.branchingProbability = t.branchingProbability || 0, this.mergingProbability = t.mergingProbability || 0, this.timingConfig = t.timingConfig || xt;
   }
   /**
    * Generate random walk sequence(s) with branching and merging
@@ -2928,8 +2928,8 @@ class $n {
         let p = d + m;
         if (isNaN(p) && (p = d), this.walkRange !== null && (p < this.walkRange[0] ? p = this.walkRange[0] : p > this.walkRange[1] && (p = this.walkRange[1])), isNaN(p) && (p = this.walkStart), u && (u[i] = p), s[l] = p, n() < this.branchingProbability) {
           const g = this.createBranch(r[l], i), f = this.generateStep(n);
-          let C = d + f;
-          isNaN(C) && (C = d), this.walkRange !== null && (C < this.walkRange[0] ? C = this.walkRange[0] : C > this.walkRange[1] && (C = this.walkRange[1])), isNaN(C) && (C = this.walkStart), g[i] = C, a.push(g), s.push(C);
+          let P = d + f;
+          isNaN(P) && (P = d), this.walkRange !== null && (P < this.walkRange[0] ? P = this.walkRange[0] : P > this.walkRange[1] && (P = this.walkRange[1])), isNaN(P) && (P = this.walkStart), g[i] = P, a.push(g), s.push(P);
         }
       }
       r.push(...a), o = s, o = this.handleMerging(r, o, i, n);
@@ -3126,7 +3126,7 @@ class Tt {
 class Kt {
   phasors;
   timingConfig;
-  constructor(t = bt) {
+  constructor(t = xt) {
     this.phasors = [], this.timingConfig = t;
   }
   /**
@@ -3200,8 +3200,8 @@ class Kt {
         g = o[1] - f * (o[1] - o[0]);
       }
       if (a) {
-        const f = Math.floor((p - r[0]) / (r[1] - r[0]) * a.length), C = Math.max(0, Math.min(f, a.length - 1));
-        p = a[C];
+        const f = Math.floor((p - r[0]) / (r[1] - r[0]) * a.length), P = Math.max(0, Math.min(f, a.length - 1));
+        p = a[P];
       } else
         p = Math.round(p);
       d.push({
@@ -3592,7 +3592,7 @@ class Fn {
   timingConfig;
   sequence = [];
   constructor(t) {
-    const { operation: e, direction: n, repetition: r, timingConfig: o = bt } = t;
+    const { operation: e, direction: n, repetition: r, timingConfig: o = xt } = t;
     if (!["additive", "subtractive"].includes(e))
       throw new Error("Invalid operation. Choose 'additive' or 'subtractive'.");
     if (!["forward", "backward", "inward", "outward"].includes(n))
@@ -3781,14 +3781,14 @@ class Fn {
     });
   }
 }
-class Dn {
+class _n {
   tChord;
   direction;
   rank;
   isAlternate;
   currentDirection;
   timingConfig;
-  constructor(t, e = "down", n = 0, r = bt) {
+  constructor(t, e = "down", n = 0, r = xt) {
     if (!["up", "down", "any", "alternate"].includes(e))
       throw new Error("Invalid direction. Choose 'up', 'down', 'any' or 'alternate'.");
     if (this.tChord = t, this.isAlternate = e === "alternate", this.currentDirection = this.isAlternate ? "up" : e, this.direction = e, this.timingConfig = r, !Number.isInteger(n) || n < 0)
@@ -3806,9 +3806,9 @@ class Dn {
     const n = this.normalizeInput(t), r = [];
     for (const o of n) {
       if (o.pitch === void 0) {
-        const { offset: g, time: f, ...C } = o;
+        const { offset: g, time: f, ...P } = o;
         r.push({
-          ...C,
+          ...P,
           pitch: void 0,
           time: e ? this.beatsToTime(g) : g
         });
@@ -3859,7 +3859,7 @@ class Dn {
     return typeof t != "string" ? Number(t) || 0 : Ht(t, this.timingConfig);
   }
 }
-class _n {
+class Dn {
   /**
    * Calculate Gini coefficient for inequality measurement
    * @param {number[]} values - Values to analyze
@@ -4071,15 +4071,15 @@ class _n {
 }
 const On = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  MusicalAnalysis: _n,
+  MusicalAnalysis: Dn,
   MusicalIndex: Lt
-}, Symbol.toStringTag, { value: "Module" })), zn = {
+}, Symbol.toStringTag, { value: "Module" })), Bn = {
   harmony: ln,
   rhythm: Tn,
   motifs: {
     MotifBank: kn
   }
-}, Bn = {
+}, zn = {
   theory: ct
 }, Vn = {
   gaussian: {
@@ -4107,15 +4107,15 @@ const On = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   },
   minimalism: {
     Process: Fn,
-    Tintinnabuli: Dn
+    Tintinnabuli: _n
   }
 }, qn = {
   ...On
 }, Gn = {
   ...nn
 }, Et = {
-  theory: zn,
-  constants: Bn,
+  theory: Bn,
+  constants: zn,
   generative: Vn,
   analysis: qn,
   utils: Gn
@@ -4201,8 +4201,8 @@ function Ae(c, t = {}) {
   let l = 0;
   r.forEach((m) => {
     m.partEvents && m.partEvents.length > 0 && m.partEvents.forEach((p) => {
-      const g = Vt.parseBBTToBeats(p.time, a), f = Vt.parseDurationToBeats(p.duration, a), C = g + f;
-      C > l && (l = C);
+      const g = Vt.parseBBTToBeats(p.time, a), f = Vt.parseDurationToBeats(p.duration, a), P = g + f;
+      P > l && (l = P);
     });
   });
   const u = 60 / o, d = l * u;
@@ -4511,8 +4511,8 @@ function Xt(c, t = {}) {
     throw console.error(`${Yt.PLAYER} Tracks/sequences must be an array:`, a), new Error(Gt.TRACKS_MUST_BE_ARRAY);
   const l = c.tempo || c.bpm || sr.DEFAULT_TEMPO, d = Ae(c, { autoMultivoice: o, maxVoices: i, showDebug: n }), { tracks: m, metadata: p } = d;
   let g = p.totalDuration;
-  const f = ir, C = document.createElement("div");
-  C.style.cssText = `
+  const f = ir, P = document.createElement("div");
+  P.style.cssText = `
         font-family: 'PT Sans', sans-serif;
         background-color: ${f.background};
         color: ${f.text};
@@ -4688,56 +4688,56 @@ function Xt(c, t = {}) {
                 flex-shrink: 0 !important;
             }
         }
-    `, document.head.appendChild(it), C.classList.add("jmon-music-player-container");
-  const et = document.createElement("div");
-  et.style.cssText = `
+    `, document.head.appendChild(it), P.classList.add("jmon-music-player-container");
+  const nt = document.createElement("div");
+  nt.style.cssText = `
         display: grid;
         grid-template-columns: 1fr;
         grid-template-rows: auto auto auto auto;
         gap: 12px;
         margin-bottom: 0px;
         font-family: 'PT Sans', sans-serif;
-    `, et.classList.add("jmon-music-player-main");
-  const O = document.createElement("div");
-  O.style.cssText = `
+    `, nt.classList.add("jmon-music-player-main");
+  const D = document.createElement("div");
+  D.style.cssText = `
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         font-family: 'PT Sans', sans-serif;
         gap: 24px;
         flex-wrap: wrap;
-    `, O.classList.add("jmon-music-player-top");
-  const J = document.createElement("div");
-  J.style.cssText = `
+    `, D.classList.add("jmon-music-player-top");
+  const Y = document.createElement("div");
+  Y.style.cssText = `
         display: flex;
         flex-direction: column;
         flex: 1;
         min-width: 0;
         box-sizing: border-box;
-    `, J.classList.add("jmon-music-player-left");
+    `, Y.classList.add("jmon-music-player-left");
   const st = document.createElement("div");
   st.style.cssText = `
         display: flex;
         flex-direction: column;
         gap: 6px;
     `;
-  const S = Pe(), j = c.tracks || [], I = [];
-  j.forEach((x, k) => {
-    const T = m.find(
-      (ot) => ot.originalTrackIndex === k
+  const A = Pe(), R = c.tracks || [], I = [];
+  R.forEach((x, S) => {
+    const k = m.find(
+      (ot) => ot.originalTrackIndex === S
     )?.analysis;
-    T?.hasGlissando && console.warn(
-      `Track ${x.label || x.name || k + 1} contient un glissando : la polyphonie sera désactivée pour cette piste.`
+    k?.hasGlissando && console.warn(
+      `Track ${x.label || x.name || S + 1} contient un glissando : la polyphonie sera désactivée pour cette piste.`
     );
-    const R = document.createElement("div");
-    R.style.cssText = `
+    const N = document.createElement("div");
+    N.style.cssText = `
             margin-bottom: 8px;
             display: flex;
             flex-direction: column;
             gap: 8px;
-        `, R.classList.add("jmon-track-selector");
-    const q = document.createElement("label");
-    q.textContent = x.label || `Track ${k + 1}`, q.style.cssText = `
+        `, N.classList.add("jmon-track-selector");
+    const B = document.createElement("label");
+    B.textContent = x.label || `Track ${S + 1}`, B.style.cssText = `
             font-family: 'PT Sans', sans-serif;
             font-size: 16px;
             color: ${f.text};
@@ -4746,8 +4746,8 @@ function Xt(c, t = {}) {
             font-weight: normal;
             flex-shrink: 0;
         `;
-    const H = document.createElement("select");
-    H.style.cssText = `
+    const J = document.createElement("select");
+    J.style.cssText = `
             padding: 4px;
             border: 1px solid ${f.secondary};
             border-radius: 4px;
@@ -4763,8 +4763,8 @@ function Xt(c, t = {}) {
             margin: 0;
             outline: none;
         `;
-    const ut = document.createElement("optgroup");
-    ut.label = "Synthesizers";
+    const ht = document.createElement("optgroup");
+    ht.label = "Synthesizers";
     const lt = [
       "PolySynth",
       "Synth",
@@ -4775,33 +4775,33 @@ function Xt(c, t = {}) {
       "MetalSynth",
       "MonoSynth",
       "PluckSynth"
-    ], pt = c.audioGraph || [];
-    if (Array.isArray(pt) && pt.length > 0) {
-      const ot = c.tracks?.[k]?.synthRef;
-      pt.forEach(($) => {
-        if ($.id && $.type && $.type !== "Destination") {
-          const ht = document.createElement("option");
-          ht.value = `AudioGraph: ${$.id}`, ht.textContent = $.id, ot === $.id && (ht.selected = !0), ut.appendChild(ht);
+    ], gt = c.audioGraph || [];
+    if (Array.isArray(gt) && gt.length > 0) {
+      const ot = c.tracks?.[S]?.synthRef;
+      gt.forEach((j) => {
+        if (j.id && j.type && j.type !== "Destination") {
+          const dt = document.createElement("option");
+          dt.value = `AudioGraph: ${j.id}`, dt.textContent = j.id, ot === j.id && (dt.selected = !0), ht.appendChild(dt);
         }
       });
     }
     lt.forEach((ot) => {
-      const $ = document.createElement("option");
-      $.value = ot, $.textContent = ot, (T?.hasGlissando && ot === "Synth" || !T?.hasGlissando && !c.tracks?.[k]?.synthRef && ot === "PolySynth") && ($.selected = !0), T?.hasGlissando && (ot === "PolySynth" || ot === "DuoSynth") && ($.disabled = !0, $.textContent += " (mono only for glissando)"), ut.appendChild($);
-    }), H.appendChild(ut);
-    const xt = document.createElement("optgroup");
-    xt.label = "Sampled Instruments";
-    const mt = {};
-    S.forEach((ot) => {
-      mt[ot.category] || (mt[ot.category] = []), mt[ot.category].push(ot);
-    }), Object.keys(mt).sort().forEach((ot) => {
-      const $ = document.createElement("optgroup");
-      $.label = ot, mt[ot].forEach((ht) => {
-        const G = document.createElement("option");
-        G.value = `GM: ${ht.name}`, G.textContent = ht.name, T?.hasGlissando && (G.disabled = !0, G.textContent += " (not suitable for glissando)"), $.appendChild(G);
-      }), H.appendChild($);
-    }), I.push(H), R.append(q, H), st.appendChild(R);
-  }), J.appendChild(st);
+      const j = document.createElement("option");
+      j.value = ot, j.textContent = ot, (k?.hasGlissando && ot === "Synth" || !k?.hasGlissando && !c.tracks?.[S]?.synthRef && ot === "PolySynth") && (j.selected = !0), k?.hasGlissando && (ot === "PolySynth" || ot === "DuoSynth") && (j.disabled = !0, j.textContent += " (mono only for glissando)"), ht.appendChild(j);
+    }), J.appendChild(ht);
+    const vt = document.createElement("optgroup");
+    vt.label = "Sampled Instruments";
+    const ft = {};
+    A.forEach((ot) => {
+      ft[ot.category] || (ft[ot.category] = []), ft[ot.category].push(ot);
+    }), Object.keys(ft).sort().forEach((ot) => {
+      const j = document.createElement("optgroup");
+      j.label = ot, ft[ot].forEach((dt) => {
+        const V = document.createElement("option");
+        V.value = `GM: ${dt.name}`, V.textContent = dt.name, k?.hasGlissando && (V.disabled = !0, V.textContent += " (not suitable for glissando)"), j.appendChild(V);
+      }), J.appendChild(j);
+    }), I.push(J), N.append(B, J), st.appendChild(N);
+  }), Y.appendChild(st);
   const F = document.createElement("div");
   F.style.cssText = `
         display: flex;
@@ -4811,8 +4811,8 @@ function Xt(c, t = {}) {
         box-sizing: border-box;
         gap: 16px;
     `, F.classList.add("jmon-music-player-right");
-  const N = document.createElement("div");
-  N.style.cssText = `
+  const C = document.createElement("div");
+  C.style.cssText = `
         display: flex;
         flex-direction: column;
         width: 100%;
@@ -4827,8 +4827,8 @@ function Xt(c, t = {}) {
         margin-bottom: 8px;
         color: ${f.text};
     `;
-  const z = document.createElement("input");
-  z.type = "number", z.min = 60, z.max = 240, z.value = l, z.style.cssText = `
+  const O = document.createElement("input");
+  O.type = "number", O.min = 60, O.max = 240, O.value = l, O.style.cssText = `
         padding: 4px;
         border: 1px solid ${f.secondary};
         border-radius: 4px;
@@ -4844,34 +4844,16 @@ function Xt(c, t = {}) {
         appearance: none;
         margin: 0;
         outline: none;
-    `, N.append(L, z);
-  const Y = document.createElement("div");
-  Y.style.cssText = `
+    `, C.append(L, O);
+  const q = document.createElement("div");
+  q.style.cssText = `
         display: flex;
         flex-direction: column;
         gap: 12px;
         margin-top: 8px;
-    `, Y.classList.add("jmon-music-player-vertical-downloads");
-  const W = document.createElement("button");
-  W.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-keyboard-music" style="margin-right: 8px;"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h4"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M2 12h20"/><path d="M6 12v4"/><path d="M10 12v4"/><path d="M14 12v4"/><path d="M18 12v4"/></svg><span>MIDI</span>', W.style.cssText = `
-        padding: 12px 16px;
-        border: none;
-        border-radius: 8px;
-        background-color: #333333;
-        color: white;
-        font-family: 'PT Sans', sans-serif;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 44px;
-        box-sizing: border-box;
-    `, W.classList.add("jmon-music-player-btn-vertical");
+    `, q.classList.add("jmon-music-player-vertical-downloads");
   const U = document.createElement("button");
-  U.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-audio-lines" style="margin-right: 8px;"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg><span>WAV</span>', U.style.cssText = `
+  U.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-keyboard-music" style="margin-right: 8px;"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h4"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M2 12h20"/><path d="M6 12v4"/><path d="M10 12v4"/><path d="M14 12v4"/><path d="M18 12v4"/></svg><span>MIDI</span>', U.style.cssText = `
         padding: 12px 16px;
         border: none;
         border-radius: 8px;
@@ -4887,9 +4869,27 @@ function Xt(c, t = {}) {
         justify-content: center;
         min-height: 44px;
         box-sizing: border-box;
-    `, U.classList.add("jmon-music-player-btn-vertical"), Y.append(W, U), Y.style.display = "none", F.append(N, Y);
-  const D = document.createElement("div");
-  D.style.cssText = `
+    `, U.classList.add("jmon-music-player-btn-vertical");
+  const G = document.createElement("button");
+  G.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-audio-lines" style="margin-right: 8px;"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg><span>WAV</span>', G.style.cssText = `
+        padding: 12px 16px;
+        border: none;
+        border-radius: 8px;
+        background-color: #333333;
+        color: white;
+        font-family: 'PT Sans', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        box-sizing: border-box;
+    `, G.classList.add("jmon-music-player-btn-vertical"), q.append(U, G), q.style.display = "none", F.append(C, q);
+  const _ = document.createElement("div");
+  _.style.cssText = `
         position: relative;
         width: 100%;
         margin: ${qt.MARGIN};
@@ -4898,25 +4898,25 @@ function Xt(c, t = {}) {
         gap: ${qt.GAP}px;
         min-width: 0;
         box-sizing: border-box;
-    `, D.classList.add("jmon-music-player-timeline");
-  const Z = document.createElement("div");
-  Z.textContent = "0:00", Z.style.cssText = `
+    `, _.classList.add("jmon-music-player-timeline");
+  const Q = document.createElement("div");
+  Q.textContent = "0:00", Q.style.cssText = `
         font-family: 'PT Sans', sans-serif;
         font-size: 14px;
         color: ${f.text};
         min-width: 40px;
         text-align: center;
     `;
-  const K = document.createElement("div");
-  K.textContent = "0:00", K.style.cssText = `
+  const W = document.createElement("div");
+  W.textContent = "0:00", W.style.cssText = `
         font-family: 'PT Sans', sans-serif;
         font-size: 14px;
         color: ${f.text};
         min-width: 40px;
         text-align: center;
     `;
-  const Q = document.createElement("input");
-  Q.type = "range", Q.min = 0, Q.max = 100, Q.value = 0, Q.style.cssText = `
+  const X = document.createElement("input");
+  X.type = "range", X.min = 0, X.max = 100, X.value = 0, X.style.cssText = `
         flex-grow: 1;
         -webkit-appearance: none;
         background: ${f.secondary};
@@ -4925,8 +4925,8 @@ function Xt(c, t = {}) {
         overflow: visible;
         height: 8px;
     `;
-  const vt = document.createElement("style");
-  vt.textContent = `
+  const Mt = document.createElement("style");
+  Mt.textContent = `
         input[type="range"].jmon-timeline-slider {
             background: ${f.secondary} !important;
             border: 1px solid ${f.border} !important;
@@ -4966,7 +4966,7 @@ function Xt(c, t = {}) {
             border: 2px solid ${f.background} !important;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
         }
-    `, document.head.appendChild(vt), Q.classList.add("jmon-timeline-slider");
+    `, document.head.appendChild(Mt), X.classList.add("jmon-timeline-slider");
   const tt = document.createElement("button");
   tt.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-play"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>', tt.style.cssText = `
         width: 40px;
@@ -4988,8 +4988,8 @@ function Xt(c, t = {}) {
         box-sizing: border-box;
         flex-shrink: 0;
     `, tt.classList.add("jmon-music-player-play");
-  const E = document.createElement("button");
-  E.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>', E.style.cssText = `
+  const mt = document.createElement("button");
+  mt.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>', mt.style.cssText = `
         width: 40px;
         height: 40px;
         min-width: 40px;
@@ -5008,32 +5008,32 @@ function Xt(c, t = {}) {
         margin: 0px 5px 0px 0px;
         box-sizing: border-box;
         flex-shrink: 0;
-    `, E.classList.add("jmon-music-player-stop");
-  const y = document.createElement("div");
-  y.style.cssText = `
+    `, mt.classList.add("jmon-music-player-stop");
+  const $ = document.createElement("div");
+  $.style.cssText = `
         display: flex;
         justify-content: space-between;
         font-size: 12px;
         color: ${f.lightText};
         margin: 0px 0px 0px 10px;
     `;
-  const v = document.createElement("div");
-  v.style.cssText = `
+  const y = document.createElement("div");
+  y.style.cssText = `
         display: flex;
         align-items: center;
         gap: 0px;
-    `, v.append(tt, E), D.append(Z, Q, K, v);
-  const A = document.createElement("div");
-  A.style.cssText = `
+    `, y.append(tt, mt), _.append(Q, X, W, y);
+  const b = document.createElement("div");
+  b.style.cssText = `
         display: flex;
         justify-content: space-between;
         margin-top: 8px;
         gap: 10px;
         min-width: 0;
         box-sizing: border-box;
-    `, A.classList.add("jmon-music-player-downloads");
-  const b = document.createElement("button");
-  b.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-keyboard-music" style="margin-right: 5px;"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h4"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M2 12h20"/><path d="M6 12v4"/><path d="M10 12v4"/><path d="M14 12v4"/><path d="M18 12v4"/></svg><span>MIDI</span>', b.style.cssText = `
+    `, b.classList.add("jmon-music-player-downloads");
+  const T = document.createElement("button");
+  T.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-keyboard-music" style="margin-right: 5px;"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h4"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M2 12h20"/><path d="M6 12v4"/><path d="M10 12v4"/><path d="M14 12v4"/><path d="M18 12v4"/></svg><span>MIDI</span>', T.style.cssText = `
         padding: 15px 30px;
         margin: 0 5px;
         border: none;
@@ -5052,7 +5052,7 @@ function Xt(c, t = {}) {
         min-height: 50px;
         min-width: 0;
         box-sizing: border-box;
-    `, b.classList.add("jmon-music-player-btn");
+    `, T.classList.add("jmon-music-player-btn");
   const w = document.createElement("button");
   w.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-audio-lines" style="margin-right: 5px;"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg><span>WAV</span>', w.style.cssText = `
         padding: 15px 30px;
@@ -5073,91 +5073,91 @@ function Xt(c, t = {}) {
         min-height: 50px;
         min-width: 0;
         box-sizing: border-box;
-    `, w.classList.add("jmon-music-player-btn"), A.append(b, w), O.append(J, F), et.appendChild(O), et.appendChild(D), C.append(
-    et,
-    A
+    `, w.classList.add("jmon-music-player-btn"), b.append(T, w), D.append(Y, F), nt.appendChild(D), nt.appendChild(_), P.append(
+    nt,
+    b
   );
-  let h, B = !1, nt = [], V = [], _ = [], P = null;
-  const rt = c.tracks || [], dt = () => {
+  let h, v = !1, H = [], et = [], K = [], E = null;
+  const z = c.tracks || [], rt = () => {
     if (!h || !c.audioGraph || !Array.isArray(c.audioGraph))
       return null;
-    const x = {}, k = (T) => {
-      const R = {};
-      return Object.entries(T || {}).forEach(([q, H]) => {
-        let ut = q;
-        if (typeof q == "number" || /^\d+$/.test(String(q)))
+    const x = {}, S = (k) => {
+      const N = {};
+      return Object.entries(k || {}).forEach(([B, J]) => {
+        let ht = B;
+        if (typeof B == "number" || /^\d+$/.test(String(B)))
           try {
-            ut = h.Frequency(parseInt(q, 10), "midi").toNote();
+            ht = h.Frequency(parseInt(B, 10), "midi").toNote();
           } catch {
           }
-        R[ut] = H;
-      }), R;
+        N[ht] = J;
+      }), N;
     };
     try {
-      return c.audioGraph.forEach((T) => {
-        const { id: R, type: q, options: H = {}, target: ut } = T;
-        if (!R || !q) return;
+      return c.audioGraph.forEach((k) => {
+        const { id: N, type: B, options: J = {}, target: ht } = k;
+        if (!N || !B) return;
         let lt = null;
-        if (q === "Sampler") {
-          const pt = k(H.urls);
-          let xt, mt;
-          const ot = new Promise((ht, G) => {
-            xt = ht, mt = G;
-          }), $ = {
-            urls: pt,
-            onload: () => xt && xt(),
-            onerror: (ht) => {
-              console.error(`[PLAYER] Sampler load error for ${R}:`, ht), mt && mt(ht);
+        if (B === "Sampler") {
+          const gt = S(J.urls);
+          let vt, ft;
+          const ot = new Promise((dt, V) => {
+            vt = dt, ft = V;
+          }), j = {
+            urls: gt,
+            onload: () => vt && vt(),
+            onerror: (dt) => {
+              console.error(`[PLAYER] Sampler load error for ${N}:`, dt), ft && ft(dt);
             }
           };
-          H.baseUrl && ($.baseUrl = H.baseUrl);
+          J.baseUrl && (j.baseUrl = J.baseUrl);
           try {
             console.log(
-              `[PLAYER] Building Sampler ${R} with urls:`,
-              pt,
+              `[PLAYER] Building Sampler ${N} with urls:`,
+              gt,
               "baseUrl:",
-              $.baseUrl || "(none)"
-            ), lt = new h.Sampler($);
-          } catch (ht) {
-            console.error("[PLAYER] Failed to create Sampler:", ht), lt = null;
+              j.baseUrl || "(none)"
+            ), lt = new h.Sampler(j);
+          } catch (dt) {
+            console.error("[PLAYER] Failed to create Sampler:", dt), lt = null;
           }
-          _.push(ot), lt && H.envelope && H.envelope.enabled && (typeof H.envelope.attack == "number" && (lt.attack = H.envelope.attack), typeof H.envelope.release == "number" && (lt.release = H.envelope.release));
-        } else if (or.includes(q))
+          K.push(ot), lt && J.envelope && J.envelope.enabled && (typeof J.envelope.attack == "number" && (lt.attack = J.envelope.attack), typeof J.envelope.release == "number" && (lt.release = J.envelope.release));
+        } else if (or.includes(B))
           try {
-            lt = new h[q](H);
-          } catch (pt) {
+            lt = new h[B](J);
+          } catch (gt) {
             console.warn(
-              `[PLAYER] Failed to create ${q} from audioGraph, using PolySynth:`,
-              pt
+              `[PLAYER] Failed to create ${B} from audioGraph, using PolySynth:`,
+              gt
             ), lt = new h.PolySynth();
           }
-        else if (rr.includes(q))
+        else if (rr.includes(B))
           try {
-            lt = new h[q](H), console.log(`[PLAYER] Created effect ${R} (${q}) with options:`, H);
-          } catch (pt) {
-            console.warn(`[PLAYER] Failed to create ${q} effect:`, pt), lt = null;
+            lt = new h[B](J), console.log(`[PLAYER] Created effect ${N} (${B}) with options:`, J);
+          } catch (gt) {
+            console.warn(`[PLAYER] Failed to create ${B} effect:`, gt), lt = null;
           }
-        else q === "Destination" && (x[R] = h.Destination);
-        lt && (x[R] = lt);
-      }), Object.keys(x).length > 0 && c.audioGraph.forEach((T) => {
-        const { id: R, target: q } = T;
-        if (!R || !x[R]) return;
-        const H = x[R];
-        if (H !== h.Destination)
-          if (q && x[q])
+        else B === "Destination" && (x[N] = h.Destination);
+        lt && (x[N] = lt);
+      }), Object.keys(x).length > 0 && c.audioGraph.forEach((k) => {
+        const { id: N, target: B } = k;
+        if (!N || !x[N]) return;
+        const J = x[N];
+        if (J !== h.Destination)
+          if (B && x[B])
             try {
-              x[q] === h.Destination ? (H.toDestination(), console.log(`[PLAYER] Connected ${R} -> Destination`)) : (H.connect(x[q]), console.log(`[PLAYER] Connected ${R} -> ${q}`));
-            } catch (ut) {
-              console.warn(`[PLAYER] Failed to connect ${R} -> ${q}:`, ut), H.toDestination();
+              x[B] === h.Destination ? (J.toDestination(), console.log(`[PLAYER] Connected ${N} -> Destination`)) : (J.connect(x[B]), console.log(`[PLAYER] Connected ${N} -> ${B}`));
+            } catch (ht) {
+              console.warn(`[PLAYER] Failed to connect ${N} -> ${B}:`, ht), J.toDestination();
             }
           else
-            H.toDestination(), console.log(`[PLAYER] Connected ${R} -> Destination (no target specified)`);
+            J.toDestination(), console.log(`[PLAYER] Connected ${N} -> Destination (no target specified)`);
       }), x;
-    } catch (T) {
-      return console.error("[PLAYER] Failed building audioGraph instruments:", T), null;
+    } catch (k) {
+      return console.error("[PLAYER] Failed building audioGraph instruments:", k), null;
     }
-  }, gt = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1, Mt = (x) => `${Math.floor(x / 60)}:${Math.floor(x % 60).toString().padStart(2, "0")}`;
-  K.textContent = Mt(g);
+  }, pt = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1, ut = (x) => `${Math.floor(x / 60)}:${Math.floor(x % 60).toString().padStart(2, "0")}`;
+  W.textContent = ut(g);
   const ne = async () => {
     if (typeof window < "u") {
       const x = s || window.Tone || (typeof h < "u" ? h : null);
@@ -5170,28 +5170,28 @@ function Xt(c, t = {}) {
         try {
           if (typeof require < "u") {
             console.log("[PLAYER] Loading Tone.js via require()...");
-            const T = await require("tone@14.8.49/build/Tone.js");
-            window.Tone = T.default || T.Tone || T;
+            const k = await require("tone@14.8.49/build/Tone.js");
+            window.Tone = k.default || k.Tone || k;
           } else {
             console.log("[PLAYER] Loading Tone.js via import()...");
-            const T = await import("https://esm.sh/tone@14.8.49");
-            window.Tone = T.default || T.Tone || T;
+            const k = await import("https://esm.sh/tone@14.8.49");
+            window.Tone = k.default || k.Tone || k;
           }
           if (!window.Tone || typeof window.Tone != "object" || !window.Tone.PolySynth) {
             console.warn(
               "[PLAYER] First load attempt failed, trying alternative CDN..."
             );
             try {
-              const T = await import("https://cdn.skypack.dev/tone@14.8.49");
-              if (window.Tone = T.default || T.Tone || T, !window.Tone || !window.Tone.PolySynth)
+              const k = await import("https://cdn.skypack.dev/tone@14.8.49");
+              if (window.Tone = k.default || k.Tone || k, !window.Tone || !window.Tone.PolySynth)
                 throw new Error("Alternative CDN also failed");
             } catch {
               console.warn(
                 "[PLAYER] Alternative CDN failed, trying jsdelivr..."
               );
               try {
-                const R = await import("https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js");
-                if (window.Tone = R.default || R.Tone || R, !window.Tone || !window.Tone.PolySynth)
+                const N = await import("https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js");
+                if (window.Tone = N.default || N.Tone || N, !window.Tone || !window.Tone.PolySynth)
                   throw new Error("All CDN attempts failed");
               } catch {
                 throw new Error(
@@ -5204,8 +5204,8 @@ function Xt(c, t = {}) {
             "[PLAYER] Tone.js loaded successfully, version:",
             window.Tone.version || "unknown"
           );
-        } catch (T) {
-          return console.warn("Could not auto-load Tone.js:", T.message), console.log(
+        } catch (k) {
+          return console.warn("Could not auto-load Tone.js:", k.message), console.log(
             "To use the player, load Tone.js manually first using one of these methods:"
           ), console.log(
             'Method 1: Tone = await require("tone@14.8.49/build/Tone.js")'
@@ -5215,9 +5215,9 @@ function Xt(c, t = {}) {
             'Method 3: Tone = await import("https://cdn.skypack.dev/tone@14.8.49").then(m => m.default)'
           ), !1;
         }
-      const k = window.Tone || x;
-      if (k)
-        return h = k, console.log("[PLAYER] Available Tone constructors:", {
+      const S = window.Tone || x;
+      if (S)
+        return h = S, console.log("[PLAYER] Available Tone constructors:", {
           PolySynth: typeof h.PolySynth,
           Synth: typeof h.Synth,
           Part: typeof h.Part,
@@ -5227,7 +5227,7 @@ function Xt(c, t = {}) {
         }), console.log(
           "[PLAYER] Tone.js initialized, context state:",
           h.context ? h.context.state : "no context"
-        ), gt() && console.log("[PLAYER] iOS device detected - audio context will start on user interaction"), !0;
+        ), pt() && console.log("[PLAYER] iOS device detected - audio context will start on user interaction"), !0;
     }
     return console.warn("Tone.js not available"), !1;
   }, Rt = () => {
@@ -5242,7 +5242,7 @@ function Xt(c, t = {}) {
         x
       ), console.error(
         "[PLAYER] Available Tone properties:",
-        Object.keys(h).filter((k) => typeof h[k] == "function").slice(
+        Object.keys(h).filter((S) => typeof h[S] == "function").slice(
           0,
           20
         )
@@ -5253,73 +5253,73 @@ function Xt(c, t = {}) {
     }
     if (h.Transport.bpm.value = p.tempo, console.log(
       `[PLAYER] Set Transport BPM to ${p.tempo} before building instruments`
-    ), !P && (P = dt(), P)) {
-      const k = Object.keys(P).filter(
-        (T) => P[T] && P[T].name === "Sampler"
+    ), !E && (E = rt(), E)) {
+      const S = Object.keys(E).filter(
+        (k) => E[k] && E[k].name === "Sampler"
       );
-      k.length > 0 && console.log(
+      S.length > 0 && console.log(
         "[PLAYER] Using audioGraph Samplers for tracks with synthRef:",
-        k
+        S
       );
     }
     console.log("[PLAYER] Cleaning up existing audio...", {
-      synths: nt.length,
-      parts: V.length
-    }), h.Transport.stop(), h.Transport.position = 0, V.forEach((k, T) => {
+      synths: H.length,
+      parts: et.length
+    }), h.Transport.stop(), h.Transport.position = 0, et.forEach((S, k) => {
       try {
-        k.stop();
-      } catch (R) {
-        console.warn(`[PLAYER] Failed to stop part ${T}:`, R);
+        S.stop();
+      } catch (N) {
+        console.warn(`[PLAYER] Failed to stop part ${k}:`, N);
       }
-    }), V.forEach((k, T) => {
+    }), et.forEach((S, k) => {
       try {
-        k.dispose();
-      } catch (R) {
-        console.warn(`[PLAYER] Failed to dispose part ${T}:`, R);
+        S.dispose();
+      } catch (N) {
+        console.warn(`[PLAYER] Failed to dispose part ${k}:`, N);
       }
-    }), nt.forEach((k, T) => {
-      if (!P || !Object.values(P).includes(k))
+    }), H.forEach((S, k) => {
+      if (!E || !Object.values(E).includes(S))
         try {
-          k.disconnect && typeof k.disconnect == "function" && k.disconnect(), k.dispose();
-        } catch (R) {
-          console.warn(`[PLAYER] Failed to dispose synth ${T}:`, R);
+          S.disconnect && typeof S.disconnect == "function" && S.disconnect(), S.dispose();
+        } catch (N) {
+          console.warn(`[PLAYER] Failed to dispose synth ${k}:`, N);
         }
-    }), nt = [], V = [], console.log("[PLAYER] Audio cleanup completed"), console.log("[PLAYER] Converted tracks:", m.length), m.forEach((k) => {
+    }), H = [], et = [], console.log("[PLAYER] Audio cleanup completed"), console.log("[PLAYER] Converted tracks:", m.length), m.forEach((S) => {
       const {
-        originalTrackIndex: T,
-        voiceIndex: R,
-        totalVoices: q,
-        trackInfo: H,
-        synthConfig: ut,
+        originalTrackIndex: k,
+        voiceIndex: N,
+        totalVoices: B,
+        trackInfo: J,
+        synthConfig: ht,
         partEvents: lt
-      } = k, xt = (rt[T] || {}).synthRef, mt = 60 / p.tempo, ot = (lt || []).map((G) => {
-        const M = typeof G.time == "number" ? G.time * mt : G.time, X = typeof G.duration == "number" ? G.duration * mt : G.duration;
-        return { ...G, time: M, duration: X };
+      } = S, vt = (z[k] || {}).synthRef, ft = 60 / p.tempo, ot = (lt || []).map((V) => {
+        const M = typeof V.time == "number" ? V.time * ft : V.time, Z = typeof V.duration == "number" ? V.duration * ft : V.duration;
+        return { ...V, time: M, duration: Z };
       });
-      let $ = null;
-      if (xt && P && P[xt])
-        $ = P[xt];
+      let j = null;
+      if (vt && E && E[vt])
+        j = E[vt];
       else {
-        const G = I[T] ? I[T].value : ut.type;
+        const V = I[k] ? I[k].value : ht.type;
         try {
-          if (G.startsWith("AudioGraph: ")) {
-            const M = G.substring(12);
-            if (P && P[M])
-              $ = P[M], console.log(
+          if (V.startsWith("AudioGraph: ")) {
+            const M = V.substring(12);
+            if (E && E[M])
+              j = E[M], console.log(
                 `[PLAYER] Using audioGraph instrument: ${M}`
               );
             else
               throw new Error(
                 `AudioGraph instrument ${M} not found`
               );
-          } else if (G.startsWith("GM: ")) {
-            const M = G.substring(4), X = S.find(
+          } else if (V.startsWith("GM: ")) {
+            const M = V.substring(4), Z = A.find(
               (at) => at.name === M
             );
-            if (X) {
+            if (Z) {
               console.log(`[PLAYER] Loading GM instrument: ${M}`);
               const at = Ct(
-                X.program,
+                Z.program,
                 Qt[0],
                 [36, 84],
                 "balanced"
@@ -5329,73 +5329,73 @@ function Xt(c, t = {}) {
               ), console.log(
                 "[PLAYER] Sample notes:",
                 Object.keys(at).sort()
-              ), $ = new h.Sampler({
+              ), j = new h.Sampler({
                 urls: at,
                 onload: () => console.log(
                   `[PLAYER] GM instrument ${M} loaded successfully`
                 ),
-                onerror: (ft) => {
+                onerror: (yt) => {
                   console.error(
                     `[PLAYER] Failed to load GM instrument ${M}:`,
-                    ft
+                    yt
                   );
                 }
               }).toDestination();
             } else
               throw new Error(`GM instrument ${M} not found`);
           } else {
-            const M = ut.reason === "glissando_compatibility" ? ut.type : G;
+            const M = ht.reason === "glissando_compatibility" ? ht.type : V;
             if (!h[M] || typeof h[M] != "function")
               throw new Error(`Tone.${M} is not a constructor`);
-            $ = new h[M]().toDestination(), ut.reason === "glissando_compatibility" && R === 0 && console.warn(
-              `[MULTIVOICE] Using ${M} instead of ${ut.original} for glissando in ${H.label}`
+            j = new h[M]().toDestination(), ht.reason === "glissando_compatibility" && N === 0 && console.warn(
+              `[MULTIVOICE] Using ${M} instead of ${ht.original} for glissando in ${J.label}`
             );
           }
         } catch (M) {
           console.warn(
-            `Failed to create ${G}, using PolySynth:`,
+            `Failed to create ${V}, using PolySynth:`,
             M
           );
           try {
             if (!h.PolySynth || typeof h.PolySynth != "function")
               throw new Error("Tone.PolySynth is not available");
-            $ = new h.PolySynth().toDestination();
-          } catch (X) {
+            j = new h.PolySynth().toDestination();
+          } catch (Z) {
             console.error(
               "Fatal: Cannot create any synth, Tone.js may not be properly loaded:",
-              X
+              Z
             );
             return;
           }
         }
       }
-      nt.push($), q > 1 && console.log(
-        `[MULTIVOICE] Track "${H.label}" voice ${R + 1}: ${lt.length} notes`
+      H.push(j), B > 1 && console.log(
+        `[MULTIVOICE] Track "${J.label}" voice ${N + 1}: ${lt.length} notes`
       );
-      const ht = new h.Part((G, M) => {
+      const dt = new h.Part((V, M) => {
         if (Array.isArray(M.pitch))
-          M.pitch.forEach((X) => {
+          M.pitch.forEach((Z) => {
             let at = "C4";
-            typeof X == "number" ? at = h.Frequency(X, "midi").toNote() : typeof X == "string" ? at = X : Array.isArray(X) && typeof X[0] == "string" && (at = X[0]), $.triggerAttackRelease(at, M.duration, G);
+            typeof Z == "number" ? at = h.Frequency(Z, "midi").toNote() : typeof Z == "string" ? at = Z : Array.isArray(Z) && typeof Z[0] == "string" && (at = Z[0]), j.triggerAttackRelease(at, M.duration, V);
           });
         else if (M.articulation === "glissando" && M.glissTarget !== void 0) {
-          let X = typeof M.pitch == "number" ? h.Frequency(M.pitch, "midi").toNote() : M.pitch, at = typeof M.glissTarget == "number" ? h.Frequency(M.glissTarget, "midi").toNote() : M.glissTarget;
+          let Z = typeof M.pitch == "number" ? h.Frequency(M.pitch, "midi").toNote() : M.pitch, at = typeof M.glissTarget == "number" ? h.Frequency(M.glissTarget, "midi").toNote() : M.glissTarget;
           console.log("[PLAYER] Glissando", {
-            fromNote: X,
+            fromNote: Z,
             toNote: at,
             duration: M.duration,
-            time: G
+            time: V
           }), console.log(
             "[PLAYER] Glissando effect starting from",
-            X,
+            Z,
             "to",
             at
-          ), $.triggerAttack(X, G, M.velocity || 0.8);
-          const ft = h.Frequency(X).toFrequency(), ae = h.Frequency(at).toFrequency(), ce = 1200 * Math.log2(ae / ft);
-          if ($.detune && $.detune.setValueAtTime && $.detune.linearRampToValueAtTime)
-            $.detune.setValueAtTime(0, G), $.detune.linearRampToValueAtTime(
+          ), j.triggerAttack(Z, V, M.velocity || 0.8);
+          const yt = h.Frequency(Z).toFrequency(), ae = h.Frequency(at).toFrequency(), ce = 1200 * Math.log2(ae / yt);
+          if (j.detune && j.detune.setValueAtTime && j.detune.linearRampToValueAtTime)
+            j.detune.setValueAtTime(0, V), j.detune.linearRampToValueAtTime(
               ce,
-              G + M.duration
+              V + M.duration
             ), console.log(
               "[PLAYER] Applied detune glissando:",
               ce,
@@ -5404,13 +5404,13 @@ function Xt(c, t = {}) {
               "beats"
             );
           else {
-            const Le = h.Frequency(X).toMidi(), Fe = h.Frequency(at).toMidi(), jt = Math.max(3, Math.abs(Fe - Le)), le = M.duration / jt;
+            const Le = h.Frequency(Z).toMidi(), Fe = h.Frequency(at).toMidi(), jt = Math.max(3, Math.abs(Fe - Le)), le = M.duration / jt;
             for (let $t = 1; $t < jt; $t++) {
-              const De = $t / (jt - 1), _e = ft * Math.pow(ae / ft, De), Oe = h.Frequency(_e).toNote(), ze = G + $t * le;
-              $.triggerAttackRelease(
+              const _e = $t / (jt - 1), De = yt * Math.pow(ae / yt, _e), Oe = h.Frequency(De).toNote(), Be = V + $t * le;
+              j.triggerAttackRelease(
                 Oe,
                 le * 0.8,
-                ze,
+                Be,
                 (M.velocity || 0.8) * 0.7
               );
             }
@@ -5420,39 +5420,39 @@ function Xt(c, t = {}) {
               "steps"
             );
           }
-          $.triggerRelease(G + M.duration);
+          j.triggerRelease(V + M.duration);
         } else {
-          let X = "C4";
-          typeof M.pitch == "number" ? X = h.Frequency(M.pitch, "midi").toNote() : typeof M.pitch == "string" ? X = M.pitch : Array.isArray(M.pitch) && typeof M.pitch[0] == "string" && (X = M.pitch[0]);
-          let at = M.duration, ft = M.velocity || 0.8;
-          M.articulation === "staccato" && (at = M.duration * 0.5), M.articulation === "accent" && (ft = Math.min(ft * 2, 1)), M.articulation === "tenuto" && (at = M.duration * 1.5, ft = Math.min(ft * 1.3, 1)), $.triggerAttackRelease(
-            X,
+          let Z = "C4";
+          typeof M.pitch == "number" ? Z = h.Frequency(M.pitch, "midi").toNote() : typeof M.pitch == "string" ? Z = M.pitch : Array.isArray(M.pitch) && typeof M.pitch[0] == "string" && (Z = M.pitch[0]);
+          let at = M.duration, yt = M.velocity || 0.8;
+          M.articulation === "staccato" && (at = M.duration * 0.5), M.articulation === "accent" && (yt = Math.min(yt * 2, 1)), M.articulation === "tenuto" && (at = M.duration * 1.5, yt = Math.min(yt * 1.3, 1)), j.triggerAttackRelease(
+            Z,
             at,
-            G,
-            ft
+            V,
+            yt
           );
         }
       }, ot);
-      V.push(ht);
-    }), h.Transport.loopEnd = g, h.Transport.loop = !0, h.Transport.stop(), h.Transport.position = 0, K.textContent = Mt(g);
+      et.push(dt);
+    }), h.Transport.loopEnd = g, h.Transport.loop = !0, h.Transport.stop(), h.Transport.position = 0, W.textContent = ut(g);
   };
   let Ot = 0;
   const Ie = qt.UPDATE_INTERVAL, re = () => {
-    const x = performance.now(), k = x - Ot >= Ie;
-    if (h && B) {
-      const T = typeof h.Transport.loopEnd == "number" ? h.Transport.loopEnd : h.Time(h.Transport.loopEnd).toSeconds();
-      if (k) {
-        const R = h.Transport.seconds % T, q = R / T * 100;
-        Q.value = Math.min(q, 100), Z.textContent = Mt(R), K.textContent = Mt(T), Ot = x;
+    const x = performance.now(), S = x - Ot >= Ie;
+    if (h && v) {
+      const k = typeof h.Transport.loopEnd == "number" ? h.Transport.loopEnd : h.Time(h.Transport.loopEnd).toSeconds();
+      if (S) {
+        const N = h.Transport.seconds % k, B = N / k * 100;
+        X.value = Math.min(B, 100), Q.textContent = ut(N), W.textContent = ut(k), Ot = x;
       }
-      if (h.Transport.state === "started" && B)
+      if (h.Transport.state === "started" && v)
         requestAnimationFrame(re);
       else if (h.Transport.state === "stopped" || h.Transport.state === "paused") {
-        if (k) {
-          const R = h.Transport.seconds % T, q = R / T * 100;
-          Q.value = Math.min(q, 100), Z.textContent = Mt(R), Ot = x;
+        if (S) {
+          const N = h.Transport.seconds % k, B = N / k * 100;
+          X.value = Math.min(B, 100), Q.textContent = ut(N), Ot = x;
         }
-        h.Transport.state === "stopped" && (h.Transport.seconds = 0, Q.value = 0, Z.textContent = Mt(0), B = !1, tt.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-play"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>');
+        h.Transport.state === "stopped" && (h.Transport.seconds = 0, X.value = 0, Q.textContent = ut(0), v = !1, tt.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-play"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>');
       }
     }
   };
@@ -5464,8 +5464,8 @@ function Xt(c, t = {}) {
         console.error("[PLAYER] Failed to initialize Tone.js");
         return;
       }
-    if (B)
-      console.log("[PLAYER] Pausing playback..."), h.Transport.pause(), B = !1, tt.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-play"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>', console.log("[PLAYER] Playback paused");
+    if (v)
+      console.log("[PLAYER] Pausing playback..."), h.Transport.pause(), v = !1, tt.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-play"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>', console.log("[PLAYER] Playback paused");
     else {
       if (!h.context || h.context.state !== "running")
         try {
@@ -5475,11 +5475,11 @@ function Xt(c, t = {}) {
           ), h.context && typeof h.context.resume == "function" && (await h.context.resume(), console.log("[PLAYER] Audio context resumed for iOS compatibility"));
         } catch (x) {
           console.error("[PLAYER] Failed to start audio context:", x);
-          let k = "Failed to start audio. ";
-          gt() ? k += "On iOS, please ensure your device isn't in silent mode and try again." : k += "Please check your audio settings and try again.", alert(k);
+          let S = "Failed to start audio. ";
+          pt() ? S += "On iOS, please ensure your device isn't in silent mode and try again." : S += "Please check your audio settings and try again.", alert(S);
           return;
         }
-      if (nt.length === 0 && (console.log("[PLAYER] No synths found, setting up audio..."), Rt()), h.Transport.state !== "paused" ? (h.Transport.stop(), h.Transport.position = 0, console.log("[PLAYER] Starting from beginning")) : console.log("[PLAYER] Resuming from paused position"), console.log(
+      if (H.length === 0 && (console.log("[PLAYER] No synths found, setting up audio..."), Rt()), h.Transport.state !== "paused" ? (h.Transport.stop(), h.Transport.position = 0, console.log("[PLAYER] Starting from beginning")) : console.log("[PLAYER] Resuming from paused position"), console.log(
         "[PLAYER] Transport state before start:",
         h.Transport.state
       ), console.log(
@@ -5488,23 +5488,23 @@ function Xt(c, t = {}) {
       ), console.log(
         "[PLAYER] Audio context state:",
         h.context ? h.context.state : "unknown"
-      ), console.log("[PLAYER] Parts count:", V.length), console.log("[PLAYER] Synths count:", nt.length), P) {
-        const x = Object.values(P).filter(
-          (k) => k && k.name === "Sampler"
+      ), console.log("[PLAYER] Parts count:", et.length), console.log("[PLAYER] Synths count:", H.length), E) {
+        const x = Object.values(E).filter(
+          (S) => S && S.name === "Sampler"
         );
-        if (x.length > 0 && _.length > 0) {
+        if (x.length > 0 && K.length > 0) {
           console.log(
             `[PLAYER] Waiting for ${x.length} sampler(s) to load...`
           );
           try {
-            await Promise.all(_), console.log("[PLAYER] All samplers loaded.");
-          } catch (k) {
-            console.warn("[PLAYER] Sampler load wait error:", k);
+            await Promise.all(K), console.log("[PLAYER] All samplers loaded.");
+          } catch (S) {
+            console.warn("[PLAYER] Sampler load wait error:", S);
             return;
           }
         }
       }
-      if (V.length === 0) {
+      if (et.length === 0) {
         console.error(
           "[PLAYER] No parts available to start. This usually means setupAudio() failed."
         ), console.error(
@@ -5512,48 +5512,48 @@ function Xt(c, t = {}) {
         );
         return;
       }
-      h.Transport.state !== "paused" && V.forEach((x, k) => {
+      h.Transport.state !== "paused" && et.forEach((x, S) => {
         if (!x || typeof x.start != "function") {
-          console.error(`[PLAYER] Part ${k} is invalid:`, x);
+          console.error(`[PLAYER] Part ${S} is invalid:`, x);
           return;
         }
         try {
           x.start(0);
-        } catch (T) {
-          console.error(`[PLAYER] Failed to start part ${k}:`, T);
+        } catch (k) {
+          console.error(`[PLAYER] Failed to start part ${S}:`, k);
         }
-      }), h.Transport.start(), B = !0, tt.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-pause"><circle cx="12" cy="12" r="10"/><line x1="10" x2="10" y1="15" y2="9"/><line x1="14" x2="14" y1="15" y2="9"/></svg>', re();
+      }), h.Transport.start(), v = !0, tt.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-pause"><circle cx="12" cy="12" r="10"/><line x1="10" x2="10" y1="15" y2="9"/><line x1="14" x2="14" y1="15" y2="9"/></svg>', re();
     }
-  }), E.addEventListener("click", async () => {
-    h && (console.log("[PLAYER] Stopping playback completely..."), h.Transport.stop(), h.Transport.cancel(), h.Transport.position = 0, V.forEach((x, k) => {
+  }), mt.addEventListener("click", async () => {
+    h && (console.log("[PLAYER] Stopping playback completely..."), h.Transport.stop(), h.Transport.cancel(), h.Transport.position = 0, et.forEach((x, S) => {
       try {
         x.stop();
-      } catch (T) {
+      } catch (k) {
         console.warn(
-          `[PLAYER] Failed to stop part ${k} during complete stop:`,
-          T
+          `[PLAYER] Failed to stop part ${S} during complete stop:`,
+          k
         );
       }
-    }), B = !1, Q.value = 0, Z.textContent = Mt(0), tt.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-play"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>', console.log("[PLAYER] Playback stopped completely"));
-  }), Q.addEventListener("input", () => {
+    }), v = !1, X.value = 0, Q.textContent = ut(0), tt.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-play"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>', console.log("[PLAYER] Playback stopped completely"));
+  }), X.addEventListener("input", () => {
     if (h && g > 0) {
-      const x = Q.value / 100 * g, k = B;
-      k && h.Transport.pause(), h.Transport.seconds = x, Z.textContent = Mt(x), k && setTimeout(() => {
+      const x = X.value / 100 * g, S = v;
+      S && h.Transport.pause(), h.Transport.seconds = x, Q.textContent = ut(x), S && setTimeout(() => {
         h.Transport.start();
       }, 50);
     }
-  }), z.addEventListener("change", () => {
-    const x = parseInt(z.value);
-    h && x >= 60 && x <= 240 ? (console.log(`[PLAYER] Tempo changed to ${x} BPM`), h.Transport.bpm.value = x, console.log(`[PLAYER] Tempo changed to ${x} BPM`)) : z.value = h ? h.Transport.bpm.value : l;
+  }), O.addEventListener("change", () => {
+    const x = parseInt(O.value);
+    h && x >= 60 && x <= 240 ? (console.log(`[PLAYER] Tempo changed to ${x} BPM`), h.Transport.bpm.value = x, console.log(`[PLAYER] Tempo changed to ${x} BPM`)) : O.value = h ? h.Transport.bpm.value : l;
   }), I.forEach((x) => {
     x.addEventListener("change", () => {
-      if (h && nt.length > 0) {
+      if (h && H.length > 0) {
         console.log(
           "[PLAYER] Synthesizer selection changed, reinitializing audio..."
         );
-        const k = B;
-        B && (h.Transport.stop(), B = !1), Rt(), k ? setTimeout(() => {
-          h.Transport.start(), B = !0, tt.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-pause"><circle cx="12" cy="12" r="10"/><line x1="10" x2="10" y1="15" y2="9"/><line x1="14" x2="14" y1="15" y2="9"/></svg>';
+        const S = v;
+        v && (h.Transport.stop(), v = !1), Rt(), S ? setTimeout(() => {
+          h.Transport.start(), v = !0, tt.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-pause"><circle cx="12" cy="12" r="10"/><line x1="10" x2="10" y1="15" y2="9"/><line x1="14" x2="14" y1="15" y2="9"/></svg>';
         }, 100) : tt.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-play"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>';
       }
     });
@@ -5563,7 +5563,7 @@ function Xt(c, t = {}) {
   }, ie = () => {
     console.log("WAV download - requires WAV generator implementation");
   };
-  b.addEventListener("click", oe), w.addEventListener("click", ie), W.addEventListener("click", oe), U.addEventListener("click", ie);
+  T.addEventListener("click", oe), w.addEventListener("click", ie), U.addEventListener("click", oe), G.addEventListener("click", ie);
   const se = typeof window < "u" && window.Tone || (typeof h < "u" ? h : null);
   if (se && ne().then(() => {
     Rt(), e && setTimeout(() => {
@@ -5579,7 +5579,7 @@ function Xt(c, t = {}) {
       clearInterval(x);
     }, 1e4);
   }
-  return C;
+  return P;
 }
 function Zt(c, t = 0.25, e = "nearest") {
   if (typeof c != "number" || !isFinite(c)) return c;
@@ -5637,7 +5637,7 @@ class cr {
    * @returns {string} ABC notation string
    */
   static fromValidatedJmon(t) {
-    const e = new Dt(), { valid: n, normalized: r, errors: o } = e.validateAndNormalize(
+    const e = new _t(), { valid: n, normalized: r, errors: o } = e.validateAndNormalize(
       t
     );
     if (!n)
@@ -5690,8 +5690,8 @@ class cr {
 `;
     const o = Array.isArray(t.tracks) ? t.tracks : Object.values(t.tracks || {});
     let i = !1;
-    o.forEach((j) => {
-      const I = j.notes || j;
+    o.forEach((R) => {
+      const I = R.notes || R;
       Array.isArray(I) && I.forEach((F) => {
         typeof F.duration == "number" && (F.duration === 0.25 || F.duration === 0.5) && (i = !0);
       });
@@ -5701,121 +5701,121 @@ class cr {
 `, n += `Q:${l}=${Math.round(u * (s ? 2 : 1))}
 `, n += `K:${t.keySignature || "C"}
 `, o.length === 0) return n;
-    const d = t.timeSignature || "4/4", [m, p] = d.split("/").map(Number), g = m * (4 / p), f = e.measuresPerLine || 4, C = e.lineBreaks || [], it = e.renderMode || "merged", et = e.trackIndex || 0, O = !!e.hideRests, J = e.showArticulations !== !1, st = (() => {
-      let j = 0;
+    const d = t.timeSignature || "4/4", [m, p] = d.split("/").map(Number), g = m * (4 / p), f = e.measuresPerLine || 4, P = e.lineBreaks || [], it = e.renderMode || "merged", nt = e.trackIndex || 0, D = !!e.hideRests, Y = e.showArticulations !== !1, st = (() => {
+      let R = 0;
       return o.forEach((I) => {
         const F = I.notes || I;
-        Array.isArray(F) && F.forEach((N) => {
-          const L = typeof N.time == "number" ? N.time : 0, z = typeof N.duration == "number" ? N.duration : 1, Y = L + z;
-          Y > j && (j = Y);
+        Array.isArray(F) && F.forEach((C) => {
+          const L = typeof C.time == "number" ? C.time : 0, O = typeof C.duration == "number" ? C.duration : 1, q = L + O;
+          q > R && (R = q);
         });
-      }), j;
-    })(), S = Math.max(
+      }), R;
+    })(), A = Math.max(
       1,
       Math.ceil(st / g)
     );
     if (it === "tracks" && o.length > 1)
-      n += "%%score {", o.forEach((j, I) => {
+      n += "%%score {", o.forEach((R, I) => {
         I > 0 && (n += " | "), n += `${I + 1}`;
       }), n += `}
-`, o.forEach((j, I) => {
-        const F = j.notes || j;
+`, o.forEach((R, I) => {
+        const F = R.notes || R;
         if (F.length === 0) return;
-        const N = I + 1, L = j.label || `Track ${I + 1}`, z = L.length > 12 ? L.substring(0, 10) + ".." : L, Y = j.instrument ? ` [${j.instrument}]` : "";
-        n += `V:${N} name="${L}${Y}" snm="${z}"
+        const C = I + 1, L = R.label || `Track ${I + 1}`, O = L.length > 12 ? L.substring(0, 10) + ".." : L, q = R.instrument ? ` [${R.instrument}]` : "";
+        n += `V:${C} name="${L}${q}" snm="${O}"
 `;
-        const W = F.filter((D) => D.pitch !== void 0).sort((D, Z) => (D.time || 0) - (Z.time || 0)), { abcNotesStr: U } = this.convertNotesToAbc(
-          W,
+        const U = F.filter((_) => _.pitch !== void 0).sort((_, Q) => (_.time || 0) - (Q.time || 0)), { abcNotesStr: G } = this.convertNotesToAbc(
+          U,
           g,
           f,
-          C,
+          P,
           {
-            hideRests: O,
-            showArticulations: J,
-            padMeasures: o.length > 1 ? S : 0
+            hideRests: D,
+            showArticulations: Y,
+            padMeasures: o.length > 1 ? A : 0
           },
           a
         );
-        U.trim() && (n += U + `
+        G.trim() && (n += G + `
 `);
       });
     else if (it === "drums") {
       n += `V:1 clef=perc name="Drum Set" snm="Drums"
 `;
-      const j = e.percussionMap || {
+      const R = e.percussionMap || {
         kick: "C,,",
         snare: "D,",
         hat: "F",
         "hi-hat": "F",
         hihat: "F"
-      }, I = (z) => {
-        const Y = (z || "").toLowerCase();
-        for (const W of Object.keys(j))
-          if (Y.includes(W)) return j[W];
+      }, I = (O) => {
+        const q = (O || "").toLowerCase();
+        for (const U of Object.keys(R))
+          if (q.includes(U)) return R[U];
         return "E";
       }, F = [];
-      o.forEach((z) => {
-        const Y = z.notes || z, W = z.label || "", U = I(W);
-        (Y || []).forEach((D) => {
-          D.pitch !== void 0 && F.push({
-            time: typeof D.time == "number" ? D.time : 0,
-            duration: typeof D.duration == "number" ? D.duration : 1,
+      o.forEach((O) => {
+        const q = O.notes || O, U = O.label || "", G = I(U);
+        (q || []).forEach((_) => {
+          _.pitch !== void 0 && F.push({
+            time: typeof _.time == "number" ? _.time : 0,
+            duration: typeof _.duration == "number" ? _.duration : 1,
             // Use mapped ABC pitch string directly in converter
-            pitch: U,
-            articulation: D.articulation
+            pitch: G,
+            articulation: _.articulation
           });
         });
       });
-      const N = F.sort((z, Y) => (z.time || 0) - (Y.time || 0)), { abcNotesStr: L } = this.convertNotesToAbc(
-        N,
+      const C = F.sort((O, q) => (O.time || 0) - (q.time || 0)), { abcNotesStr: L } = this.convertNotesToAbc(
+        C,
         g,
         f,
-        C,
+        P,
         {
-          hideRests: O,
-          showArticulations: J,
-          padMeasures: o.length > 1 ? S : 0
+          hideRests: D,
+          showArticulations: Y,
+          padMeasures: o.length > 1 ? A : 0
         },
         a
       );
       L.trim() && (n += L + `
 `);
     } else if (it === "single") {
-      const j = o[et];
-      if (j) {
-        const F = (j.notes || j).filter((L) => L.pitch !== void 0).sort((L, z) => (L.time || 0) - (z.time || 0)), { abcNotesStr: N } = this.convertNotesToAbc(
+      const R = o[nt];
+      if (R) {
+        const F = (R.notes || R).filter((L) => L.pitch !== void 0).sort((L, O) => (L.time || 0) - (O.time || 0)), { abcNotesStr: C } = this.convertNotesToAbc(
           F,
           g,
           f,
-          C,
+          P,
           {
-            hideRests: O,
-            showArticulations: J,
-            padMeasures: o.length > 1 ? S : 0
+            hideRests: D,
+            showArticulations: Y,
+            padMeasures: o.length > 1 ? A : 0
           },
           a
         );
-        N.trim() && (n += N + `
+        C.trim() && (n += C + `
 `);
       }
     } else {
-      const j = [];
-      o.forEach((N) => {
-        (N.notes || N).forEach((z) => {
-          z.pitch !== void 0 && j.push(z);
+      const R = [];
+      o.forEach((C) => {
+        (C.notes || C).forEach((O) => {
+          O.pitch !== void 0 && R.push(O);
         });
       });
-      const I = j.sort(
-        (N, L) => (N.time || 0) - (L.time || 0)
+      const I = R.sort(
+        (C, L) => (C.time || 0) - (L.time || 0)
       ), { abcNotesStr: F } = this.convertNotesToAbc(
         I,
         g,
         f,
-        C,
+        P,
         {
-          hideRests: O,
-          showArticulations: J,
-          padMeasures: o.length > 1 ? S : 0
+          hideRests: D,
+          showArticulations: Y,
+          padMeasures: o.length > 1 ? A : 0
         },
         a
       );
@@ -5831,30 +5831,30 @@ class cr {
     let s = "";
     const a = e / i;
     let l = 0, u = 0, d = 0, m = 0;
-    const p = o?.quantizeBeats || 0.25, g = 1e-6, f = (S) => Zt(S, p, "nearest"), C = (S) => Re(S, p / i), it = (S) => {
-      s += S + " ";
-    }, et = () => {
+    const p = o?.quantizeBeats || 0.25, g = 1e-6, f = (A) => Zt(A, p, "nearest"), P = (A) => Re(A, p / i), it = (A) => {
+      s += A + " ";
+    }, nt = () => {
       for (; l >= a - g; )
         it("|"), l -= a, u++, d++, (r.includes(u) || d >= n) && (s += `
 `, d = 0);
-    }, O = (S, { forceVisible: j = !1 } = {}) => {
-      let I = S / i;
+    }, D = (A, { forceVisible: R = !1 } = {}) => {
+      let I = A / i;
       for (; I > g; ) {
-        const F = f(a - l), N = f(Math.min(I, F));
-        if (N > g) {
-          let L = o.hideRests && !j ? "x" : "z";
-          L += C(N), it(L), l = f(l + N), I = f(I - N);
+        const F = f(a - l), C = f(Math.min(I, F));
+        if (C > g) {
+          let L = o.hideRests && !R ? "x" : "z";
+          L += P(C), it(L), l = f(l + C), I = f(I - C);
         }
-        et();
+        nt();
       }
     };
-    for (const S of t) {
-      const j = typeof S.time == "number" ? f(S.time) : 0, I = typeof S.duration == "number" ? f(S.duration / i) : 1 / i, F = f((j - m) / i);
-      F > g && O(F);
-      let N = "z";
-      if (Array.isArray(S.pitch)) {
-        const Y = (W) => {
-          const U = [
+    for (const A of t) {
+      const R = typeof A.time == "number" ? f(A.time) : 0, I = typeof A.duration == "number" ? f(A.duration / i) : 1 / i, F = f((R - m) / i);
+      F > g && D(F);
+      let C = "z";
+      if (Array.isArray(A.pitch)) {
+        const q = (U) => {
+          const G = [
             "C",
             "C#",
             "D",
@@ -5867,13 +5867,13 @@ class cr {
             "A",
             "A#",
             "B"
-          ], D = Math.floor(W / 12) - 1, Z = W % 12;
-          let K = U[Z].replace("#", "^");
-          return D >= 4 ? (K = K.toLowerCase(), D > 4 && (K += "'".repeat(D - 4))) : D < 4 && (K = K.toUpperCase(), D < 3 && (K += ",".repeat(3 - D))), K;
+          ], _ = Math.floor(U / 12) - 1, Q = U % 12;
+          let W = G[Q].replace("#", "^");
+          return _ >= 4 ? (W = W.toLowerCase(), _ > 4 && (W += "'".repeat(_ - 4))) : _ < 4 && (W = W.toUpperCase(), _ < 3 && (W += ",".repeat(3 - _))), W;
         };
-        N = "[" + S.pitch.map(Y).join("") + "]";
-      } else if (typeof S.pitch == "number") {
-        const Y = S.pitch, W = [
+        C = "[" + A.pitch.map(q).join("") + "]";
+      } else if (typeof A.pitch == "number") {
+        const q = A.pitch, U = [
           "C",
           "C#",
           "D",
@@ -5886,28 +5886,28 @@ class cr {
           "A",
           "A#",
           "B"
-        ], U = Math.floor(Y / 12) - 1, D = Y % 12;
-        N = W[D].replace("#", "^"), U >= 4 ? (N = N.toLowerCase(), U > 4 && (N += "'".repeat(U - 4))) : U < 4 && (N = N.toUpperCase(), U < 3 && (N += ",".repeat(3 - U)));
-      } else typeof S.pitch == "string" ? N = S.pitch : S.pitch === null && (N = o.hideRests ? "x" : "z");
-      let L = I, z = !0;
+        ], G = Math.floor(q / 12) - 1, _ = q % 12;
+        C = U[_].replace("#", "^"), G >= 4 ? (C = C.toLowerCase(), G > 4 && (C += "'".repeat(G - 4))) : G < 4 && (C = C.toUpperCase(), G < 3 && (C += ",".repeat(3 - G)));
+      } else typeof A.pitch == "string" ? C = A.pitch : A.pitch === null && (C = o.hideRests ? "x" : "z");
+      let L = I, O = !0;
       for (; L > g; ) {
-        const Y = f(a - l), W = f(Math.min(L, Y));
-        if (W > g) {
-          let U = N;
-          U += C(W), z && o.showArticulations && (S.articulation === "staccato" && (U += "."), S.articulation === "accent" && (U += ">"), S.articulation === "tenuto" && (U += "-"), S.articulation === "marcato" && (U += "^")), L > W + g && (U += "-"), it(U), l = f(l + W), L = f(L - W), z = !1;
+        const q = f(a - l), U = f(Math.min(L, q));
+        if (U > g) {
+          let G = C;
+          G += P(U), O && o.showArticulations && (A.articulation === "staccato" && (G += "."), A.articulation === "accent" && (G += ">"), A.articulation === "tenuto" && (G += "-"), A.articulation === "marcato" && (G += "^")), L > U + g && (G += "-"), it(G), l = f(l + U), L = f(L - U), O = !1;
         }
-        et();
+        nt();
       }
-      m = f(j + I);
+      m = f(R + I);
     }
-    const J = o.padMeasures || 0;
-    for (; u < J; ) {
-      const S = f(a - l);
-      S > g && O(S, { forceVisible: !0 }), it("|"), l = 0, u++;
+    const Y = o.padMeasures || 0;
+    for (; u < Y; ) {
+      const A = f(a - l);
+      A > g && D(A, { forceVisible: !0 }), it("|"), l = 0, u++;
     }
     if (l > g) {
-      const S = f(a - l);
-      S > g && O(S, { forceVisible: !0 });
+      const A = f(a - l);
+      A > g && D(A, { forceVisible: !0 });
     }
     const st = s.trim();
     return st && !st.endsWith("|") && (s += "|"), { abcNotesStr: s };
@@ -5982,7 +5982,7 @@ class ee {
     } catch (l) {
       throw new Error(`Failed to parse MIDI file: ${l.message}`);
     }
-    const r = this.buildJmonComposition(n, e), o = new Dt(), { valid: i, normalized: s, errors: a } = o.validateAndNormalize(
+    const r = this.buildJmonComposition(n, e), o = new _t(), { valid: i, normalized: s, errors: a } = o.validateAndNormalize(
       r
     );
     return i || console.warn("Generated JMON failed validation:", a), i ? s : r;
@@ -6436,15 +6436,33 @@ class pr {
       clef: t.clef,
       tracks: []
     };
-    return (Array.isArray(t.tracks) ? t.tracks : [t]).forEach((r, o) => {
+    let n = [];
+    return Array.isArray(t.tracks) ? n = t.tracks.map((r, o) => ({
+      name: r.name || `Track ${o + 1}`,
+      notes: r.notes || r,
+      clef: r.clef
+    })) : t.tracks && typeof t.tracks == "object" ? n = Object.entries(t.tracks).map(([r, o], i) => ({
+      name: r || `Track ${i + 1}`,
+      notes: o,
+      clef: o && o.clef || void 0
+    })) : t.notes ? n = [{
+      name: t.name || "Track 1",
+      notes: t.notes,
+      clef: t.clef
+    }] : n = [{
+      name: "Track 1",
+      notes: t,
+      clef: t.clef
+    }], n.forEach((r, o) => {
       const i = r.notes || r, s = [];
       Array.isArray(i) && i.forEach((a) => {
-        if (a.pitch !== null && a.pitch !== void 0) {
-          const l = {
-            keys: [this.midiToVexFlow(a.pitch)],
+        const l = Array.isArray(a.pitch) ? a.pitch : a.pitch !== null && a.pitch !== void 0 ? [a.pitch] : [];
+        if (l.length > 0) {
+          const u = {
+            keys: l.map((d) => this.midiToVexFlow(d)),
             duration: this.durationToVexFlow(a.duration || 1)
           };
-          a.articulation && (l.articulation = a.articulation), s.push(l);
+          a.articulation && (u.articulation = a.articulation), s.push(u);
         } else
           s.push({
             keys: [],
@@ -6505,7 +6523,7 @@ class pr {
               height: e.height
             }
           }).getContext(), u = i && (i.Flow || i) || {}, d = e.accidentalsMode || "auto", p = ((y) => {
-            const v = (y || "C").trim(), A = {
+            const b = (y || "C").trim(), T = {
               C: 0,
               G: 1,
               D: 2,
@@ -6514,7 +6532,212 @@ class pr {
               B: 5,
               "F#": 6,
               "C#": 7
-            }, b = {
+            }, w = {
+              C: 0,
+              F: 1,
+              Bb: 2,
+              Eb: 3,
+              Ab: 4,
+              Db: 5,
+              Gb: 6,
+              Cb: 7
+            }, h = {
+              A: 0,
+              E: 1,
+              B: 2,
+              "F#": 3,
+              "C#": 4,
+              "G#": 5,
+              "D#": 6,
+              "A#": 7
+            }, v = {
+              A: 0,
+              D: 1,
+              G: 2,
+              C: 3,
+              F: 4,
+              Bb: 5,
+              Eb: 6,
+              Ab: 7
+            }, H = ["f", "c", "g", "d", "a", "e", "b"], et = ["b", "e", "a", "d", "g", "c", "f"], K = /m(in)?$/i.test(b), E = b.replace(/m(in)?$/i, "");
+            let z = 0, rt = "natural";
+            K && h[E] !== void 0 ? (z = h[E], rt = "sharp") : K && v[E] !== void 0 ? (z = v[E], rt = "flat") : T[E] !== void 0 ? (z = T[E], rt = "sharp") : w[E] !== void 0 && (z = w[E], rt = "flat");
+            const pt = {
+              a: "natural",
+              b: "natural",
+              c: "natural",
+              d: "natural",
+              e: "natural",
+              f: "natural",
+              g: "natural"
+            };
+            if (rt === "sharp")
+              for (let ut = 0; ut < z; ut++) pt[H[ut]] = "sharp";
+            if (rt === "flat")
+              for (let ut = 0; ut < z; ut++) pt[et[ut]] = "flat";
+            return pt;
+          })(t.keySignature), g = (y) => {
+            const b = String(y).replace(/r/g, "");
+            return { w: 32, h: 16, q: 8, 8: 4, 16: 2, 32: 1 }[b] || 0;
+          }, P = ((y) => {
+            const [b, T] = (y || "4/4").split("/").map((w) => parseInt(w, 10));
+            return { n: b || 4, d: T || 4 };
+          })(t.timeSignature), it = Math.max(1, Math.round(32 * P.n / P.d)), nt = (y) => ({ 32: "w", 16: "h", 8: "q", 4: "8", 2: "16", 1: "32" })[y] || "q", D = [];
+          let Y = [], st = 0;
+          const A = t.tracks[0].notes;
+          for (const y of A) {
+            let b = g(y.duration), T = !0;
+            for (; b > 0; ) {
+              const w = it - st, h = Math.min(b, w), v = { ...y, duration: nt(h) };
+              T || (v.tieFromPrev = !0), h < b && (v.tieToNext = !0), Y.push(v), st += h, b -= h, T = !1, st >= it && (D.push(Y), Y = [], st = 0);
+            }
+          }
+          Y.length && D.push(Y);
+          const R = 10, I = 10, F = 40, C = Math.max(
+            100,
+            (e.width || 800) - R - I
+          ), L = Math.max(1, D.length), O = Math.max(100, Math.floor(C / L)), q = (y) => {
+            const b = /^([a-g])(b|#)?\/(-?\d+)$/.exec(y);
+            if (!b) return 60;
+            const w = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 }[b[1]], h = b[2] === "#" ? 1 : b[2] === "b" ? -1 : 0;
+            return (parseInt(b[3], 10) + 1) * 12 + w + h;
+          }, U = [];
+          D.forEach((y) => {
+            y.forEach((b) => {
+              b && !b.isRest && Array.isArray(b.keys) && b.keys[0] && U.push(q(String(b.keys[0]).toLowerCase()));
+            });
+          });
+          const _ = (U.length ? U.sort(
+            (y, b) => y - b
+          )[Math.floor(U.length / 2)] : 60) < 60 ? "bass" : "treble", Q = new u.Stave(R, F, C);
+          Q.addClef(
+            t.clef || t.tracks && t.tracks[0] && t.tracks[0].clef || _
+          ), t.timeSignature && Q.addTimeSignature(t.timeSignature), t.keySignature && t.keySignature !== "C" && Q.addKeySignature(t.keySignature), Q.setContext(l).draw();
+          const W = [], X = [], Mt = [];
+          D.forEach((y, b) => {
+            const T = y.map((w) => {
+              if (w.isRest)
+                return new u.StaveNote({
+                  keys: ["d/5"],
+                  duration: String(w.duration).replace(/r?$/, "r")
+                });
+              const h = new u.StaveNote({
+                keys: w.keys.map((v) => v.toLowerCase()),
+                duration: w.duration
+              });
+              if (u.Accidental && w.keys.forEach((v, H) => {
+                const et = v.toLowerCase(), K = et[0], E = et.includes("#") ? "#" : et.includes("b") ? "b" : "", z = p[K] || "natural";
+                let rt = null;
+                d === "always" ? E === "#" ? rt = "#" : E === "b" ? rt = "b" : z !== "natural" && (rt = "n") : E === "#" && z !== "sharp" ? rt = "#" : E === "b" && z !== "flat" ? rt = "b" : !E && (z === "sharp" || z === "flat") && (rt = "n"), rt && (typeof h.addAccidental == "function" ? h.addAccidental(H, new u.Accidental(rt)) : typeof h.addModifier == "function" && h.addModifier(new u.Accidental(rt), H));
+              }), w.articulation) {
+                const H = {
+                  staccato: "a.",
+                  accent: "a>",
+                  tenuto: "a-",
+                  marcato: "a^"
+                }[w.articulation] || null;
+                H && (typeof h.addArticulation == "function" ? h.addArticulation(
+                  0,
+                  new u.Articulation(H).setPosition(
+                    u.Modifier.Position.ABOVE
+                  )
+                ) : typeof h.addModifier == "function" && h.addModifier(
+                  new u.Articulation(H).setPosition(
+                    u.Modifier.Position.ABOVE
+                  ),
+                  0
+                ));
+              }
+              return h;
+            });
+            if (T.forEach((w, h) => {
+              const v = y[h];
+              if (!v || v.isRest) return;
+              const H = typeof v.dots == "number" ? v.dots : v.dots === !0 || v.dot === !0 || v.dotted === !0 ? 1 : 0;
+              for (let et = 0; et < H; et++)
+                typeof w.addDotToAll == "function" ? w.addDotToAll() : u.Dot && v.keys.forEach((K, E) => {
+                  typeof w.addModifier == "function" && w.addModifier(new u.Dot(), E);
+                });
+              X.push({ vf: w, data: v });
+            }), W.push(...T), u.Beam && typeof u.Beam.generateBeams == "function") {
+              const w = T.filter(
+                (h) => typeof h.isRest != "function" || !h.isRest()
+              );
+              try {
+                const h = u.Beam.generateBeams(w);
+                h.forEach((v) => v.setContext(l)), Mt.push(...h);
+              } catch {
+              }
+            }
+            b < D.length - 1 && u.BarNote && u.Barline && u.Barline.type && W.push(new u.BarNote(u.Barline.type.SINGLE));
+          });
+          const tt = t.tracks[0].notes.reduce(
+            (y, b) => y + g(b.duration),
+            0
+          ), mt = new u.Voice({
+            num_beats: tt,
+            beat_value: 32
+          });
+          mt.setMode && u.Voice && u.Voice.Mode && u.Voice.Mode.SOFT !== void 0 ? mt.setMode(u.Voice.Mode.SOFT) : typeof mt.setStrict == "function" && mt.setStrict(!1), mt.addTickables(
+            W.filter(
+              (y) => typeof y.getTicks == "function" ? y.getTicks().value() > 0 : !0
+            )
+          ), !W.some(
+            (y) => typeof y.getMetrics != "function"
+          ) && u.Formatter && typeof u.Formatter.FormatAndDraw == "function" ? u.Formatter.FormatAndDraw(l, Q, W) : (new u.Formatter().joinVoices([mt]).format([mt], C - 20), mt.draw(l, Q)), Mt.length && Mt.forEach((y) => {
+            try {
+              y.draw();
+            } catch {
+            }
+          });
+          try {
+            const y = document.createElement("details");
+            y.style.marginTop = "10px";
+            const b = document.createElement("summary");
+            b.textContent = "VexFlow Source (click to expand)", b.style.cursor = "pointer", y.appendChild(b);
+            const T = document.createElement("pre");
+            T.textContent = JSON.stringify(t, null, 2), y.appendChild(T), o && o.parentNode ? o.parentNode.insertBefore(y, o.nextSibling) : o && o.appendChild(y);
+          } catch {
+          }
+          if (X.length && u.StaveTie)
+            for (let y = 0; y < X.length - 1; y++) {
+              const b = X[y];
+              if (!b) continue;
+              const T = b.data || {};
+              if (!!!(T.tieToNext || T.tieStart || T.tie === "start")) continue;
+              let h = null;
+              for (let v = y + 1; v < X.length; v++)
+                if (X[v]) {
+                  h = X[v];
+                  break;
+                }
+              if (h)
+                try {
+                  new u.StaveTie({
+                    first_note: b.vf,
+                    last_note: h.vf,
+                    first_indices: [0],
+                    last_indices: [0]
+                  }).setContext(l).draw();
+                } catch {
+                }
+            }
+        } catch (s) {
+          console.warn(
+            "Factory API failed, trying low-level API:",
+            s
+          );
+          const a = i && (i.Flow || i.VF || i) || {}, l = e.accidentalsMode || "auto", d = (($) => {
+            const y = ($ || "C").trim(), b = {
+              C: 0,
+              G: 1,
+              D: 2,
+              A: 3,
+              E: 4,
+              B: 5,
+              "F#": 6,
+              "C#": 7
+            }, T = {
               C: 0,
               F: 1,
               Bb: 2,
@@ -6541,202 +6764,9 @@ class pr {
               Bb: 5,
               Eb: 6,
               Ab: 7
-            }, B = ["f", "c", "g", "d", "a", "e", "b"], nt = ["b", "e", "a", "d", "g", "c", "f"], V = /m(in)?$/i.test(v), _ = v.replace(/m(in)?$/i, "");
-            let P = 0, rt = "natural";
-            V && w[_] !== void 0 ? (P = w[_], rt = "sharp") : V && h[_] !== void 0 ? (P = h[_], rt = "flat") : A[_] !== void 0 ? (P = A[_], rt = "sharp") : b[_] !== void 0 && (P = b[_], rt = "flat");
-            const dt = {
-              a: "natural",
-              b: "natural",
-              c: "natural",
-              d: "natural",
-              e: "natural",
-              f: "natural",
-              g: "natural"
-            };
-            if (rt === "sharp")
-              for (let gt = 0; gt < P; gt++) dt[B[gt]] = "sharp";
-            if (rt === "flat")
-              for (let gt = 0; gt < P; gt++) dt[nt[gt]] = "flat";
-            return dt;
-          })(t.keySignature), g = (y) => {
-            const v = String(y).replace(/r/g, "");
-            return { w: 32, h: 16, q: 8, 8: 4, 16: 2, 32: 1 }[v] || 0;
-          }, C = ((y) => {
-            const [v, A] = (y || "4/4").split("/").map((b) => parseInt(b, 10));
-            return { n: v || 4, d: A || 4 };
-          })(t.timeSignature), it = Math.max(1, Math.round(32 * C.n / C.d)), et = (y) => ({ 32: "w", 16: "h", 8: "q", 4: "8", 2: "16", 1: "32" })[y] || "q", O = [];
-          let J = [], st = 0;
-          const S = t.tracks[0].notes;
-          for (const y of S) {
-            let v = g(y.duration), A = !0;
-            for (; v > 0; ) {
-              const b = it - st, w = Math.min(v, b), h = { ...y, duration: et(w) };
-              A || (h.tieFromPrev = !0), w < v && (h.tieToNext = !0), J.push(h), st += w, v -= w, A = !1, st >= it && (O.push(J), J = [], st = 0);
-            }
-          }
-          J.length && O.push(J);
-          const j = 10, I = 10, F = 40, N = Math.max(
-            100,
-            (e.width || 800) - j - I
-          ), L = Math.max(1, O.length), z = Math.max(100, Math.floor(N / L)), Y = (y) => {
-            const v = /^([a-g])(b|#)?\/(-?\d+)$/.exec(y);
-            if (!v) return 60;
-            const b = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 }[v[1]], w = v[2] === "#" ? 1 : v[2] === "b" ? -1 : 0;
-            return (parseInt(v[3], 10) + 1) * 12 + b + w;
-          }, W = [];
-          O.forEach((y) => {
-            y.forEach((v) => {
-              v && !v.isRest && Array.isArray(v.keys) && v.keys[0] && W.push(Y(String(v.keys[0]).toLowerCase()));
-            });
-          });
-          const D = (W.length ? W.sort(
-            (y, v) => y - v
-          )[Math.floor(W.length / 2)] : 60) < 60 ? "bass" : "treble", Z = new u.Stave(j, F, N);
-          Z.addClef(
-            t.clef || t.tracks && t.tracks[0] && t.tracks[0].clef || D
-          ), t.timeSignature && Z.addTimeSignature(t.timeSignature), t.keySignature && t.keySignature !== "C" && Z.addKeySignature(t.keySignature), Z.setContext(l).draw();
-          const K = [], Q = [], vt = [];
-          O.forEach((y, v) => {
-            const A = y.map((b) => {
-              if (b.isRest)
-                return new u.StaveNote({
-                  keys: ["d/5"],
-                  duration: String(b.duration).replace(/r?$/, "r")
-                });
-              const w = new u.StaveNote({
-                keys: b.keys.map((h) => h.toLowerCase()),
-                duration: b.duration
-              });
-              if (u.Accidental && b.keys.forEach((h, B) => {
-                const nt = h.toLowerCase(), V = nt[0], _ = nt.includes("#") ? "#" : nt.includes("b") ? "b" : "", P = p[V] || "natural";
-                let rt = null;
-                d === "always" ? _ === "#" ? rt = "#" : _ === "b" ? rt = "b" : P !== "natural" && (rt = "n") : _ === "#" && P !== "sharp" ? rt = "#" : _ === "b" && P !== "flat" ? rt = "b" : !_ && (P === "sharp" || P === "flat") && (rt = "n"), rt && (typeof w.addAccidental == "function" ? w.addAccidental(B, new u.Accidental(rt)) : typeof w.addModifier == "function" && w.addModifier(new u.Accidental(rt), B));
-              }), b.articulation) {
-                const B = {
-                  staccato: "a.",
-                  accent: "a>",
-                  tenuto: "a-",
-                  marcato: "a^"
-                }[b.articulation] || null;
-                B && (typeof w.addArticulation == "function" ? w.addArticulation(
-                  0,
-                  new u.Articulation(B).setPosition(
-                    u.Modifier.Position.ABOVE
-                  )
-                ) : typeof w.addModifier == "function" && w.addModifier(
-                  new u.Articulation(B).setPosition(
-                    u.Modifier.Position.ABOVE
-                  ),
-                  0
-                ));
-              }
-              return w;
-            });
-            if (A.forEach((b, w) => {
-              const h = y[w];
-              if (!h || h.isRest) return;
-              const B = typeof h.dots == "number" ? h.dots : h.dots === !0 || h.dot === !0 || h.dotted === !0 ? 1 : 0;
-              for (let nt = 0; nt < B; nt++)
-                typeof b.addDotToAll == "function" ? b.addDotToAll() : u.Dot && h.keys.forEach((V, _) => {
-                  typeof b.addModifier == "function" && b.addModifier(new u.Dot(), _);
-                });
-              Q.push({ vf: b, data: h });
-            }), K.push(...A), u.Beam && typeof u.Beam.generateBeams == "function") {
-              const b = A.filter(
-                (w) => typeof w.isRest != "function" || !w.isRest()
-              );
-              try {
-                const w = u.Beam.generateBeams(b);
-                w.forEach((h) => h.setContext(l)), vt.push(...w);
-              } catch {
-              }
-            }
-            v < O.length - 1 && u.BarNote && u.Barline && u.Barline.type && K.push(new u.BarNote(u.Barline.type.SINGLE));
-          });
-          const tt = t.tracks[0].notes.reduce(
-            (y, v) => y + g(v.duration),
-            0
-          ), E = new u.Voice({
-            num_beats: tt,
-            beat_value: 32
-          });
-          if (E.setMode && u.Voice && u.Voice.Mode && u.Voice.Mode.SOFT !== void 0 ? E.setMode(u.Voice.Mode.SOFT) : typeof E.setStrict == "function" && E.setStrict(!1), E.addTickables(
-            K.filter(
-              (y) => typeof y.getTicks == "function" ? y.getTicks().value() > 0 : !0
-            )
-          ), u.Formatter && typeof u.Formatter.FormatAndDraw == "function" ? u.Formatter.FormatAndDraw(l, Z, K) : (new u.Formatter().joinVoices([E]).format([E], N - 20), E.draw(l, Z)), vt.length && vt.forEach((y) => {
-            try {
-              y.draw();
-            } catch {
-            }
-          }), Q.length && u.StaveTie)
-            for (let y = 0; y < Q.length - 1; y++) {
-              const v = Q[y];
-              if (!v) continue;
-              const A = v.data || {};
-              if (!!!(A.tieToNext || A.tieStart || A.tie === "start")) continue;
-              let w = null;
-              for (let h = y + 1; h < Q.length; h++)
-                if (Q[h]) {
-                  w = Q[h];
-                  break;
-                }
-              if (w)
-                try {
-                  new u.StaveTie({
-                    first_note: v.vf,
-                    last_note: w.vf,
-                    first_indices: [0],
-                    last_indices: [0]
-                  }).setContext(l).draw();
-                } catch {
-                }
-            }
-        } catch (s) {
-          console.warn(
-            "Factory API failed, trying low-level API:",
-            s
-          );
-          const a = i && (i.Flow || i.VF || i) || {}, l = e.accidentalsMode || "auto", d = ((E) => {
-            const y = (E || "C").trim(), v = {
-              C: 0,
-              G: 1,
-              D: 2,
-              A: 3,
-              E: 4,
-              B: 5,
-              "F#": 6,
-              "C#": 7
-            }, A = {
-              C: 0,
-              F: 1,
-              Bb: 2,
-              Eb: 3,
-              Ab: 4,
-              Db: 5,
-              Gb: 6,
-              Cb: 7
-            }, b = {
-              A: 0,
-              E: 1,
-              B: 2,
-              "F#": 3,
-              "C#": 4,
-              "G#": 5,
-              "D#": 6,
-              "A#": 7
-            }, w = {
-              A: 0,
-              D: 1,
-              G: 2,
-              C: 3,
-              F: 4,
-              Bb: 5,
-              Eb: 6,
-              Ab: 7
-            }, h = ["f", "c", "g", "d", "a", "e", "b"], B = ["b", "e", "a", "d", "g", "c", "f"], nt = /m(in)?$/i.test(y), V = y.replace(/m(in)?$/i, "");
-            let _ = 0, P = "natural";
-            nt && b[V] !== void 0 ? (_ = b[V], P = "sharp") : nt && w[V] !== void 0 ? (_ = w[V], P = "flat") : v[V] !== void 0 ? (_ = v[V], P = "sharp") : A[V] !== void 0 && (_ = A[V], P = "flat");
+            }, v = ["f", "c", "g", "d", "a", "e", "b"], H = ["b", "e", "a", "d", "g", "c", "f"], et = /m(in)?$/i.test(y), K = y.replace(/m(in)?$/i, "");
+            let E = 0, z = "natural";
+            et && w[K] !== void 0 ? (E = w[K], z = "sharp") : et && h[K] !== void 0 ? (E = h[K], z = "flat") : b[K] !== void 0 ? (E = b[K], z = "sharp") : T[K] !== void 0 && (E = T[K], z = "flat");
             const rt = {
               a: "natural",
               b: "natural",
@@ -6746,10 +6776,10 @@ class pr {
               f: "natural",
               g: "natural"
             };
-            if (P === "sharp")
-              for (let dt = 0; dt < _; dt++) rt[h[dt]] = "sharp";
-            if (P === "flat")
-              for (let dt = 0; dt < _; dt++) rt[B[dt]] = "flat";
+            if (z === "sharp")
+              for (let pt = 0; pt < E; pt++) rt[v[pt]] = "sharp";
+            if (z === "flat")
+              for (let pt = 0; pt < E; pt++) rt[H[pt]] = "flat";
             return rt;
           })(t.keySignature), m = a && a.Renderer || i.Renderer || i.Flow && i.Flow.Renderer;
           if (!m || !m.Backends)
@@ -6761,134 +6791,136 @@ class pr {
             m.Backends.SVG
           );
           p.resize(e.width, e.height);
-          const g = p.getContext(), f = (E) => {
-            const y = String(E).replace(/r/g, "");
+          const g = p.getContext(), f = ($) => {
+            const y = String($).replace(/r/g, "");
             return { w: 32, h: 16, q: 8, 8: 4, 16: 2, 32: 1 }[y] || 0;
-          }, it = ((E) => {
-            const [y, v] = (E || "4/4").split("/").map((A) => parseInt(A, 10));
-            return { n: y || 4, d: v || 4 };
-          })(t.timeSignature), et = Math.max(1, Math.round(32 * it.n / it.d)), O = (E) => ({ 32: "w", 16: "h", 8: "q", 4: "8", 2: "16", 1: "32" })[E] || "q", J = [];
-          let st = [], S = 0;
-          const j = t.tracks[0].notes;
-          for (const E of j) {
-            let y = f(E.duration), v = !0;
+          }, it = (($) => {
+            const [y, b] = ($ || "4/4").split("/").map((T) => parseInt(T, 10));
+            return { n: y || 4, d: b || 4 };
+          })(t.timeSignature), nt = Math.max(1, Math.round(32 * it.n / it.d)), D = ($) => ({ 32: "w", 16: "h", 8: "q", 4: "8", 2: "16", 1: "32" })[$] || "q", Y = [];
+          let st = [], A = 0;
+          const R = t.tracks[0].notes;
+          for (const $ of R) {
+            let y = f($.duration), b = !0;
             for (; y > 0; ) {
-              const A = et - S, b = Math.min(y, A), w = { ...E, duration: O(b) };
-              v || (w.tieFromPrev = !0), b < y && (w.tieToNext = !0), st.push(w), S += b, y -= b, v = !1, S >= et && (J.push(st), st = [], S = 0);
+              const T = nt - A, w = Math.min(y, T), h = { ...$, duration: D(w) };
+              b || (h.tieFromPrev = !0), w < y && (h.tieToNext = !0), st.push(h), A += w, y -= w, b = !1, A >= nt && (Y.push(st), st = [], A = 0);
             }
           }
-          st.length && J.push(st);
-          const I = 10, F = 10, N = 40, L = Math.max(
+          st.length && Y.push(st);
+          const I = 10, F = 10, C = 40, L = Math.max(
             100,
             (e.width || 800) - I - F
-          ), z = (E) => {
-            const y = /^([a-g])(b|#)?\/(-?\d+)$/.exec(E);
+          ), O = ($) => {
+            const y = /^([a-g])(b|#)?\/(-?\d+)$/.exec($);
             if (!y) return 60;
-            const A = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 }[y[1]], b = y[2] === "#" ? 1 : y[2] === "b" ? -1 : 0;
-            return (parseInt(y[3], 10) + 1) * 12 + A + b;
-          }, Y = [];
-          J.forEach((E) => {
-            E.forEach((y) => {
-              y && !y.isRest && Array.isArray(y.keys) && y.keys[0] && Y.push(
-                z(String(y.keys[0]).toLowerCase())
+            const T = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 }[y[1]], w = y[2] === "#" ? 1 : y[2] === "b" ? -1 : 0;
+            return (parseInt(y[3], 10) + 1) * 12 + T + w;
+          }, q = [];
+          Y.forEach(($) => {
+            $.forEach((y) => {
+              y && !y.isRest && Array.isArray(y.keys) && y.keys[0] && q.push(
+                O(String(y.keys[0]).toLowerCase())
               );
             });
           });
-          const U = (Y.length ? Y.sort((E, y) => E - y)[Math.floor(Y.length / 2)] : 60) < 60 ? "bass" : "treble", D = new a.Stave(I, N, L);
-          D.addClef(
-            t.clef || t.tracks && t.tracks[0] && t.tracks[0].clef || U
-          ), t.timeSignature && D.addTimeSignature(t.timeSignature), t.keySignature && t.keySignature !== "C" && D.addKeySignature(t.keySignature), D.setContext(g).draw();
-          const Z = [], K = [], Q = [];
-          J.forEach((E, y) => {
-            const v = E.map((A) => {
-              if (A.isRest)
+          const G = (q.length ? q.sort(($, y) => $ - y)[Math.floor(q.length / 2)] : 60) < 60 ? "bass" : "treble", _ = new a.Stave(I, C, L);
+          _.addClef(
+            t.clef || t.tracks && t.tracks[0] && t.tracks[0].clef || G
+          ), t.timeSignature && _.addTimeSignature(t.timeSignature), t.keySignature && t.keySignature !== "C" && _.addKeySignature(t.keySignature), _.setContext(g).draw();
+          const Q = [], W = [], X = [];
+          Y.forEach(($, y) => {
+            const b = $.map((T) => {
+              if (T.isRest)
                 return new a.StaveNote({
                   keys: ["d/5"],
-                  duration: String(A.duration).replace(/r?$/, "r")
+                  duration: String(T.duration).replace(/r?$/, "r")
                 });
-              const b = new a.StaveNote({
-                keys: A.keys.map((w) => w.toLowerCase()),
-                duration: A.duration
+              const w = new a.StaveNote({
+                keys: T.keys.map((h) => h.toLowerCase()),
+                duration: T.duration
               });
-              if (a.Accidental && A.keys.forEach((w, h) => {
-                const B = w.toLowerCase(), nt = B[0], V = B.includes("#") ? "#" : B.includes("b") ? "b" : "", _ = d[nt] || "natural";
-                let P = null;
-                l === "always" ? V === "#" ? P = "#" : V === "b" ? P = "b" : _ !== "natural" && (P = "n") : V === "#" && _ !== "sharp" ? P = "#" : V === "b" && _ !== "flat" ? P = "b" : !V && (_ === "sharp" || _ === "flat") && (P = "n"), P && (typeof b.addAccidental == "function" ? b.addAccidental(h, new a.Accidental(P)) : typeof b.addModifier == "function" && b.addModifier(new a.Accidental(P), h));
-              }), A.articulation) {
-                const h = {
+              if (a.Accidental && T.keys.forEach((h, v) => {
+                const H = h.toLowerCase(), et = H[0], K = H.includes("#") ? "#" : H.includes("b") ? "b" : "", E = d[et] || "natural";
+                let z = null;
+                l === "always" ? K === "#" ? z = "#" : K === "b" ? z = "b" : E !== "natural" && (z = "n") : K === "#" && E !== "sharp" ? z = "#" : K === "b" && E !== "flat" ? z = "b" : !K && (E === "sharp" || E === "flat") && (z = "n"), z && (typeof w.addAccidental == "function" ? w.addAccidental(v, new a.Accidental(z)) : typeof w.addModifier == "function" && w.addModifier(new a.Accidental(z), v));
+              }), T.articulation) {
+                const v = {
                   staccato: "a.",
                   accent: "a>",
                   tenuto: "a-",
                   marcato: "a^"
-                }[A.articulation] || null;
-                h && (typeof b.addArticulation == "function" ? b.addArticulation(
+                }[T.articulation] || null;
+                v && (typeof w.addArticulation == "function" ? w.addArticulation(
                   0,
-                  new a.Articulation(h).setPosition(
+                  new a.Articulation(v).setPosition(
                     a.Modifier.Position.ABOVE
                   )
-                ) : typeof b.addModifier == "function" && b.addModifier(
-                  new a.Articulation(h).setPosition(
+                ) : typeof w.addModifier == "function" && w.addModifier(
+                  new a.Articulation(v).setPosition(
                     a.Modifier.Position.ABOVE
                   ),
                   0
                 ));
               }
-              return b;
+              return w;
             });
-            if (v.forEach((A, b) => {
-              const w = E[b];
-              if (!w || w.isRest) return;
-              const h = typeof w.dots == "number" ? w.dots : w.dots === !0 || w.dot === !0 || w.dotted === !0 ? 1 : 0;
-              for (let B = 0; B < h; B++)
-                typeof A.addDotToAll == "function" ? A.addDotToAll() : a.Dot && w.keys.forEach((nt, V) => {
-                  typeof A.addModifier == "function" && A.addModifier(new a.Dot(), V);
+            if (b.forEach((T, w) => {
+              const h = $[w];
+              if (!h || h.isRest) return;
+              const v = typeof h.dots == "number" ? h.dots : h.dots === !0 || h.dot === !0 || h.dotted === !0 ? 1 : 0;
+              for (let H = 0; H < v; H++)
+                typeof T.addDotToAll == "function" ? T.addDotToAll() : a.Dot && h.keys.forEach((et, K) => {
+                  typeof T.addModifier == "function" && T.addModifier(new a.Dot(), K);
                 });
-              K.push({ vf: A, data: w });
-            }), Z.push(...v), a.Beam && typeof a.Beam.generateBeams == "function") {
-              const A = v.filter(
-                (b) => typeof b.isRest != "function" || !b.isRest()
+              W.push({ vf: T, data: h });
+            }), Q.push(...b), a.Beam && typeof a.Beam.generateBeams == "function") {
+              const T = b.filter(
+                (w) => typeof w.isRest != "function" || !w.isRest()
               );
               try {
-                const b = a.Beam.generateBeams(A);
-                b.forEach((w) => w.setContext(g)), Q.push(...b);
+                const w = a.Beam.generateBeams(T);
+                w.forEach((h) => h.setContext(g)), X.push(...w);
               } catch {
               }
             }
-            y < J.length - 1 && a.BarNote && a.Barline && a.Barline.type && Z.push(new a.BarNote(a.Barline.type.SINGLE));
+            y < Y.length - 1 && a.BarNote && a.Barline && a.Barline.type && Q.push(new a.BarNote(a.Barline.type.SINGLE));
           });
-          const vt = t.tracks[0].notes.reduce(
-            (E, y) => E + f(y.duration),
+          const Mt = t.tracks[0].notes.reduce(
+            ($, y) => $ + f(y.duration),
             0
           ), tt = new a.Voice({
-            num_beats: vt,
+            num_beats: Mt,
             beat_value: 32
           });
           if (tt.setMode && a.Voice && a.Voice.Mode && a.Voice.Mode.SOFT !== void 0 ? tt.setMode(a.Voice.Mode.SOFT) : typeof tt.setStrict == "function" && tt.setStrict(!1), tt.addTickables(
-            Z.filter(
-              (E) => typeof E.getTicks == "function" ? E.getTicks().value() > 0 : !0
+            Q.filter(
+              ($) => typeof $.getTicks == "function" ? $.getTicks().value() > 0 : !0
             )
-          ), a.Formatter && typeof a.Formatter.FormatAndDraw == "function" ? a.Formatter.FormatAndDraw(g, D, Z) : (new a.Formatter().joinVoices([tt]).format([tt], L - 20), tt.draw(g, D)), Q.length && Q.forEach((E) => {
+          ), !Q.some(
+            ($) => typeof $.getMetrics != "function"
+          ) && a.Formatter && typeof a.Formatter.FormatAndDraw == "function" ? a.Formatter.FormatAndDraw(g, _, Q) : (new a.Formatter().joinVoices([tt]).format([tt], L - 20), tt.draw(g, _)), X.length && X.forEach(($) => {
             try {
-              E.draw();
+              $.draw();
             } catch {
             }
-          }), K.length && a.StaveTie)
-            for (let E = 0; E < K.length - 1; E++) {
-              const y = K[E];
+          }), W.length && a.StaveTie)
+            for (let $ = 0; $ < W.length - 1; $++) {
+              const y = W[$];
               if (!y) continue;
-              const v = y.data || {};
-              if (!!!(v.tieToNext || v.tieStart || v.tie === "start")) continue;
-              let b = null;
-              for (let w = E + 1; w < K.length; w++)
-                if (K[w]) {
-                  b = K[w];
+              const b = y.data || {};
+              if (!!!(b.tieToNext || b.tieStart || b.tie === "start")) continue;
+              let w = null;
+              for (let h = $ + 1; h < W.length; h++)
+                if (W[h]) {
+                  w = W[h];
                   break;
                 }
-              if (b)
+              if (w)
                 try {
                   new a.StaveTie({
                     first_note: y.vf,
-                    last_note: b.vf,
+                    last_note: w.vf,
                     first_indices: [0],
                     last_indices: [0]
                   }).setContext(g).draw();
@@ -6913,7 +6945,7 @@ function $e(c, t = {}) {
   return n;
 }
 function fr(c) {
-  return new Dt().validateAndNormalize(c);
+  return new _t().validateAndNormalize(c);
 }
 function gr(c, t = {}) {
   if (!c || typeof c != "object")
@@ -6996,11 +7028,42 @@ async function br(c, t, e, n, r) {
       s && (e.style.position = "absolute", e.style.left = "-10000px", e.style.top = "-10000px", e.style.visibility = "hidden", document.body.appendChild(e));
       try {
         i.render(n);
+        try {
+          const a = document.createElement("details");
+          a.style.marginTop = "15px";
+          const l = document.createElement("summary");
+          l.textContent = "VexFlow Source (click to expand)", l.style.cursor = "pointer", a.appendChild(l);
+          const u = document.createElement("pre");
+          u.textContent = JSON.stringify(i, null, 2), u.style.cssText = `
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+          `, a.appendChild(u), e.appendChild(a);
+        } catch {
+        }
       } finally {
         s && (e.style.position = "", e.style.left = "", e.style.top = "", e.style.visibility = "", document.body && document.body.contains(e) && document.body.removeChild(e));
       }
-    } else
+    } else {
       t.innerHTML = "<p>VexFlow not available - install VexFlow to render scores</p>";
+      try {
+        const s = document.createElement("details");
+        s.style.marginTop = "15px";
+        const a = document.createElement("summary");
+        a.textContent = "VexFlow Source (click to expand)", a.style.cursor = "pointer", s.appendChild(a);
+        const l = document.createElement("pre");
+        l.textContent = JSON.stringify(i, null, 2), l.style.cssText = `
+          background: #f5f5f5;
+          padding: 10px;
+          border-radius: 4px;
+          overflow-x: auto;
+          font-size: 12px;
+        `, s.appendChild(l), e.appendChild(s);
+      } catch {
+      }
+    }
   } catch (o) {
     console.error("[SCORE] Error rendering with VexFlow:", o), t.innerHTML = `<p>Error rendering VexFlow score: ${o.message}</p>`;
   }
@@ -7096,7 +7159,7 @@ const vr = {
   // Utils
   utils: {
     ...Et.utils,
-    JmonValidator: Dt,
+    JmonValidator: _t,
     // Expose utility helpers
     quantize: (c, t, e) => Promise.resolve().then(() => It).then((n) => n.quantize(c, t, e)),
     quantizeEvents: async (c, t) => (await Promise.resolve().then(() => It)).quantizeEvents(c, t),

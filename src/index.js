@@ -234,6 +234,28 @@ async function renderVexFlowScore(
       }
       try {
         vexFlowData.render(engineInstance);
+        // Append a collapsible VexFlow source block (like ABC)
+        try {
+          const details = document.createElement("details");
+          details.style.marginTop = "15px";
+          const summary = document.createElement("summary");
+          summary.textContent = "VexFlow Source (click to expand)";
+          summary.style.cursor = "pointer";
+          details.appendChild(summary);
+
+          const pre = document.createElement("pre");
+          pre.textContent = JSON.stringify(vexFlowData, null, 2);
+          pre.style.cssText = `
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+          `;
+          details.appendChild(pre);
+
+          scoreContainer.appendChild(details);
+        } catch {}
       } finally {
         if (shouldAttach) {
           // Clean up temporary styles and detach from body
@@ -249,6 +271,28 @@ async function renderVexFlowScore(
     } else {
       notationDiv.innerHTML =
         `<p>VexFlow not available - install VexFlow to render scores</p>`;
+      // Still expose VexFlow source structure for debugging
+      try {
+        const details = document.createElement("details");
+        details.style.marginTop = "15px";
+        const summary = document.createElement("summary");
+        summary.textContent = "VexFlow Source (click to expand)";
+        summary.style.cursor = "pointer";
+        details.appendChild(summary);
+
+        const pre = document.createElement("pre");
+        pre.textContent = JSON.stringify(vexFlowData, null, 2);
+        pre.style.cssText = `
+          background: #f5f5f5;
+          padding: 10px;
+          border-radius: 4px;
+          overflow-x: auto;
+          font-size: 12px;
+        `;
+        details.appendChild(pre);
+
+        scoreContainer.appendChild(details);
+      } catch {}
     }
   } catch (error) {
     console.error("[SCORE] Error rendering with VexFlow:", error);

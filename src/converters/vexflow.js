@@ -85,10 +85,33 @@ class VexFlowConverter {
       tracks: [],
     };
 
-    // Handle both single track and multi-track compositions
-    const tracks = Array.isArray(composition.tracks)
-      ? composition.tracks
-      : [composition];
+    // Handle tracks: array, object map, or single-track fallback
+    let tracks = [];
+    if (Array.isArray(composition.tracks)) {
+      tracks = composition.tracks.map((t, i) => ({
+        name: t.name || `Track ${i + 1}`,
+        notes: t.notes || t,
+        clef: t.clef,
+      }));
+    } else if (composition.tracks && typeof composition.tracks === "object") {
+      tracks = Object.entries(composition.tracks).map(([name, notes], i) => ({
+        name: name || `Track ${i + 1}`,
+        notes,
+        clef: (notes && notes.clef) || undefined,
+      }));
+    } else if (composition.notes) {
+      tracks = [{
+        name: composition.name || "Track 1",
+        notes: composition.notes,
+        clef: composition.clef,
+      }];
+    } else {
+      tracks = [{
+        name: "Track 1",
+        notes: composition,
+        clef: composition.clef,
+      }];
+    }
 
     tracks.forEach((track, trackIndex) => {
       const notes = track.notes || track;
@@ -96,9 +119,14 @@ class VexFlowConverter {
 
       if (Array.isArray(notes)) {
         notes.forEach((note) => {
-          if (note.pitch !== null && note.pitch !== undefined) {
+          const pitches = Array.isArray(note.pitch)
+            ? note.pitch
+            : (note.pitch !== null && note.pitch !== undefined
+              ? [note.pitch]
+              : []);
+          if (pitches.length > 0) {
             const vexFlowNote = {
-              keys: [this.midiToVexFlow(note.pitch)],
+              keys: pitches.map((p) => this.midiToVexFlow(p)),
               duration: this.durationToVexFlow(note.duration || 1),
             };
 
@@ -532,8 +560,13 @@ class VexFlowConverter {
             ),
           );
 
+          const hasBarNote = allTickables.some((t) =>
+            typeof t.getMetrics !== "function"
+          );
           if (
-            Flow.Formatter && typeof Flow.Formatter.FormatAndDraw === "function"
+            !hasBarNote &&
+            Flow.Formatter &&
+            typeof Flow.Formatter.FormatAndDraw === "function"
           ) {
             Flow.Formatter.FormatAndDraw(context, stave, allTickables);
           } else {
@@ -549,6 +582,23 @@ class VexFlowConverter {
               } catch (_) {}
             });
           }
+          // Append collapsible VexFlow source block (like ABC)
+          try {
+            const details = document.createElement("details");
+            details.style.marginTop = "10px";
+            const summary = document.createElement("summary");
+            summary.textContent = "VexFlow Source (click to expand)";
+            summary.style.cursor = "pointer";
+            details.appendChild(summary);
+            const pre = document.createElement("pre");
+            pre.textContent = JSON.stringify(vexFlowData, null, 2);
+            details.appendChild(pre);
+            if (div && div.parentNode) {
+              div.parentNode.insertBefore(details, div.nextSibling);
+            } else if (div) {
+              div.appendChild(details);
+            }
+          } catch (_) {}
           // Draw simple ties when requested (tie to next note)
           if (createdNotes.length && Flow.StaveTie) {
             for (let i = 0; i < createdNotes.length - 1; i++) {
@@ -925,8 +975,13 @@ class VexFlowConverter {
             ),
           );
 
+          const hasBarNote = allTickables.some((t) =>
+            typeof t.getMetrics !== "function"
+          );
           if (
-            Flow.Formatter && typeof Flow.Formatter.FormatAndDraw === "function"
+            !hasBarNote &&
+            Flow.Formatter &&
+            typeof Flow.Formatter.FormatAndDraw === "function"
           ) {
             Flow.Formatter.FormatAndDraw(context, stave, allTickables);
           } else {
