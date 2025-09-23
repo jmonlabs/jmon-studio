@@ -1,8 +1,9 @@
-import { JmonValidator } from "./utils/jmon-validator.js";
+import { JmonValidator } from "./utils/jmon-validator.browser.js";
 import algorithms from "./algorithms/index.js";
 import { createPlayer } from "./browser/music-player.js";
 import {
   abc,
+  convertToVexFlow,
   midi,
   midiToJmon,
   supercollider,
@@ -66,28 +67,58 @@ function play(jmonObj, options = {}) {
 }
 
 /**
- * Score function - renders ABC notation as visual musical score
+ * Score function - renders musical score using auto-detected rendering engine
  * @param {Object} jmonObj - JMON object to render as score
+ * @param {Object|string} renderingEngine - Rendering engine (ABCJS, VexFlow, or engine name)
  * @param {Object} options - Score rendering options
- * @param {Object} options.ABCJS - Pre-loaded ABCJS instance (optional)
- * @param {Object} options.abcjs - Pre-loaded ABCJS instance (optional, lowercase alias)
- * @param {boolean} options.autoload - Whether to auto-load ABCJS if not provided (default: true)
  * @returns {HTMLElement} Score container element
  */
-async function score(jmonObj, options = {}) {
+async function score(jmonObj, renderingEngine = {}, options = {}) {
+  // Handle legacy call signature: score(jmonObj, options)
+  if (
+    typeof renderingEngine === "object" && !renderingEngine.renderAbc &&
+    !renderingEngine.Renderer && !renderingEngine.VF
+  ) {
+    options = renderingEngine;
+    renderingEngine = null;
+  }
   const {
     scale = 0.9,
     staffwidth,
     showAbc = true,
     responsive = "resize",
     abcOptions = {},
-    ABCJS: externalABCJS = null,
-    abcjs: externalAbcjs = null, // Support lowercase alias
+    width = 800,
+    height = 200,
     autoload = true,
   } = options;
 
-  // Generate ABC notation with options
-  const abcNotation = abc(jmonObj, abcOptions);
+  // Auto-detect rendering engine
+  let engineType = "unknown";
+  let engineInstance = null;
+
+  if (renderingEngine) {
+    if (typeof renderingEngine === "string") {
+      engineType = renderingEngine.toLowerCase();
+    } else if (renderingEngine.renderAbc) {
+      engineType = "abcjs";
+      engineInstance = renderingEngine;
+    } else if (renderingEngine.Renderer || renderingEngine.VF) {
+      engineType = "vexflow";
+      engineInstance = renderingEngine;
+    }
+  } else {
+    // Try to detect available engines globally
+    if (typeof window !== "undefined") {
+      if (window.ABCJS) {
+        engineType = "abcjs";
+        engineInstance = window.ABCJS;
+      } else if (window.VF || window.Vex) {
+        engineType = "vexflow";
+        engineInstance = window.VF || window.Vex;
+      }
+    }
+  }
 
   // Create container
   const scoreContainer = document.createElement("div");
@@ -105,6 +136,144 @@ async function score(jmonObj, options = {}) {
 		margin: 10px 0;
 	`;
   scoreContainer.appendChild(notationDiv);
+
+  // Render based on detected engine
+  if (engineType === "vexflow" || engineType === "vf") {
+    return await renderVexFlowScore(
+      jmonObj,
+      notationDiv,
+      scoreContainer,
+      engineInstance,
+      options,
+    );
+  } else {
+    return await renderAbcjsScore(
+      jmonObj,
+      notationDiv,
+      scoreContainer,
+      engineInstance,
+      options,
+      autoload,
+    );
+  }
+}
+
+/**
+ * Render score using VexFlow
+ */
+async function renderVexFlowScore(
+  jmonObj,
+  notationDiv,
+  scoreContainer,
+  engineInstance,
+  options,
+) {
+  try {
+    const elementId = notationDiv.id || `rendered-score-${Date.now()}`;
+    if (!notationDiv.id) notationDiv.id = elementId;
+    const vexFlowData = convertToVexFlow(jmonObj, {
+      element: notationDiv,
+      elementId,
+      width: options.width,
+      height: options.height,
+    });
+
+    if (!engineInstance && options.autoload !== false) {
+      try {
+        console.log("[SCORE] Loading VexFlow...");
+        const VexFlowModule = await import(
+          "https://cdn.jsdelivr.net/npm/vexflow@5.0.0/+esm"
+        );
+        // Use the ESM namespace (default may be undefined with +esm)
+        engineInstance = VexFlowModule.default || VexFlowModule;
+        if (typeof window !== "undefined") {
+          // Expose globals for different consumers (VF, VexFlow, Vex.Flow)
+          window.VF = engineInstance;
+          window.VexFlow = engineInstance;
+          window.Vex = window.Vex || {};
+          window.Vex.Flow = engineInstance;
+        }
+      } catch (error) {
+        console.warn(
+          "[SCORE] Could not auto-load VexFlow via ESM:",
+          (error && (error.message || String(error))) || "Unknown error",
+        );
+        // Fallback: inject UMD/CJS script tag (sets window.VF / window.Vex.Flow)
+        if (typeof document !== "undefined") {
+          await new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src =
+              "https://cdn.jsdelivr.net/npm/vexflow@5.0.0/build/cjs/vexflow.min.js";
+            script.async = true;
+            script.onload = () => {
+              engineInstance = window.VF || window.VexFlow ||
+                (window.Vex && (window.Vex.Flow || window.Vex)) || null;
+              if (engineInstance && !window.VF) {
+                window.VF = engineInstance;
+              }
+              resolve();
+            };
+            script.onerror = () => resolve();
+            document.head.appendChild(script);
+          });
+        }
+      }
+    }
+
+    if (engineInstance && vexFlowData.render) {
+      // Ensure the notation container is attached to the DOM so VexFlow can find it by ID
+      const shouldAttach = typeof document !== "undefined" &&
+        !notationDiv.isConnected;
+      if (shouldAttach) {
+        // Temporarily attach offscreen to avoid layout shifts
+        scoreContainer.style.position = "absolute";
+        scoreContainer.style.left = "-10000px";
+        scoreContainer.style.top = "-10000px";
+        scoreContainer.style.visibility = "hidden";
+        document.body.appendChild(scoreContainer);
+      }
+      try {
+        vexFlowData.render(engineInstance);
+      } finally {
+        if (shouldAttach) {
+          // Clean up temporary styles and detach from body
+          scoreContainer.style.position = "";
+          scoreContainer.style.left = "";
+          scoreContainer.style.top = "";
+          scoreContainer.style.visibility = "";
+          if (document.body && document.body.contains(scoreContainer)) {
+            document.body.removeChild(scoreContainer);
+          }
+        }
+      }
+    } else {
+      notationDiv.innerHTML =
+        `<p>VexFlow not available - install VexFlow to render scores</p>`;
+    }
+  } catch (error) {
+    console.error("[SCORE] Error rendering with VexFlow:", error);
+    notationDiv.innerHTML =
+      `<p>Error rendering VexFlow score: ${error.message}</p>`;
+  }
+
+  return scoreContainer;
+}
+
+/**
+ * Render score using ABCJS (legacy function)
+ */
+async function renderAbcjsScore(
+  jmonObj,
+  notationDiv,
+  scoreContainer,
+  engineInstance,
+  options,
+  autoload,
+) {
+  const { scale, staffwidth, responsive, abcOptions, showAbc } = options;
+
+  // Generate ABC notation with options
+  const abcNotation = abc(jmonObj, abcOptions);
 
   // Add ABC text as collapsible if requested
   if (showAbc) {
@@ -129,25 +298,20 @@ async function score(jmonObj, options = {}) {
     scoreContainer.appendChild(details);
   }
 
-  // Initialize ABCJS (support both uppercase ABCJS and lowercase abcjs parameters)
-  let ABCJSInstance = externalABCJS || externalAbcjs ||
-    (typeof window !== "undefined" && window.ABCJS) ||
-    (typeof ABCJS !== "undefined" ? ABCJS : null);
-
   // Try to auto-load ABCJS if not available and autoload is enabled
-  if (!ABCJSInstance && autoload) {
+  if (!engineInstance && autoload) {
     try {
       if (typeof require !== "undefined") {
         console.log("[SCORE] Loading ABCJS via require()...");
-        ABCJSInstance = await require("abcjs");
+        engineInstance = await require("abcjs");
       } else {
         console.log("[SCORE] Loading ABCJS via import()...");
         const ABCJSModule = await import("https://cdn.skypack.dev/abcjs");
-        ABCJSInstance = ABCJSModule.default || ABCJSModule;
+        engineInstance = ABCJSModule.default || ABCJSModule;
       }
 
       // Validate that we got a proper ABCJS object
-      if (!ABCJSInstance || !ABCJSInstance.renderAbc) {
+      if (!engineInstance || !engineInstance.renderAbc) {
         console.warn(
           "[SCORE] First load attempt failed, trying alternative CDN...",
         );
@@ -155,46 +319,39 @@ async function score(jmonObj, options = {}) {
           const ABCJSAlt = await import(
             "https://cdn.jsdelivr.net/npm/abcjs@6.4.0/dist/abcjs-basic-min.js"
           );
-          ABCJSInstance = ABCJSAlt.default || ABCJSAlt.ABCJS ||
+          engineInstance = ABCJSAlt.default || ABCJSAlt.ABCJS ||
             (typeof window !== "undefined" && window.ABCJS);
-          if (!ABCJSInstance || !ABCJSInstance.renderAbc) {
+          if (!engineInstance || !engineInstance.renderAbc) {
             throw new Error("Alternative CDN also failed");
           }
         } catch (altError) {
           console.warn("[SCORE] Could not auto-load ABCJS:", altError.message);
-          ABCJSInstance = null;
+          engineInstance = null;
         }
       }
 
-      if (ABCJSInstance) {
+      if (engineInstance) {
         console.log(
           "[SCORE] ABCJS loaded successfully, version:",
-          ABCJSInstance.version || "unknown",
+          engineInstance.version || "unknown",
         );
-        // Make it globally available for consistency
         if (typeof window !== "undefined") {
-          window.ABCJS = ABCJSInstance;
+          window.ABCJS = engineInstance;
         }
       }
     } catch (error) {
       console.warn("[SCORE] Could not auto-load ABCJS:", error.message);
-      console.log("[SCORE] To use score rendering, load ABCJS manually first:");
-      console.log('Method 1: ABCJS = await require("abcjs")');
-      console.log(
-        'Method 2: ABCJS = await import("https://cdn.skypack.dev/abcjs").then(m => m.default)',
-      );
-      ABCJSInstance = null;
+      engineInstance = null;
     }
   }
 
   // Render the musical notation using ABCJS
-  if (ABCJSInstance && ABCJSInstance.renderAbc) {
+  if (engineInstance && engineInstance.renderAbc) {
     try {
-      // Determine staff width from container if not provided
       const width = staffwidth || null;
       const params = { responsive, scale };
       if (width) params.staffwidth = width;
-      ABCJSInstance.renderAbc(notationDiv, abcNotation, params);
+      engineInstance.renderAbc(notationDiv, abcNotation, params);
 
       // Check if anything was actually rendered
       setTimeout(() => {
@@ -202,10 +359,8 @@ async function score(jmonObj, options = {}) {
           notationDiv.children.length === 0 ||
           notationDiv.innerHTML.trim() === ""
         ) {
-          // Try alternative rendering method
           try {
-            ABCJSInstance.renderAbc(notationDiv, abcNotation);
-
+            engineInstance.renderAbc(notationDiv, abcNotation);
             if (notationDiv.children.length === 0) {
               notationDiv.innerHTML =
                 '<p style="color: red;">ABCJS rendering failed - no content generated</p><pre>' +
@@ -228,13 +383,6 @@ async function score(jmonObj, options = {}) {
       ? "ABCJS not available and auto-loading failed - showing text notation only"
       : "ABCJS not provided and auto-loading disabled - showing text notation only";
     notationDiv.innerHTML = `<p>${message}</p><pre>` + abcNotation + "</pre>";
-
-    if (!ABCJSInstance && autoload) {
-      console.log("[SCORE] To use visual score rendering, try:");
-      console.log(
-        'ABCJS = await require("abcjs"), then jm.score(composition, { ABCJS })',
-      );
-    }
   }
 
   return scoreContainer;
@@ -257,6 +405,7 @@ const jm = {
     tonejs,
     wav,
     supercollider,
+    vexflow: convertToVexFlow,
   },
 
   // Theory and algorithms

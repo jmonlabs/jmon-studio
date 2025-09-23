@@ -4,7 +4,7 @@
  * Follows existing patterns from music-player.js and other converters
  */
 
-import { JmonValidator } from "../utils/jmon-validator.js";
+import { JmonValidator } from "../utils/jmon-validator.browser.js";
 
 /**
  * MIDI to JMON Converter Class

@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Local ABC Test</title>
+        <script src="https://cdn.jsdelivr.net/npm/abcjs@6.4.0/dist/abcjs-basic-min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vexflow@5.0.0/build/cjs/vexflow.min.js"></script>
+    </head>
+    <body>
+        <h1>Testing ABC & VexFlow Improvements Locally</h1>
+
+        <h2>ABCJS Rendering</h2>
+        <div id="abcjs-container"></div>
+
+        <h2>VexFlow Rendering</h2>
+        <div id="vexflow-container"></div>
+
+        <div id="abc-output" style="margin-top: 20px">
+            <h3>ABC Notation:</h3>
+            <pre id="abc-text"></pre>
+        </div>
+
+        <div id="vexflow-output" style="margin-top: 20px">
+            <h3>VexFlow Data:</h3>
+            <pre id="vexflow-text"></pre>
+        </div>
+
+        <script type="module">
+            import jm from "http://localhost:8000/src/index.js";
+
+            // Your exact composition
+            const pitches = [68, 64, 71, 69, 75, 73];
+            const durations = [1, 0.5, 0.25, 0.5, 1, 0.75, 0.5, 0.5, 1, 2];
+            const notes = jm.theory.rhythm.isorhythm(pitches, durations);
+
+            const composition = {
+                metadata: { title: "Melody A" },
+                keySignature: "E",
+                tracks: [{ notes: notes }],
+            };
+
+            console.log("Testing composition:", composition);
+
+            // Test ABC conversion
+            const abcResult = jm.converters.abc(composition);
+            document.getElementById("abc-text").textContent = abcResult;
+
+            // Test VexFlow conversion
+            const vexFlowResult = jm.converters.vexflow(composition);
+            document.getElementById("vexflow-text").textContent =
+                JSON.stringify(vexFlowResult, null, 2);
+
+            console.log("ABC Result:", abcResult);
+            console.log("VexFlow Result:", vexFlowResult);
+
+            // Test auto-detection with ABCJS
+            try {
+                const abcjsScore = await jm.score(composition, window.ABCJS, {
+                    elementId: "abcjs-container",
+                    showAbc: false,
+                });
+                console.log("✅ ABCJS auto-detection working");
+            } catch (error) {
+                console.error("❌ ABCJS rendering failed:", error);
+                document.getElementById("abcjs-container").innerHTML =
+                    `<p>ABCJS Error: ${error.message}</p>`;
+            }
+
+            // Test auto-detection with VexFlow
+            try {
+                console.log("VexFlow global object:", window.VexFlow);
+                console.log(
+                    "Available properties:",
+                    Object.keys(window.VexFlow || {}),
+                );
+                console.log("Window.Vex:", window.Vex);
+
+                const vexFlowScore = await jm.score(composition, "vexflow", {
+                    width: 800,
+                    height: 200,
+                });
+                document
+                    .getElementById("vexflow-container")
+                    .appendChild(vexFlowScore);
+                console.log("✅ VexFlow auto-detection working");
+            } catch (error) {
+                console.error("❌ VexFlow rendering failed:", error);
+                document.getElementById("vexflow-container").innerHTML =
+                    `<p>VexFlow Error: ${error.message}</p>`;
+            }
+
+            // Test pure auto-detection (should pick ABCJS since it's loaded first)
+            try {
+                const autoScore = await jm.score(composition);
+                console.log(
+                    "✅ Auto-detection working - detected engine automatically",
+                );
+            } catch (error) {
+                console.error("❌ Auto-detection failed:", error);
+            }
+
+            // Check for improvements in ABC
+            const lines = abcResult.split("\n");
+            const lLine = lines.find((line) => line.startsWith("L:"));
+            const musicLines = lines.filter(
+                (line) => line.includes("g^") || line.includes("|"),
+            );
+            const allFractions = musicLines.flatMap(
+                (line) => line.match(/\d+\/\d+/g) || [],
+            );
+
+            console.log(`L: value: ${lLine}`);
+            console.log(
+                `Fractional durations found: ${allFractions.length} (${allFractions.join(", ")})`,
+            );
+            console.log(`Music lines: ${musicLines.length}`);
+
+            // Check measure boundaries
+            const measures = abcResult
+                .split("|")
+                .filter((m) => m.trim() && !m.includes("M:"));
+            console.log(`Measures found: ${measures.length}`);
+            measures.forEach((measure, i) => {
+                const noteCount = (measure.match(/[a-gA-G]/g) || []).length;
+                console.log(
+                    `Measure ${i + 1}: "${measure.trim()}" (${noteCount} notes)`,
+                );
+            });
+
+            console.log(
+                allFractions.length === 0
+                    ? "✅ Clean notation - no fractional durations!"
+                    : "❌ Still has fractional durations",
+            );
+        </script>
+    </body>
+</html>

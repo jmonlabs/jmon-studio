@@ -4,3 +4,4 @@ export { midiToJmon } from "./midi-to-jmon.js";
 export { tonejs } from "./tonejs.js";
 export { wav } from "./wav.js";
 export { supercollider } from "./supercollider.js";
+export { convertToVexFlow } from "./vexflow.js";

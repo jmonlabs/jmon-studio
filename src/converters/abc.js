@@ -1,4 +1,4 @@
-import { JmonValidator } from "../utils/jmon-validator.js";
+import { JmonValidator } from "../utils/jmon-validator.browser.js";
 import {
   encodeAbcDuration,
   quantize,
@@ -325,7 +325,9 @@ export class ToAbc {
     lValue = 1 / 4,
   ) {
     let abcNotes = "";
-    let currentMeasureBeat = 0; // in quarter-note units
+    // Convert measure length to L: value units
+    const lUnitsPerMeasure = quarterNotesPerMeasure / lValue;
+    let currentMeasureBeat = 0; // in L: value units
     let measureCount = 0;
     let measuresOnCurrentLine = 0;
     let lastEnd = 0; // absolute time in quarter-note units
@@ -333,15 +335,15 @@ export class ToAbc {
     const grid = opts?.quantizeBeats || 0.25; // user-definable grid
     const EPS = 1e-6;
     const q = (v) => quantize(v, grid, "nearest");
-    const encodeDur = (d) => encodeAbcDuration(d / lValue, grid / lValue);
+    const encodeDur = (d) => encodeAbcDuration(d, grid / lValue);
 
     const emitToken = (token) => {
       abcNotes += token + " ";
     };
     const emitBarsIfNeeded = () => {
-      while (currentMeasureBeat >= quarterNotesPerMeasure - EPS) {
+      while (currentMeasureBeat >= lUnitsPerMeasure - EPS) {
         emitToken("|");
-        currentMeasureBeat -= quarterNotesPerMeasure;
+        currentMeasureBeat -= lUnitsPerMeasure;
         measureCount++;
         measuresOnCurrentLine++;
         const shouldBreakLine = lineBreaks.includes(measureCount) ||
@@ -353,10 +355,10 @@ export class ToAbc {
       }
     };
     const emitRest = (dur, { forceVisible = false } = {}) => {
-      // dur in quarter-note units; may span measures
-      let remaining = dur;
+      // dur in quarter-note units; convert to L: units
+      let remaining = dur / lValue;
       while (remaining > EPS) {
-        const spaceLeft = q(quarterNotesPerMeasure - currentMeasureBeat);
+        const spaceLeft = q(lUnitsPerMeasure - currentMeasureBeat);
         const chunk = q(Math.min(remaining, spaceLeft));
         if (chunk > EPS) {
           let restToken = (opts.hideRests && !forceVisible) ? "x" : "z";
@@ -372,11 +374,11 @@ export class ToAbc {
     for (const note of sortedNotes) {
       const start = (typeof note.time === "number") ? q(note.time) : 0; // quarters
       const duration = (typeof note.duration === "number")
-        ? q(note.duration)
-        : 1.0;
+        ? q(note.duration / lValue) // Convert to L: value units
+        : (1.0 / lValue);
 
       // Insert rests for gaps
-      const gap = q(start - lastEnd);
+      const gap = q((start - lastEnd) / lValue); // Convert gap to L: units
       if (gap > EPS) emitRest(gap);
 
       // Build pitch token
@@ -449,7 +451,7 @@ export class ToAbc {
       let isFirstPart = true;
 
       while (remainingDuration > EPS) {
-        const spaceLeft = q(quarterNotesPerMeasure - currentMeasureBeat);
+        const spaceLeft = q(lUnitsPerMeasure - currentMeasureBeat);
         const chunk = q(Math.min(remainingDuration, spaceLeft));
 
         if (chunk > EPS) {
@@ -484,7 +486,7 @@ export class ToAbc {
     // Pad trailing measure(s) to align voices
     const padMeasures = opts.padMeasures || 0;
     while (measureCount < padMeasures) {
-      const remaining = q(quarterNotesPerMeasure - currentMeasureBeat);
+      const remaining = q(lUnitsPerMeasure - currentMeasureBeat);
       if (remaining > EPS) emitRest(remaining, { forceVisible: true });
       // ensure barline at end of measure
       emitToken("|");
@@ -494,7 +496,7 @@ export class ToAbc {
 
     // Fill current incomplete measure with rests
     if (currentMeasureBeat > EPS) {
-      const remaining = q(quarterNotesPerMeasure - currentMeasureBeat);
+      const remaining = q(lUnitsPerMeasure - currentMeasureBeat);
       if (remaining > EPS) {
         emitRest(remaining, { forceVisible: true });
       }
