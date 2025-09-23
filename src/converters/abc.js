@@ -87,14 +87,64 @@ export class ToAbc {
       abc += `C:${composer}\n`;
     }
     abc += `M:${composition.timeSignature || "4/4"}\n`;
-    abc += "L:1/4\n";
-    abc += `Q:1/4=${composition.tempo || composition.bpm || 120}\n`;
+
+    // Get tracks first
+    const tracks = Array.isArray(composition.tracks)
+      ? composition.tracks
+      : Object.values(composition.tracks || {});
+    if (tracks.length === 0) return abc;
+
+    // Automatically choose the best L: value to minimize fractions
+    const allDurations = [];
+    tracks.forEach((track) => {
+      const notes = track.notes || track;
+      if (Array.isArray(notes)) {
+        notes.forEach((note) => {
+          if (typeof note.duration === "number") {
+            allDurations.push(note.duration);
+          }
+        });
+      }
+    });
+
+    // Test different L: values and choose the one that minimizes fractions
+    const testLValues = [1 / 8, 1 / 4, 1 / 2]; // L:1/8, L:1/4, L:1/2
+    let bestL = 1 / 4;
+    let minFractions = Infinity;
+
+    for (const lValue of testLValues) {
+      let fractionCount = 0;
+      for (const duration of allDurations) {
+        const normalized = duration / lValue;
+        // Count as fraction if it's not a whole number
+        if (Math.abs(normalized - Math.round(normalized)) > 0.001) {
+          fractionCount++;
+        }
+      }
+      if (fractionCount < minFractions) {
+        minFractions = fractionCount;
+        bestL = lValue;
+      }
+    }
+
+    // Format L: value
+    const lValueStr = bestL === 1 / 8 ? "1/8" : bestL === 1 / 4 ? "1/4" : "1/2";
+    abc += `L:${lValueStr}\n`;
+
+    // Adjust tempo marking based on L: value
+    const tempoNote = bestL === 1 / 8 ? "1/8" : bestL === 1 / 4 ? "1/4" : "1/2";
+    const tempoValue = (composition.tempo || composition.bpm || 120) *
+      (bestL / (1 / 4));
+    abc += `Q:${tempoNote}=${Math.round(tempoValue)}\n`;
     abc += `K:${composition.keySignature || "C"}\n`;
 
     // Parse time signature to get beats per measure
     const timeSignature = composition.timeSignature || "4/4";
     const [beatsPerMeasure, beatValue] = timeSignature.split("/").map(Number);
     const quarterNotesPerMeasure = beatsPerMeasure * (4 / beatValue); // Convert to quarter note units
+
+    // Store the chosen L: value for duration encoding
+    const lValue = bestL;
 
     // Line break options
     const measuresPerLine = options.measuresPerLine || 4; // Default: 4 measures per line
@@ -104,11 +154,7 @@ export class ToAbc {
     const hideRests = !!options.hideRests; // if true, use spacer rests 'x' instead of 'z'
     const showArticulations = options.showArticulations !== false; // default true
 
-    // Get tracks
-    const tracks = Array.isArray(composition.tracks)
-      ? composition.tracks
-      : Object.values(composition.tracks || {});
-    if (tracks.length === 0) return abc;
+    // Pre-compute total project length (already have tracks)
 
     // Pre-compute total project length (in quarter notes) for padding
     const totalQuarters = (() => {
@@ -168,6 +214,7 @@ export class ToAbc {
             showArticulations,
             padMeasures: tracks.length > 1 ? totalMeasures : 0,
           },
+          lValue,
         );
 
         if (abcNotesStr.trim()) {
@@ -219,6 +266,7 @@ export class ToAbc {
           showArticulations,
           padMeasures: tracks.length > 1 ? totalMeasures : 0,
         },
+        lValue,
       );
       if (abcNotesStr.trim()) abc += abcNotesStr + "\n";
     } else if (renderMode === "single") {
@@ -240,6 +288,7 @@ export class ToAbc {
             showArticulations,
             padMeasures: tracks.length > 1 ? totalMeasures : 0,
           },
+          lValue,
         );
 
         if (abcNotesStr.trim()) {
@@ -271,6 +320,7 @@ export class ToAbc {
           showArticulations,
           padMeasures: tracks.length > 1 ? totalMeasures : 0,
         },
+        lValue,
       );
 
       if (abcNotesStr.trim()) {
@@ -289,6 +339,7 @@ export class ToAbc {
     measuresPerLine,
     lineBreaks,
     opts = {},
+    lValue = 1 / 4,
   ) {
     let abcNotes = "";
     let currentMeasureBeat = 0; // in quarter-note units
@@ -299,7 +350,7 @@ export class ToAbc {
     const grid = opts?.quantizeBeats || 0.25; // user-definable grid
     const EPS = 1e-6;
     const q = (v) => quantize(v, grid, "nearest");
-    const encodeDur = (d) => encodeAbcDuration(d, grid);
+    const encodeDur = (d) => encodeAbcDuration(d / lValue, grid / lValue);
 
     const emitToken = (token) => {
       abcNotes += token + " ";
