@@ -229,15 +229,33 @@ class VexFlowConverter {
 
         // Ensure we always have a valid HTMLDivElement for VexFlow
         let div = targetEl;
+        const root = (document.body || document.documentElement);
+
         if (!div) {
+          // No element provided: create a hidden container and attach it
           div = document.createElement("div");
           div.id = rendererConfig.elementId || `vexflow-${Date.now()}`;
           div.style.position = "absolute";
           div.style.left = "-10000px";
           div.style.top = "-10000px";
           div.style.visibility = "hidden";
-          (document.body || document.documentElement).appendChild(div);
+          root.appendChild(div);
+        } else {
+          // Caller provided an element. Make sure it has an id and is attached to DOM.
+          if (!div.id) {
+            div.id = rendererConfig.elementId || `vexflow-${Date.now()}`;
+          }
+          if (!root.contains(div)) {
+            // Attach off-screen so Factory can render into it
+            div.style.position = "absolute";
+            div.style.left = "-10000px";
+            div.style.top = "-10000px";
+            div.style.visibility = "hidden";
+            root.appendChild(div);
+          }
         }
+        // Ensure renderer uses the actual element's id
+        rendererConfig.elementId = div.id;
         const VFNS = (() => {
           const candidates = [
             VF,

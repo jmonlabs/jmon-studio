@@ -142,8 +142,16 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
           const height = options.height || 200;
           const instructions = convertToVexFlow(jmonObj, { elementId, width, height });
           if (instructions && instructions.type === 'vexflow' && typeof instructions.render === 'function') {
+            if (instructions.config) {
+              instructions.config.element = container; // ensure SVG renders into this container
+            }
             instructions.render(engineInstance);
-            return container;
+            // Verify that the converter actually rendered into our container.
+            // If no SVG is present, fall back to the simple renderer below.
+            if (container && container.querySelector && container.querySelector('svg')) {
+              return container;
+            }
+            // otherwise continue to simple direct VexFlow renderer
           }
         } catch (e) {
           // Fall back to simple renderer below
