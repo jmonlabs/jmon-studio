@@ -814,9 +814,8 @@ class VexFlowConverter {
             ),
           );
 
-          const formatter = new Flow.Formatter().joinVoices([voice]);
-          formatter.format([voice], avail - 20);
-          voice.draw(context, stave);
+          // Note: Voice drawing is handled per system in the lines.forEach loop above
+          // Removing duplicate voice.draw call that uses undefined 'stave' variable
 
           if (allBeams.length) {
             allBeams.forEach((b) => {
@@ -1451,9 +1450,8 @@ class VexFlowConverter {
             ),
           );
 
-          const formatter = new Flow.Formatter().joinVoices([voice]);
-          formatter.format([voice], avail - 20);
-          voice.draw(context, stave);
+          // Note: Voice drawing is handled per system in the lines.forEach loop above
+          // Removing duplicate voice.draw call that uses undefined 'stave' variable
 
           if (allBeams.length) {
             allBeams.forEach((b) => {

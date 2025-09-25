@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>JMON Studio ESM Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #score {
+            border: 2px dashed #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+            min-height: 200px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 20px 0;
+        }
+        input[type="number"] {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>JMON Studio ESM Test</h1>
+        <p>Testing score generation using modern ESM imports with VexFlow.</p>
+
+        <div class="controls">
+            <button onclick="testABC()">Test ABC</button>
+            <button onclick="testVexFlow()">Test VexFlow</button>
+            <button onclick="clearResults()">Clear</button>
+            <label>Width: <input type="number" id="width" value="800" min="400" max="1200"></label>
+            <label>Height: <input type="number" id="height" value="200" min="150" max="400"></label>
+        </div>
+
+        <div id="status"></div>
+        <div id="score"></div>
+    </div>
+
+    <script type="module">
+        import jm from '../dist/jmon.esm.js';
+
+        // Import VexFlow using ESM - try multiple sources
+        let VF;
+        try {
+            // Try to import VexFlow from different CDNs
+            const vfModule = await import('https://cdn.skypack.dev/vexflow@4.2.2');
+            VF = vfModule.default || vfModule.VF || vfModule;
+        } catch (e) {
+            try {
+                const vfModule = await import('https://esm.sh/vexflow@4.2.2');
+                VF = vfModule.default || vfModule.VF || vfModule;
+            } catch (e2) {
+                console.warn('Failed to import VexFlow via ESM:', e2);
+            }
+        }
+
+        // Test data
+        const testPiece = {
+            metadata: { title: 'ESM Test Piece' },
+            timeSignature: '4/4',
+            keySignature: 'C',
+            tempo: 120,
+            notes: [
+                { pitch: 60, duration: 1, time: 0 },
+                { pitch: 62, duration: 1, time: 1 },
+                { pitch: 64, duration: 1, time: 2 },
+                { pitch: 65, duration: 1, time: 3 },
+                { pitch: 67, duration: 1, time: 4 },
+                { pitch: 69, duration: 1, time: 5 },
+                { pitch: 71, duration: 1, time: 6 },
+                { pitch: 72, duration: 1, time: 7 }
+            ]
+        };
+
+        const statusDiv = document.getElementById('status');
+        const scoreDiv = document.getElementById('score');
+
+        function showStatus(message, type = 'success') {
+            statusDiv.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+
+        function testABC() {
+            try {
+                showStatus('Testing ABC conversion...', 'warning');
+
+                // Test direct ABC converter
+                const abcText = jm.converters.abc(testPiece);
+                console.log('ABC text:', abcText);
+
+                // Test score function without VexFlow
+                const result = jm.score(testPiece);
+
+                if (result && result.nodeType === 1) {
+                    scoreDiv.innerHTML = '';
+                    scoreDiv.appendChild(result);
+                    showStatus('✅ ABC rendered as DOM element', 'success');
+                } else if (result && result.type === 'abc') {
+                    const pre = document.createElement('pre');
+                    pre.textContent = result.data;
+                    pre.style.fontSize = '12px';
+                    pre.style.fontFamily = 'monospace';
+                    scoreDiv.innerHTML = '';
+                    scoreDiv.appendChild(pre);
+                    showStatus('✅ ABC returned as structured data', 'success');
+                } else {
+                    showStatus('❌ Unexpected result format', 'error');
+                    console.log('Unexpected result:', result);
+                }
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        function testVexFlow() {
+            try {
+                const width = parseInt(document.getElementById('width').value);
+                const height = parseInt(document.getElementById('height').value);
+
+                if (!VF) {
+                    showStatus('VexFlow not loaded - falling back to ABC', 'warning');
+                    testABC();
+                    return;
+                }
+
+                showStatus('Testing VexFlow rendering...', 'warning');
+
+                const result = jm.score(testPiece, VF, { width, height });
+
+                if (result && result.nodeType === 1) {
+                    scoreDiv.innerHTML = '';
+                    scoreDiv.appendChild(result);
+
+                    const svg = result.querySelector('svg');
+                    if (svg) {
+                        showStatus('✅ VexFlow SVG rendered successfully!', 'success');
+                    } else {
+                        showStatus('⚠️ DOM element created but no SVG found', 'warning');
+                    }
+                } else if (result && result.type === 'vexflow') {
+                    showStatus('✅ VexFlow data structure created (non-DOM env)', 'success');
+
+                    // Display some info about the structure
+                    const info = document.createElement('div');
+                    info.innerHTML = `
+                        <p><strong>VexFlow Data Structure:</strong></p>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                    scoreDiv.innerHTML = '';
+                    scoreDiv.appendChild(info);
+                } else if (result && result.type === 'abc') {
+                    showStatus('⚠️ Fell back to ABC despite VexFlow being available', 'warning');
+                    const pre = document.createElement('pre');
+                    pre.textContent = result.data;
+                    scoreDiv.innerHTML = '';
+                    scoreDiv.appendChild(pre);
+                } else {
+                    showStatus('❌ Unexpected result', 'error');
+                    console.log('Unexpected result:', result);
+                }
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        function clearResults() {
+            statusDiv.innerHTML = '';
+            scoreDiv.innerHTML = '';
+        }
+
+        // Make functions available globally for onclick handlers
+        window.testABC = testABC;
+        window.testVexFlow = testVexFlow;
+        window.clearResults = clearResults;
+
+        // Initialize
+        showStatus(
+            VF
+                ? '✅ Ready! VexFlow loaded via ESM. Click buttons to test.'
+                : '⚠️ VexFlow failed to load via ESM. ABC fallback available.',
+            VF ? 'success' : 'warning'
+        );
+
+        console.log('JMON Studio:', jm);
+        console.log('VexFlow:', VF);
+    </script>
+</body>
+</html>
