@@ -122,6 +122,7 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
 
   // VexFlow path: render SVG and return the container element
   if (engineType === "vexflow") {
+    console.log("VexFlow engine detected, proceeding with rendering");
     // Create container element - works in both browser and Observable environments
     const hasDocument = typeof document !== "undefined";
     let container;

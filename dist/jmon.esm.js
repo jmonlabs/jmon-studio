@@ -7427,6 +7427,7 @@ function zr(c, t = {}, e = {}) {
   let n = "unknown", r = null;
   if (t && typeof t == "string" ? n = t.toLowerCase() : t && typeof t == "object" ? (t.Renderer || t.Flow || t.VF || t.Factory || t.Stave || t.StaveNote || t.Voice || t.Formatter || t.Vex && (t.Vex.Flow || t.Vex) || // Check for common VexFlow object patterns
   t.default && (t.default.Renderer || t.default.Stave || t.default.VF)) && (n = "vexflow", r = t) : typeof window < "u" && (window.VF || window.VexFlow || window.Vex && (window.Vex.Flow || window.Vex) || window.Flow && window.Flow.Factory) && (n = "vexflow", r = window.VF || window.VexFlow || window.Vex && (window.Vex.Flow || window.Vex) || window), n === "vexflow") {
+    console.log("VexFlow engine detected, proceeding with rendering");
     const o = typeof document < "u";
     let i;
     if (o) {
