@@ -157,26 +157,21 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
             // The VexFlow converter ensures the div is visible and properly styled
 
             // Handle different return formats based on outputType option
-            if (options.outputType || options.returnSvg) {
+            if (options.outputType) {
               const svg = container.querySelector('svg');
               if (!svg) return container;
 
-              const outputType = options.outputType || options.returnSvg; // backward compatibility
-
-              if (outputType === 'svg') {
+              if (options.outputType === 'svg') {
                 return svg;
-              } else if (outputType === 'clonedSvg') {
+              } else if (options.outputType === 'clonedSvg') {
                 // Clone and style for Observable compatibility
                 const clonedSvg = svg.cloneNode(true);
                 clonedSvg.style.display = 'block';
                 clonedSvg.style.maxWidth = '100%';
                 clonedSvg.style.height = 'auto';
                 return clonedSvg;
-              } else if (outputType === 'div') {
+              } else if (options.outputType === 'div') {
                 return container;
-              } else if (outputType === true) {
-                // Backward compatibility - return raw SVG
-                return svg;
               }
             }
 
@@ -295,26 +290,21 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
         }
 
         // Handle different return formats based on outputType option
-        if (options.outputType || options.returnSvg) {
+        if (options.outputType) {
           const svg = container.querySelector('svg');
           if (!svg) return container;
 
-          const outputType = options.outputType || options.returnSvg; // backward compatibility
-
-          if (outputType === 'svg') {
+          if (options.outputType === 'svg') {
             return svg;
-          } else if (outputType === 'clonedSvg') {
+          } else if (options.outputType === 'clonedSvg') {
             // Clone and style for Observable compatibility
             const clonedSvg = svg.cloneNode(true);
             clonedSvg.style.display = 'block';
             clonedSvg.style.maxWidth = '100%';
             clonedSvg.style.height = 'auto';
             return clonedSvg;
-          } else if (outputType === 'div') {
+          } else if (options.outputType === 'div') {
             return container;
-          } else if (outputType === true) {
-            // Backward compatibility - return raw SVG
-            return svg;
           }
         }
 
