@@ -82,7 +82,7 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
   // Detect rendering engine
   if (renderingEngine && typeof renderingEngine === "string") {
     engineType = renderingEngine.toLowerCase();
-  } else if (renderingEngine && typeof renderingEngine === "object") {
+  } else if (renderingEngine && (typeof renderingEngine === "object" || typeof renderingEngine === "function")) {
     // Check for any VexFlow-like properties (be more permissive)
     if (
       renderingEngine.Renderer ||
