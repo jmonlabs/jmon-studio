@@ -262,12 +262,9 @@ class VexFlowConverter {
         const root = (document.body || document.documentElement);
 
         if (!div) {
-          // No element provided: create a visible container and attach it
+          // No element provided: create a container and attach it
           div = document.createElement("div");
           div.id = rendererConfig.elementId || `vexflow-${Date.now()}`;
-          div.style.position = "relative";
-          div.style.display = "block";
-          div.style.visibility = "visible";
           root.appendChild(div);
         } else {
           // Caller provided an element. Make sure it has an id and is attached to DOM.
@@ -275,10 +272,7 @@ class VexFlowConverter {
             div.id = rendererConfig.elementId || `vexflow-${Date.now()}`;
           }
           if (!root.contains(div)) {
-            // Attach visibly to DOM
-            div.style.position = "relative";
-            div.style.display = "block";
-            div.style.visibility = "visible";
+            // Attach to DOM
             root.appendChild(div);
           }
         }
@@ -914,12 +908,7 @@ class VexFlowConverter {
               } catch (_) {}
             });
           }
-          // Ensure the div is visible after all rendering is complete
-          div.style.position = "relative";
-          div.style.display = "block";
-          div.style.visibility = "visible";
-          div.style.left = "auto";
-          div.style.top = "auto";
+          // Rendering complete - styling handled by main score function
 
           // Append collapsible VexFlow source block (like ABC)
           try {
@@ -1113,10 +1102,7 @@ class VexFlowConverter {
           );
           renderer.resize(rendererConfig.width, rendererConfig.height);
 
-          // Ensure the div is visible after rendering
-          div.style.position = "relative";
-          div.style.display = "block";
-          div.style.visibility = "visible";
+          // Rendering complete
 
           const context = renderer.getContext();
 
@@ -1607,12 +1593,7 @@ class VexFlowConverter {
             });
           }
 
-          // Ensure the div is visible after all rendering is complete
-          div.style.position = "relative";
-          div.style.display = "block";
-          div.style.visibility = "visible";
-          div.style.left = "auto";
-          div.style.top = "auto";
+          // Rendering complete - styling handled by main score function
 
           // Draw simple ties when requested (tie to next note)
           if (createdNotes.length && Flow.StaveTie) {

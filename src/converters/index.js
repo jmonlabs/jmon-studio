@@ -1,4 +1,3 @@
-export { abc } from "./abc.js";
 export { midi } from "./midi.js";
 export { midiToJmon } from "./midi-to-jmon.js";
 export { tonejs } from "./tonejs.js";

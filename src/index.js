@@ -10,7 +10,6 @@ import { JmonValidator } from "./utils/jmon-validator.browser.js";
 import algorithms from "./algorithms/index.js";
 import { createPlayer } from "./browser/music-player.js";
 import {
-  abc,
   convertToVexFlow,
   midi,
   midiToJmon,
@@ -132,6 +131,13 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
       const elementId = `vexflow-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       container.id = elementId;
 
+      // Style container for Observable compatibility
+      container.style.display = 'block';
+      container.style.position = 'static';
+      container.style.visibility = 'visible';
+      container.style.width = 'fit-content';
+      container.style.height = 'fit-content';
+
       // For Observable and similar environments, just create the element without mounting
       // VexFlow can render to detached elements
 
@@ -149,6 +155,13 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
 
             // Always return the container after rendering - Observable needs the div
             // The VexFlow converter ensures the div is visible and properly styled
+
+            // If options.returnSvg is true, return just the SVG for Observable compatibility
+            if (options.returnSvg) {
+              const svg = container.querySelector('svg');
+              return svg || container;
+            }
+
             return container;
           }
         } catch (e) {
@@ -263,6 +276,12 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
           }
         }
 
+        // If options.returnSvg is true, return just the SVG for Observable compatibility
+        if (options.returnSvg) {
+          const svg = container.querySelector('svg');
+          return svg || container;
+        }
+
         return container;
 
       } catch (error) {
@@ -288,7 +307,6 @@ const jm = {
 
   // Converters
   converters: {
-    abc,
     midi,
     midiToJmon,
     tonejs,
