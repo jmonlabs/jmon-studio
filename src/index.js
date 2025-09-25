@@ -136,6 +136,18 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
       // VexFlow can render to detached elements
 
       try {
+        // Preferred path: use VexFlowConverter to render full JMON (tracks, measures, ties, decorations)
+        try {
+          const width = options.width || 800;
+          const height = options.height || 200;
+          const instructions = convertToVexFlow(jmonObj, { elementId, width, height });
+          if (instructions && instructions.type === 'vexflow' && typeof instructions.render === 'function') {
+            instructions.render(engineInstance);
+            return container;
+          }
+        } catch (e) {
+          // Fall back to simple renderer below
+        }
         // Simple direct VexFlow rendering - bypass complex converter
         const VF = engineInstance ||
           (typeof window !== "undefined" && (
@@ -206,6 +218,13 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
               beat_value: 4
             });
 
+            // Be tolerant about strict timing to avoid formatter/voice rejections
+            if (typeof voice.setMode === 'function' && VF.Voice && VF.Voice.Mode && VF.Voice.Mode.SOFT !== undefined) {
+              voice.setMode(VF.Voice.Mode.SOFT);
+            } else if (typeof voice.setStrict === 'function') {
+              voice.setStrict(false);
+            }
+
             if (typeof voice.addTickables === 'function') {
               voice.addTickables(notes);
             }
@@ -220,6 +239,21 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
             }
           } catch (voiceError) {
             console.warn('VexFlow voice/formatter error:', voiceError);
+
+            // Fallback: draw notes manually in a naive layout so score is never empty
+            try {
+              let x = 60; // starting x position inside stave
+              notes.forEach(n => {
+                if (typeof n.setStave === 'function') n.setStave(stave);
+                if (typeof n.setContext === 'function') n.setContext(context);
+                if (typeof n.preFormat === 'function') n.preFormat();
+                if (typeof n.setX === 'function') n.setX(x);
+                if (typeof n.draw === 'function') n.draw();
+                x += 40; // simple spacing between notes
+              });
+            } catch (manualError) {
+              console.warn('Manual note drawing failed:', manualError);
+            }
           }
         }
 
