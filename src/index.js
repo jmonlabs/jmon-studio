@@ -85,7 +85,13 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
     if (renderingEngine.renderAbc) {
       engineType = "abcjs";
       engineInstance = renderingEngine;
-    } else if (renderingEngine.Renderer || renderingEngine.Flow || renderingEngine.VF) {
+    } else if (
+      renderingEngine.Renderer ||
+      renderingEngine.Flow ||
+      renderingEngine.VF ||
+      renderingEngine.Factory || // some builds expose Factory directly
+      (renderingEngine.Vex && (renderingEngine.Vex.Flow || renderingEngine.Vex)) // nested Vex namespace
+    ) {
       engineType = "vexflow";
       engineInstance = renderingEngine;
     }
@@ -93,9 +99,18 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
     if (window.ABCJS) {
       engineType = "abcjs";
       engineInstance = window.ABCJS;
-    } else if (window.VF || window.VexFlow || (window.Vex && (window.Vex.Flow || window.Vex))) {
+    } else if (
+      window.VF ||
+      window.VexFlow ||
+      (window.Vex && (window.Vex.Flow || window.Vex)) ||
+      (window.Flow && window.Flow.Factory) // some builds expose Flow.Factory globally
+    ) {
       engineType = "vexflow";
-      engineInstance = window.VF || window.VexFlow || (window.Vex && (window.Vex.Flow || window.Vex));
+      engineInstance =
+        window.VF ||
+        window.VexFlow ||
+        (window.Vex && (window.Vex.Flow || window.Vex)) ||
+        window; // allow { Flow: { Factory } } pattern
     }
   }
 
@@ -104,6 +119,16 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
     const container = document.createElement("div");
     const elementId = `vexflow-${Date.now()}`;
     container.id = elementId;
+
+    // Ensure the container is attached before rendering so VexFlow can resolve the target element
+    if (typeof document !== "undefined" && !container.isConnected && document.body) {
+      // mount offscreen to avoid layout shift; Observable will reparent the same node later
+      container.style.position = "absolute";
+      container.style.left = "-10000px";
+      container.style.top = "-10000px";
+      container.style.visibility = "hidden";
+      document.body.appendChild(container);
+    }
 
     const vex = convertToVexFlow(jmonObj, {
       elementId,
@@ -116,7 +141,14 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
         const VF =
           engineInstance ||
           (typeof window !== "undefined" && (window.VF || window.VexFlow || (window.Vex && (window.Vex.Flow || window.Vex))));
-        if (VF) vex.render(VF);
+        if (VF) {
+          vex.render(VF);
+          // restore normal positioning if we mounted offscreen
+          container.style.position = "";
+          container.style.left = "";
+          container.style.top = "";
+          container.style.visibility = "";
+        }
       } catch {}
     }
     return container;

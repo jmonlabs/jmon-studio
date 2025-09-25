@@ -22,10 +22,7 @@
   "scripts": {
     "build": "vite build",
     "copy-files": "mkdir -p dist && cp -r src/* dist/ && cp src/format/*.js dist/format/ 2>/dev/null || true",
-    "test": "npm run build && node test/simple-test.cjs",
-    "test:ornaments": "npm run build && node test/minimalism-ornaments-test.cjs",
-    "test:slides": "npm run build && node test/articulation-slides-test.cjs",
-    "test:minimalism": "npm run build && node test/minimalism-more-test.cjs",
+    "test": "node tests/run-all.cjs",
     "dev": "vite",
     "preview": "vite preview",
     "clean": "rm -rf dist",

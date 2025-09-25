@@ -651,5 +651,14 @@ export class MidiToJmon {
  * @returns {Promise<Object>} JMON composition
  */
 export async function midiToJmon(midiData, options = {}) {
+  const isArrayBuffer =
+    typeof ArrayBuffer !== 'undefined' && midiData instanceof ArrayBuffer;
+  const isUint8Array =
+    typeof Uint8Array !== 'undefined' && midiData instanceof Uint8Array;
+
+  if (!isArrayBuffer && !isUint8Array) {
+    throw new TypeError("midiToJmon: 'midiData' must be an ArrayBuffer or Uint8Array");
+  }
+
   return await MidiToJmon.convert(midiData, options);
 }
