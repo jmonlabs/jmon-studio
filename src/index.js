@@ -71,9 +71,9 @@ function play(jmonObj, options = {}) {
 }
 
 /**
- * Score rendering function that generates SVG musical notation.
- * Requires VexFlow for rendering - no fallbacks.
- * Returns DOM element or structured data depending on environment and engine.
+ * Score rendering function that generates SVG musical notation using VexFlow.
+ * REQUIRES VexFlow instance - no fallbacks, will throw error if VexFlow fails.
+ * Returns DOM element with SVG content.
  */
 function score(jmonObj, renderingEngine = {}, options = {}) {
   let engineType = "unknown";
@@ -214,44 +214,16 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
         return container;
 
       } catch (error) {
-        console.warn("Simple VexFlow rendering failed:", error);
-        // Fall through to ABC fallback
+        throw new Error(`VexFlow rendering failed: ${error.message}. Please check your VexFlow instance.`);
       }
     } else {
-      // Non-DOM environment (e.g., Node.js): return structured data for VexFlow
-      try {
-        const vexData = convertToVexFlow(jmonObj, {
-          width: options.width || 800,
-          height: options.height || 200,
-        });
-        return {
-          type: "vexflow",
-          data: vexData,
-          options: { width: options.width || 800, height: options.height || 200 }
-        };
-      } catch (error) {
-        console.warn("VexFlow conversion failed:", error);
-        // Fall through to ABC fallback
-      }
+      // Non-DOM environment: VexFlow not supported without DOM
+      throw new Error("VexFlow rendering requires a DOM environment. Use jm.converters.vexflow() for data conversion.");
     }
   }
 
-  // ABCJS support removed - VexFlow is stable and sufficient
-
-  // ABC text fallback - works in all environments
-  const notation = abc(jmonObj, options.abc || {});
-
-  if (typeof document !== "undefined") {
-    const pre = document.createElement("pre");
-    pre.textContent = notation;
-    pre.style.fontFamily = "monospace";
-    pre.style.fontSize = "12px";
-    pre.style.whiteSpace = "pre-wrap";
-    return pre;
-  }
-
-  // Non-DOM environment: return structured data
-  return { type: "abc", data: notation, options };
+  // No VexFlow provided
+  throw new Error("Score rendering requires VexFlow. Please provide a VexFlow instance as the second parameter: jm.score(piece, vexflow)");
 }
 
 // Compose the jm API object expected by build and tests
