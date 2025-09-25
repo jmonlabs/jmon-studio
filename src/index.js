@@ -83,12 +83,23 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
   if (renderingEngine && typeof renderingEngine === "string") {
     engineType = renderingEngine.toLowerCase();
   } else if (renderingEngine && typeof renderingEngine === "object") {
+    // Check for any VexFlow-like properties (be more permissive)
     if (
       renderingEngine.Renderer ||
       renderingEngine.Flow ||
       renderingEngine.VF ||
-      renderingEngine.Factory || // some builds expose Factory directly
-      (renderingEngine.Vex && (renderingEngine.Vex.Flow || renderingEngine.Vex)) // nested Vex namespace
+      renderingEngine.Factory ||
+      renderingEngine.Stave ||
+      renderingEngine.StaveNote ||
+      renderingEngine.Voice ||
+      renderingEngine.Formatter ||
+      (renderingEngine.Vex && (renderingEngine.Vex.Flow || renderingEngine.Vex)) ||
+      // Check for common VexFlow object patterns
+      (renderingEngine.default && (
+        renderingEngine.default.Renderer ||
+        renderingEngine.default.Stave ||
+        renderingEngine.default.VF
+      ))
     ) {
       engineType = "vexflow";
       engineInstance = renderingEngine;
