@@ -138,8 +138,8 @@
           <input id="height" type="number" min="120" max="800" step="10" value="220" />
         </label>
         <button id="btn-render" type="button">Render</button>
-        <button id="btn-scale" type="button" title="Render a one-octave C major scale">Load C Major Scale</button>
-        <button id="btn-artic" type="button" title="Render articulations, arpeggio stroke, and glissando">Load Articulations Demo</button>
+        <button id="btn-scale" type="button" title="Render A minor scale">Load A Minor Scale</button>
+        <button id="btn-chords" type="button" title="Render chord progression in F major">Load Chord Progression</button>
         <span class="note" id="engine-note">Loading ESM modules…</span>
       </div>
       <div id="score" class="score-wrap"></div>
@@ -186,39 +186,46 @@
       console.error('Failed to load VexFlow via ESM:', error);
     }
 
-    // Demo pieces
-    function cMajorScale() {
+    // Demo pieces using proper JMON schema - focus on different musical examples
+    function minorScale() {
       const notes = [];
-      const scale = [60,62,64,65,67,69,71,72];
+      const scale = [57,59,60,62,64,65,67,69]; // A minor scale
       for (let i = 0; i < scale.length; i++) {
-        notes.push({ pitch: scale[i], duration: 1, time: i });
+        notes.push({ pitch: scale[i], duration: "4n", time: i });
       }
       return {
-        tempo: 120,
+        format: "jmon",
+        version: "1.0.0",
+        tempo: 100,
         timeSignature: '4/4',
-        keySignature: 'C',
-        metadata: { title: 'C-major scale' },
-        notes
+        keySignature: 'Am',
+        metadata: { title: 'A minor scale' },
+        tracks: [{ label: "melody", notes }]
       };
     }
 
-    function articulationDemo() {
+    function chordProgression() {
       return {
-        tempo: 108,
+        format: "jmon",
+        version: "1.0.0",
+        tempo: 80,
         timeSignature: '4/4',
-        keySignature: 'C',
-        metadata: { title: 'Articulations & Ornaments' },
-        notes: [
-          { pitch: 60, duration: 1, time: 0, articulations: ['staccato','accent'] },
-          { pitch: 64, duration: 1, time: 1, articulations: [{ type: 'glissando', target: 67 }] },
-          { pitch: [60,64,67], duration: 1, time: 2, articulations: [{ type: 'arpeggio', direction: 'up' }] },
-          { pitch: 67, duration: 1, time: 3, articulations: ['tenuto'] }
-        ]
+        keySignature: 'F',
+        metadata: { title: 'Chord Progression in F Major' },
+        tracks: [{
+          label: "harmony",
+          notes: [
+            { pitch: [65,69,72], duration: "2n", time: 0 }, // F major
+            { pitch: [62,67,70], duration: "2n", time: 2 }, // D minor
+            { pitch: [67,70,74], duration: "2n", time: 4 }, // G minor
+            { pitch: [60,65,69], duration: "2n", time: 6 }  // C major
+          ]
+        }]
       };
     }
 
     // State
-    let piece = articulationDemo();
+    let piece = chordProgression();
 
     // DOM references
     const elScore = document.getElementById('score');
@@ -226,7 +233,7 @@
     const elHeight = document.getElementById('height');
     const elBtnRender = document.getElementById('btn-render');
     const elBtnScale = document.getElementById('btn-scale');
-    const elBtnArtic = document.getElementById('btn-artic');
+    const elBtnChords = document.getElementById('btn-chords');
     const elPieceJson = document.getElementById('piece-json');
     const elEngineNote = document.getElementById('engine-note');
 
@@ -244,7 +251,7 @@
         return;
       }
 
-      elEngineNote.textContent = VF ? 'VexFlow loaded via ESM.' : 'VexFlow not available — showing ABC fallback.';
+      elEngineNote.textContent = VF ? 'VexFlow loaded via ESM.' : 'VexFlow not available — cannot render.';
 
       // Clear previous content
       elScore.innerHTML = '';
@@ -265,44 +272,25 @@
               return;
             }
           }
-          console.warn('VexFlow rendering returned unexpected result:', result);
+          throw new Error('VexFlow rendering returned unexpected result: ' + typeof result);
         } catch (e) {
-          console.warn('[VexFlow] Render failed, falling back to ABC:', e);
+          console.error('[VexFlow] Render failed:', e);
+          elScore.innerHTML = '<div style="color:#ffb86c">VexFlow rendering error: ' + e.message + '</div>';
         }
-      }
-
-      // ABC fallback
-      try {
-        console.log('Rendering with ABC fallback...');
-        const result = jm.score(piece);
-
-        if (result && result.nodeType === 1) {
-          elScore.appendChild(result);
-        } else if (result && result.type === 'abc') {
-          const pre = document.createElement('pre');
-          pre.style.margin = '0';
-          pre.style.color = '#cfe3ff';
-          pre.style.fontSize = '12px';
-          pre.textContent = result.data;
-          elScore.appendChild(pre);
-        } else {
-          elScore.innerHTML = '<div style="color:#ffb86c">Cannot render score: no renderer available.</div>';
-        }
-      } catch (e) {
-        console.error('ABC fallback failed:', e);
-        elScore.innerHTML = '<div style="color:#ffb86c">Rendering error: ' + e.message + '</div>';
+      } else {
+        elScore.innerHTML = '<div style="color:#ffb86c">VexFlow is required but not loaded.</div>';
       }
     }
 
     // Wire controls
     elBtnRender.addEventListener('click', renderScore);
     elBtnScale.addEventListener('click', () => {
-      piece = cMajorScale();
+      piece = minorScale();
       updateJson();
       renderScore();
     });
-    elBtnArtic.addEventListener('click', () => {
-      piece = articulationDemo();
+    elBtnChords.addEventListener('click', () => {
+      piece = chordProgression();
       updateJson();
       renderScore();
     });

@@ -47,11 +47,11 @@
 </head>
 <body>
     <div class="container">
-        <h1>JMON Studio Score Test</h1>
-        <p>Testing score generation with and without VexFlow.</p>
+        <h1>JMON Studio Basic API Test</h1>
+        <p>Testing fundamental jm.score() API functionality and error handling.</p>
 
         <div>
-            <button onclick="testWithoutVexFlow()">Test ABC Fallback</button>
+            <button onclick="testWithoutVexFlow()">Test Without VexFlow</button>
             <button onclick="testWithVexFlow()">Test with VexFlow</button>
             <button onclick="clearResults()">Clear</button>
         </div>
@@ -72,18 +72,23 @@
         const scoreDiv = document.getElementById('score');
         const debugDiv = document.getElementById('debug');
 
-        // Test data
+        // Test data using proper JMON schema
         const testPiece = {
-            metadata: { title: 'Simple Test' },
-            timeSignature: '4/4',
-            keySignature: 'C',
+            format: "jmon",
+            version: "1.0.0",
             tempo: 120,
-            notes: [
-                { pitch: 60, duration: 1, time: 0 },
-                { pitch: 62, duration: 1, time: 1 },
-                { pitch: 64, duration: 1, time: 2 },
-                { pitch: 65, duration: 1, time: 3 }
-            ]
+            keySignature: 'C',
+            timeSignature: '4/4',
+            metadata: { title: 'Simple Test Melody' },
+            tracks: [{
+                label: "melody",
+                notes: [
+                    { pitch: 60, duration: "4n", time: 0 }, // C
+                    { pitch: 62, duration: "4n", time: 1 }, // D
+                    { pitch: 64, duration: "4n", time: 2 }, // E
+                    { pitch: 65, duration: "4n", time: 3 }  // F
+                ]
+            }]
         };
 
         function showStatus(message, type = 'success') {
@@ -108,32 +113,14 @@
                     return;
                 }
 
-                showStatus('Testing ABC fallback...', 'warning');
-                const result = jm.score(testPiece); // No VexFlow
+                showStatus('Testing without VexFlow (should fail)...', 'warning');
+                const result = jm.score(testPiece); // No VexFlow - should throw error
 
-                if (result && typeof result === 'object') {
-                    if (result.nodeType === 1) {
-                        // DOM element
-                        scoreDiv.innerHTML = '';
-                        scoreDiv.appendChild(result);
-                        showStatus('✅ ABC fallback returned DOM element', 'success');
-                    } else if (result.type === 'abc') {
-                        // Structured data
-                        const pre = document.createElement('pre');
-                        pre.textContent = result.data;
-                        scoreDiv.innerHTML = '';
-                        scoreDiv.appendChild(pre);
-                        showStatus('✅ ABC fallback returned structured data', 'success');
-                    } else {
-                        showStatus('⚠️ Unexpected result format', 'warning');
-                        showDebug(result);
-                    }
-                } else {
-                    showStatus('❌ No result returned', 'error');
-                }
+                showStatus('⚠️ Unexpected: jm.score worked without VexFlow', 'warning');
+                showDebug(result);
             } catch (error) {
-                showStatus(`❌ Error: ${error.message}`, 'error');
-                console.error(error);
+                showStatus(`✅ Expected error: ${error.message}`, 'success');
+                console.log('Expected error (VexFlow required):', error);
             }
         }
 
@@ -170,11 +157,9 @@
                     } else if (result.type === 'vexflow') {
                         showStatus('✅ VexFlow data structure returned (non-DOM)', 'success');
                         showDebug({ type: result.type, dataKeys: Object.keys(result.data || {}) });
-                    } else if (result.type === 'abc') {
-                        showStatus('⚠️ Fell back to ABC despite VexFlow being available', 'warning');
-                        const pre = document.createElement('pre');
-                        pre.textContent = result.data;
-                        scoreDiv.appendChild(pre);
+                    } else {
+                        showStatus('⚠️ Unexpected result format', 'warning');
+                        showDebug({ type: typeof result, data: result });
                     }
                 } else {
                     showStatus('❌ No result returned', 'error');

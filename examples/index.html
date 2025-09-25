@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <title>JMON Studio — Examples</title>
-    <meta name="</head></title>viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content="Examples index for JMON Studio: quick ABC preview and links to demos." />
     <style>
       :root {
-        --bg: #0b0f</style>14;
+        --bg: #0b0f14;
         --card: #121821;
         --text: #e7edf3;
         --muted: #9fb2c7;
@@ -88,108 +88,53 @@
   </head>
   <body>
     <header>
-      <h1></body>JMON Studio — Examples</h1>
-      <p</header></h1>>
+      <h1>JMON Studio — Examples</h1>
+      <p>
         This page renders a simple ABC preview and links to the dedicated demos.
-        Build first (<code>npm run build</code>), then serve this</code> folder (e.g.,
-        <code>npx http-server . -p 8080</code>)</code> and open <code>/examples/</code>.
+        Build first (<code>npm run build</code>), then serve this folder (e.g.,
+        <code>npx http-server . -p 8080</code>) and open <code>/examples/</code>.
       </p>
     </header>
 
     <main class="grid">
       <section class="card col-12">
-        <h2>Live ABC Preview</h2>
-        <p class="</h2>note">
-          This preview uses ABCJS only (no VexFlow) to avoid any MIME/CORS issues. Use the demo links below for full SVG rendering.
+        <h2>JMON Studio Examples</h2>
+        <p class="note">
+          Click the links below to test different VexFlow rendering examples with various JMON features.
         </p>
-        <div id="abc-preview" class="preview"><em class="note">Loading…</em></div>
+        <div class="preview">
+          <p style="text-align: center; color: var(--muted); padding: 40px;">
+            Choose an example below to see VexFlow musical notation rendering.
+          </p>
+        </div>
       </section>
 
       <section class="card col-6">
         <h2>Notation Demos</h2>
         <div class="links">
-          <</h2>a href="./score-vexflow.html">Score — VexFlow (SVG)</a>
-          <a href="./score-abcjs.html">Score — ABCJS</a>
+          <a href="./score-vexflow.html">Score — VexFlow (UMD)</a>
+          <a href="./score-vexflow-esm.html">Score — VexFlow (ESM)</a>
         </div>
         <p class="note">
-          VexFlow demo renders SVG; ABCJS demo renders notation and shows generated ABC.
+          Both demos render SVG musical notation with different loading approaches.
         </p>
       </section>
 
       <section class="card col-6">
-        <h2>More</h2>
+        <h2>Testing & Examples</h2>
         <div class="links">
-          <!-- reserved</h2> for future examples (player, MIDI, generative, etc.) -->
+          <a href="./simple-test.html">Basic API Test</a>
+          <a href="./esm-test.html">ESM Import Test</a>
           <a href="https://github.com/essicolo/jmon-studio" target="_blank" rel="noreferrer">Project README</a>
         </div>
-        <p class="note">See the repository for detailed docs and additional usage examples.</p>
+        <p class="note">Basic tests show fundamental API usage. See repository for advanced examples.</p>
       </section>
     </main>
 
     <footer>
-      <p>JMON Studio — format conversion, audio event planning,</footer> and music</p> visualization.</p>
+      <p>JMON Studio — format conversion, audio event planning, and music visualization.</p>
     </footer>
 
-    <!-- UMD bundle (exposes window.JmonStudio) -->
-    <script src="../dist/jmon.umd.js"></script>
-    <!-- ABCJS for rendering the preview -->
-    <script src="https://cdn.jsdelivr.net/npm/abcjs@6.4.0/dist/abcjs-basic-min.js"></script>
-    <script>
-      (function () {
-        function</script> hasAbc() {
-          return typeof window !== 'undefined' && window.ABCJS && typeof window.ABCJS.renderAbc === 'function';
-        }
-
-        function renderPreview() {
-          var root = document.getElementById('abc-preview');
-          if (!root) return;
-
-          var jm = window.JmonStudio;
-          if (!jm) {
-            root.innerHTML = '<span class="note">dist/jmon.umd.js not found — run <code>npm run build</code>.</span>';</code>
-            return;
-          }
-
-          // Simple one-octave C-major scale
-          var notes = [];
-          var scale = [60,62,64,65,67,69,71,72];
-          for (var i = 0; i < scale.length; i++) {
-            notes.push({ pitch: scale[i], duration: 1, time: i });
-          }
-          var piece = {
-            tempo: 120,
-            timeSignature: '4/4',
-            keySignature: 'C',
-            metadata: { title: 'C-major' },
-            tracks: [{ notes: notes }]
-          };
-
-          try {
-            var abcText = jm.converters.abc(piece, { showArticulations: true });
-            root.innerHTML = '';
-            if (hasAbc()) {
-              window.ABCJS.renderAbc(root, abcText, {
-                responsive: 'resize',
-                scale: 0.95,
-              });
-            } else {
-              var pre = document.createElement('pre');
-              pre.textContent = abcText;
-              root.appendChild(pre);
-            }
-          } catch (e) {
-            console.error('[ABC] Preview render failed:', e);
-            root.innerHTML = '<span class="note">Failed to render preview.</span>';
-          }
-        }
-
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-          setTimeout(renderPreview, 0);
-        } else {
-          document.addEventListener('DOMContentLoaded', renderPreview, { once: true });
-        }
-      })();
-    </script>
+    <!-- Examples index - static page, no preview rendering -->
   </body>
-</html>
 </html>

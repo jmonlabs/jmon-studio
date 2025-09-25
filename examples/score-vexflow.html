@@ -208,34 +208,40 @@
         return null;
       }
 
-      // Demo pieces
+      // Demo pieces using proper JMON schema
       function cMajorScale() {
         const notes = [];
         const scale = [60,62,64,65,67,69,71,72];
         for (let i = 0; i < scale.length; i++) {
-          notes.push({ pitch: scale[i], duration: 1, time: i });
+          notes.push({ pitch: scale[i], duration: "4n", time: i });
         }
         return {
+          format: "jmon",
+          version: "1.0.0",
           tempo: 120,
           timeSignature: '4/4',
           keySignature: 'C',
           metadata: { title: 'C-major scale' },
-          tracks: [{ notes }]
+          tracks: [{ label: "melody", notes }]
         };
       }
 
       function articulationDemo() {
         return {
+          format: "jmon",
+          version: "1.0.0",
           tempo: 108,
           timeSignature: '4/4',
-          keySignature: 'C',
+          keySignature: 'G',
           metadata: { title: 'Articulations & Ornaments' },
           tracks: [{
+            label: "melody",
             notes: [
-              { pitch: 60, duration: 1, time: 0, articulations: ['staccato','accent'] },
-              { pitch: 64, duration: 1, time: 1, articulations: [{ type: 'glissando', target: 67 }] },
-              { pitch: [60,64,67], duration: 1, time: 2, articulations: [{ type: 'arpeggio', direction: 'up' }] },
-              { pitch: 67, duration: 1, time: 3, articulations: ['tenuto'] }
+              { pitch: 67, duration: "4n", time: 0, articulation: 'staccato' },
+              { pitch: 69, duration: "4n", time: 1, articulation: 'accent' },
+              { pitch: 71, duration: "4n", time: 2, articulation: 'tenuto',
+                ornaments: [{ type: 'grace_note', parameters: { graceNoteType: 'acciaccatura', gracePitches: [70] } }] },
+              { pitch: 72, duration: "2n", time: 3, articulation: 'marcato' }
             ]
           }]
         };
@@ -269,7 +275,7 @@
         }
 
         const VF = resolveVF();
-        elEngineNote.textContent = VF ? 'VexFlow detected.' : 'VexFlow not detected — showing ABC fallback.';
+        elEngineNote.textContent = VF ? 'VexFlow detected.' : 'VexFlow not detected — cannot render.';
 
         // Clear previous content
         elScore.innerHTML = '';
@@ -279,27 +285,20 @@
 
         if (VF) {
           try {
-            // Prepare element container and render with VexFlow
-            const vex = jm.converters.vexflow(piece, { elementId: 'score', width, height });
-            if (vex && typeof vex.render === 'function') {
-              vex.render(VF);
+            // Use jm.score directly - this should work in all environments
+            const result = jm.score(piece, VF, { width, height });
+            if (result && result.nodeType === 1) {
+              elScore.appendChild(result);
               return;
+            } else {
+              throw new Error('jm.score did not return a DOM element');
             }
           } catch (e) {
-            console.warn('[VexFlow] Render failed, falling back to ABC:', e);
+            console.error('[VexFlow] Render failed:', e);
+            elScore.innerHTML = '<div style="color:#ffb86c">VexFlow rendering error: ' + e.message + '</div>';
           }
-        }
-
-        // ABC fallback (text)
-        try {
-          const pre = document.createElement('pre');
-          pre.style.margin = '0';
-          pre.style.color = '#cfe3ff';
-          pre.style.fontSize = '12px';
-          pre.textContent = jm.converters.abc(piece, { showArticulations: true });
-          elScore.appendChild(pre);
-        } catch {
-          elScore.innerHTML = '<div style="color:#ffb86c">Cannot render score: no renderer available.</div>';
+        } else {
+          elScore.innerHTML = '<div style="color:#ffb86c">VexFlow is required but not loaded.</div>';
         }
       }
 
@@ -333,8 +332,8 @@
               renderScore();
             } else if (attempts > 100) { // 10 seconds timeout
               clearInterval(checkInterval);
-              elEngineNote.textContent = 'VexFlow failed to load - showing ABC fallback';
-              renderScore(); // Render with ABC fallback
+              elEngineNote.textContent = 'VexFlow failed to load - cannot render';
+              elScore.innerHTML = '<div style="color:#ffb86c">VexFlow failed to load from CDN.</div>';
             }
           }, 100);
         }
@@ -349,7 +348,7 @@
 
       // Re-render on resize to reflow width
       window.addEventListener('resize', () => {
-        // Only re-render if we currently have an SVG; otherwise leave ABC text
+        // Only re-render if we currently have an SVG
         const hasSvg = !!elScore.querySelector('svg');
         if (hasSvg) renderScore();
       });

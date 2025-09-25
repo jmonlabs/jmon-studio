@@ -7479,8 +7479,8 @@ function zr(c, t = {}, e = {}) {
       try {
         try {
           const f = e.width || 800, k = e.height || 200, L = De(c, { elementId: s, width: f, height: k });
-          if (L && L.type === "vexflow" && typeof L.render == "function" && (L.config && (L.config.element = i), L.render(r), i && i.querySelector && i.querySelector("svg")))
-            return i;
+          if (L && L.type === "vexflow" && typeof L.render == "function")
+            return L.config && (L.config.element = i), L.render(r), i;
         } catch {
         }
         const l = r || typeof window < "u" && (window.VF || window.VexFlow || window.Vex && (window.Vex.Flow || window.Vex));

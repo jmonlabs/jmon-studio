@@ -146,12 +146,10 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
               instructions.config.element = container; // ensure SVG renders into this container
             }
             instructions.render(engineInstance);
-            // Verify that the converter actually rendered into our container.
-            // If no SVG is present, fall back to the simple renderer below.
-            if (container && container.querySelector && container.querySelector('svg')) {
-              return container;
-            }
-            // otherwise continue to simple direct VexFlow renderer
+
+            // Always return the container after rendering - Observable needs the div
+            // The VexFlow converter ensures the div is visible and properly styled
+            return container;
           }
         } catch (e) {
           // Fall back to simple renderer below

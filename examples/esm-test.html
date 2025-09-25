@@ -59,11 +59,11 @@
 </head>
 <body>
     <div class="container">
-        <h1>JMON Studio ESM Test</h1>
-        <p>Testing score generation using modern ESM imports with VexFlow.</p>
+        <h1>JMON Studio ESM Import Test</h1>
+        <p>Testing modern ES module imports and advanced JMON schema features.</p>
 
         <div class="controls">
-            <button onclick="testABC()">Test ABC</button>
+            <button onclick="testWithoutVexFlow()">Test Without VexFlow</button>
             <button onclick="testVexFlow()">Test VexFlow</button>
             <button onclick="clearResults()">Clear</button>
             <label>Width: <input type="number" id="width" value="800" min="400" max="1200"></label>
@@ -92,22 +92,26 @@
             }
         }
 
-        // Test data
+        // Test data using proper JMON schema - different from UMD test
         const testPiece = {
-            metadata: { title: 'ESM Test Piece' },
-            timeSignature: '4/4',
-            keySignature: 'C',
-            tempo: 120,
-            notes: [
-                { pitch: 60, duration: 1, time: 0 },
-                { pitch: 62, duration: 1, time: 1 },
-                { pitch: 64, duration: 1, time: 2 },
-                { pitch: 65, duration: 1, time: 3 },
-                { pitch: 67, duration: 1, time: 4 },
-                { pitch: 69, duration: 1, time: 5 },
-                { pitch: 71, duration: 1, time: 6 },
-                { pitch: 72, duration: 1, time: 7 }
-            ]
+            format: "jmon",
+            version: "1.0.0",
+            tempo: 90,
+            keySignature: 'Bb',
+            timeSignature: '3/4',
+            metadata: { title: 'ESM Test Waltz' },
+            tracks: [{
+                label: "melody",
+                notes: [
+                    { pitch: 70, duration: "2n", time: 0 },   // Bb
+                    { pitch: 72, duration: "4n", time: 2 },   // C
+                    { pitch: 74, duration: "2n", time: 3 },   // D
+                    { pitch: 72, duration: "4n", time: 5 },   // C
+                    { pitch: 70, duration: "2n", time: 6 },   // Bb
+                    { pitch: 67, duration: "4n", time: 8 },   // G
+                    { pitch: 70, duration: "1n", time: 9 }    // Bb
+                ]
+            }]
         };
 
         const statusDiv = document.getElementById('status');
@@ -117,36 +121,22 @@
             statusDiv.innerHTML = `<div class="${type}">${message}</div>`;
         }
 
-        function testABC() {
+        function testWithoutVexFlow() {
             try {
-                showStatus('Testing ABC conversion...', 'warning');
+                showStatus('Testing without VexFlow (should fail)...', 'warning');
 
-                // Test direct ABC converter
+                // Test direct ABC converter (should still work)
                 const abcText = jm.converters.abc(testPiece);
-                console.log('ABC text:', abcText);
+                console.log('✅ ABC converter works:', abcText.length, 'chars');
 
-                // Test score function without VexFlow
+                // Test score function without VexFlow (should fail)
                 const result = jm.score(testPiece);
 
-                if (result && result.nodeType === 1) {
-                    scoreDiv.innerHTML = '';
-                    scoreDiv.appendChild(result);
-                    showStatus('✅ ABC rendered as DOM element', 'success');
-                } else if (result && result.type === 'abc') {
-                    const pre = document.createElement('pre');
-                    pre.textContent = result.data;
-                    pre.style.fontSize = '12px';
-                    pre.style.fontFamily = 'monospace';
-                    scoreDiv.innerHTML = '';
-                    scoreDiv.appendChild(pre);
-                    showStatus('✅ ABC returned as structured data', 'success');
-                } else {
-                    showStatus('❌ Unexpected result format', 'error');
-                    console.log('Unexpected result:', result);
-                }
+                showStatus('⚠️ Unexpected: jm.score worked without VexFlow', 'warning');
+                console.log('Unexpected result:', result);
             } catch (error) {
-                showStatus(`❌ Error: ${error.message}`, 'error');
-                console.error(error);
+                showStatus(`✅ Expected error: ${error.message}`, 'success');
+                console.log('Expected error (VexFlow required):', error);
             }
         }
 
@@ -156,8 +146,8 @@
                 const height = parseInt(document.getElementById('height').value);
 
                 if (!VF) {
-                    showStatus('VexFlow not loaded - falling back to ABC', 'warning');
-                    testABC();
+                    showStatus('VexFlow not loaded - cannot render', 'warning');
+                    testWithoutVexFlow();
                     return;
                 }
 
@@ -186,12 +176,6 @@
                     `;
                     scoreDiv.innerHTML = '';
                     scoreDiv.appendChild(info);
-                } else if (result && result.type === 'abc') {
-                    showStatus('⚠️ Fell back to ABC despite VexFlow being available', 'warning');
-                    const pre = document.createElement('pre');
-                    pre.textContent = result.data;
-                    scoreDiv.innerHTML = '';
-                    scoreDiv.appendChild(pre);
                 } else {
                     showStatus('❌ Unexpected result', 'error');
                     console.log('Unexpected result:', result);
@@ -208,7 +192,7 @@
         }
 
         // Make functions available globally for onclick handlers
-        window.testABC = testABC;
+        window.testWithoutVexFlow = testWithoutVexFlow;
         window.testVexFlow = testVexFlow;
         window.clearResults = clearResults;
 
