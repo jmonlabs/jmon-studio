@@ -71,14 +71,15 @@ function play(jmonObj, options = {}) {
 }
 
 /**
- * Lightweight score function placeholder.
- * Consumers can use jm.converters.abc or jm.converters.vexflow directly.
- * Returned value is a simple object for future extensibility.
+ * Score rendering function that prioritizes SVG output over text fallbacks.
+ * Supports VexFlow (SVG), ABCJS, and ABC text fallback.
+ * Returns DOM element or structured data depending on environment and engine.
  */
 function score(jmonObj, renderingEngine = {}, options = {}) {
   let engineType = "unknown";
   let engineInstance = null;
 
+  // Detect rendering engine
   if (renderingEngine && typeof renderingEngine === "string") {
     engineType = renderingEngine.toLowerCase();
   } else if (renderingEngine && typeof renderingEngine === "object") {
@@ -96,7 +97,8 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
       engineInstance = renderingEngine;
     }
   } else if (typeof window !== "undefined") {
-    if (window.ABCJS) {
+    // Check for ABCJS first to respect user preference if both are available
+    if (window.ABCJS && !renderingEngine.VF && !renderingEngine.VexFlow) {
       engineType = "abcjs";
       engineInstance = window.ABCJS;
     } else if (
@@ -114,47 +116,84 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
     }
   }
 
-  // VexFlow path: render SVG to a container and return the element
-  if (engineType === "vexflow" && typeof document !== "undefined") {
-    const container = document.createElement("div");
-    const elementId = `vexflow-${Date.now()}`;
-    container.id = elementId;
+  // VexFlow path: render SVG and return the container element
+  if (engineType === "vexflow") {
+    // Create container element - works in both browser and Observable environments
+    const hasDocument = typeof document !== "undefined";
+    let container;
 
-    // Ensure the container is attached before rendering so VexFlow can resolve the target element
-    if (typeof document !== "undefined" && !container.isConnected && document.body) {
-      // mount offscreen to avoid layout shift; Observable will reparent the same node later
-      container.style.position = "absolute";
-      container.style.left = "-10000px";
-      container.style.top = "-10000px";
-      container.style.visibility = "hidden";
-      document.body.appendChild(container);
-    }
+    if (hasDocument) {
+      container = document.createElement("div");
+      const elementId = `vexflow-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      container.id = elementId;
 
-    const vex = convertToVexFlow(jmonObj, {
-      elementId,
-      width: options.width,
-      height: options.height,
-    });
+      // For Observable and similar environments, just create the element without mounting
+      // VexFlow can render to detached elements
 
-    if (vex && typeof vex.render === "function") {
       try {
-        const VF =
-          engineInstance ||
-          (typeof window !== "undefined" && (window.VF || window.VexFlow || (window.Vex && (window.Vex.Flow || window.Vex))));
-        if (VF) {
-          vex.render(VF);
-          // restore normal positioning if we mounted offscreen
-          container.style.position = "";
-          container.style.left = "";
-          container.style.top = "";
-          container.style.visibility = "";
+        const vex = convertToVexFlow(jmonObj, {
+          elementId,
+          width: options.width || 800,
+          height: options.height || 200,
+        });
+
+        if (vex && typeof vex.render === "function") {
+          const VF = engineInstance ||
+            (typeof window !== "undefined" && (
+              window.VF ||
+              window.VexFlow ||
+              (window.Vex && (window.Vex.Flow || window.Vex))
+            ));
+
+          if (VF) {
+            // Temporarily mount to DOM if needed for VexFlow to work
+            let wasAttached = container.isConnected;
+            if (!wasAttached && document.body) {
+              container.style.position = "absolute";
+              container.style.left = "-10000px";
+              container.style.top = "-10000px";
+              container.style.visibility = "hidden";
+              document.body.appendChild(container);
+            }
+
+            vex.render(VF);
+
+            // Clean up temporary mounting
+            if (!wasAttached && container.parentNode) {
+              container.parentNode.removeChild(container);
+              container.style.position = "";
+              container.style.left = "";
+              container.style.top = "";
+              container.style.visibility = "";
+            }
+
+            return container;
+          }
         }
-      } catch {}
+      } catch (error) {
+        console.warn("VexFlow rendering failed:", error);
+        // Fall through to ABC fallback
+      }
+    } else {
+      // Non-DOM environment (e.g., Node.js): return structured data for VexFlow
+      try {
+        const vexData = convertToVexFlow(jmonObj, {
+          width: options.width || 800,
+          height: options.height || 200,
+        });
+        return {
+          type: "vexflow",
+          data: vexData,
+          options: { width: options.width || 800, height: options.height || 200 }
+        };
+      } catch (error) {
+        console.warn("VexFlow conversion failed:", error);
+        // Fall through to ABC fallback
+      }
     }
-    return container;
   }
 
-  // ABCJS path: render into a container when engine provided/detected; fallback to text
+  // ABCJS path: render into a container when engine provided/detected
   if (engineType === "abcjs" && typeof document !== "undefined" && engineInstance && engineInstance.renderAbc) {
     const container = document.createElement("div");
     const notation = abc(jmonObj, options.abc || {});
@@ -165,19 +204,25 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
         staffwidth: options.staffwidth,
       });
       return container;
-    } catch {}
-    const pre = document.createElement("pre");
-    pre.textContent = notation;
-    return pre;
+    } catch (error) {
+      console.warn("ABCJS rendering failed:", error);
+      // Fall through to text fallback
+    }
   }
 
-  // Fallback: return ABC text (works in non-DOM contexts)
+  // ABC text fallback - works in all environments
   const notation = abc(jmonObj, options.abc || {});
+
   if (typeof document !== "undefined") {
     const pre = document.createElement("pre");
     pre.textContent = notation;
+    pre.style.fontFamily = "monospace";
+    pre.style.fontSize = "12px";
+    pre.style.whiteSpace = "pre-wrap";
     return pre;
   }
+
+  // Non-DOM environment: return structured data
   return { type: "abc", data: notation, options };
 }
 

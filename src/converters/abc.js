@@ -90,10 +90,18 @@ export class ToAbc {
     abc += `M:${composition.timeSignature || "4/4"}\n`;
 
     // Choose L: value based on common durations to minimize fractions
-    // Get all durations from tracks to analyze
-    const tracks = Array.isArray(composition.tracks)
-      ? composition.tracks
-      : Object.values(composition.tracks || {});
+    // Get all durations from tracks to analyze - handle case where notes are directly on composition
+    let tracks = [];
+    if (Array.isArray(composition.tracks)) {
+      tracks = composition.tracks;
+    } else if (composition.tracks && typeof composition.tracks === "object") {
+      tracks = Object.values(composition.tracks);
+    } else if (composition.notes && Array.isArray(composition.notes)) {
+      // Handle case where notes are directly on the composition
+      tracks = [{ notes: composition.notes }];
+    } else {
+      tracks = [];
+    }
 
     let hasSmallDurations = false;
     tracks.forEach((track) => {
