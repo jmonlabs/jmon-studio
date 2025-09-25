@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>JMON Studio — Examples</title>
+    <meta name="</head></title>viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="Examples index for JMON Studio: quick ABC preview and links to demos." />
+    <style>
+      :root {
+        --bg: #0b0f</style>14;
+        --card: #121821;
+        --text: #e7edf3;
+        --muted: #9fb2c7;
+        --accent: #67d4ff;
+        --border: #1e2937;
+        --radius: 12px;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        background: radial-gradient(1200px 600px at 20% -10%, #16202c 0%, #0b0f14 50%) fixed, var(--bg);
+        color: var(--text);
+        font: 16px/1.55 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      header, main, footer {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 16px 20px;
+      }
+      header h1 {
+        margin: 8px 0 6px;
+        font-size: clamp(22px, 4.4vw, 34px);
+        letter-spacing: 0.2px;
+        line-height: 1.15;
+      }
+      header p { margin: 0; color: var(--muted); }
+      .card {
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)), var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 14px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.03);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 16px;
+        align-items: stretch;
+      }
+      .col-12 { grid-column: span 12; }
+      .col-6 { grid-column: span 6; }
+      @media (max-width: 720px) {
+        .col-12, .col-6 { grid-column: 1 / -1; }
+      }
+      .preview {
+        min-height: 160px;
+        padding: 10px;
+        border-radius: 10px;
+        background: #0c131a;
+        border: 1px dashed #263140;
+        overflow-x: auto;
+      }
+      .links a {
+        display: inline-block;
+        padding: 8px 10px;
+        margin: 6px 8px 0 0;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: rgba(255,255,255,0.02);
+      }
+      .note {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 6px;
+      }
+      code {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid var(--border);
+        color: #d9e7ff;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1></body>JMON Studio — Examples</h1>
+      <p</header></h1>>
+        This page renders a simple ABC preview and links to the dedicated demos.
+        Build first (<code>npm run build</code>), then serve this</code> folder (e.g.,
+        <code>npx http-server . -p 8080</code>)</code> and open <code>/examples/</code>.
+      </p>
+    </header>
+
+    <main class="grid">
+      <section class="card col-12">
+        <h2>Live ABC Preview</h2>
+        <p class="</h2>note">
+          This preview uses ABCJS only (no VexFlow) to avoid any MIME/CORS issues. Use the demo links below for full SVG rendering.
+        </p>
+        <div id="abc-preview" class="preview"><em class="note">Loading…</em></div>
+      </section>
+
+      <section class="card col-6">
+        <h2>Notation Demos</h2>
+        <div class="links">
+          <</h2>a href="./score-vexflow.html">Score — VexFlow (SVG)</a>
+          <a href="./score-abcjs.html">Score — ABCJS</a>
+        </div>
+        <p class="note">
+          VexFlow demo renders SVG; ABCJS demo renders notation and shows generated ABC.
+        </p>
+      </section>
+
+      <section class="card col-6">
+        <h2>More</h2>
+        <div class="links">
+          <!-- reserved</h2> for future examples (player, MIDI, generative, etc.) -->
+          <a href="https://github.com/essicolo/jmon-studio" target="_blank" rel="noreferrer">Project README</a>
+        </div>
+        <p class="note">See the repository for detailed docs and additional usage examples.</p>
+      </section>
+    </main>
+
+    <footer>
+      <p>JMON Studio — format conversion, audio event planning,</footer> and music</p> visualization.</p>
+    </footer>
+
+    <!-- UMD bundle (exposes window.JmonStudio) -->
+    <script src="../dist/jmon.umd.js"></script>
+    <!-- ABCJS for rendering the preview -->
+    <script src="https://cdn.jsdelivr.net/npm/abcjs@6.4.0/dist/abcjs-basic-min.js"></script>
+    <script>
+      (function () {
+        function</script> hasAbc() {
+          return typeof window !== 'undefined' && window.ABCJS && typeof window.ABCJS.renderAbc === 'function';
+        }
+
+        function renderPreview() {
+          var root = document.getElementById('abc-preview');
+          if (!root) return;
+
+          var jm = window.JmonStudio;
+          if (!jm) {
+            root.innerHTML = '<span class="note">dist/jmon.umd.js not found — run <code>npm run build</code>.</span>';</code>
+            return;
+          }
+
+          // Simple one-octave C-major scale
+          var notes = [];
+          var scale = [60,62,64,65,67,69,71,72];
+          for (var i = 0; i < scale.length; i++) {
+            notes.push({ pitch: scale[i], duration: 1, time: i });
+          }
+          var piece = {
+            tempo: 120,
+            timeSignature: '4/4',
+            keySignature: 'C',
+            metadata: { title: 'C-major' },
+            tracks: [{ notes: notes }]
+          };
+
+          try {
+            var abcText = jm.converters.abc(piece, { showArticulations: true });
+            root.innerHTML = '';
+            if (hasAbc()) {
+              window.ABCJS.renderAbc(root, abcText, {
+                responsive: 'resize',
+                scale: 0.95,
+              });
+            } else {
+              var pre = document.createElement('pre');
+              pre.textContent = abcText;
+              root.appendChild(pre);
+            }
+          } catch (e) {
+            console.error('[ABC] Preview render failed:', e);
+            root.innerHTML = '<span class="note">Failed to render preview.</span>';
+          }
+        }
+
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+          setTimeout(renderPreview, 0);
+        } else {
+          document.addEventListener('DOMContentLoaded', renderPreview, { once: true });
+        }
+      })();
+    </script>
+  </body>
+</html>
+</html>
