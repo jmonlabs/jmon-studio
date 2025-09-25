@@ -71,8 +71,8 @@ function play(jmonObj, options = {}) {
 }
 
 /**
- * Score rendering function that prioritizes SVG output over text fallbacks.
- * Supports VexFlow (SVG) and ABC text fallback.
+ * Score rendering function that generates SVG musical notation.
+ * Requires VexFlow for rendering - no fallbacks.
  * Returns DOM element or structured data depending on environment and engine.
  */
 function score(jmonObj, renderingEngine = {}, options = {}) {
@@ -124,47 +124,86 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
       // VexFlow can render to detached elements
 
       try {
-        const vex = convertToVexFlow(jmonObj, {
-          elementId,
-          width: options.width || 800,
-          height: options.height || 200,
-        });
+        // Simple direct VexFlow rendering - bypass complex converter
+        const VF = engineInstance ||
+          (typeof window !== "undefined" && (
+            window.VF ||
+            window.VexFlow ||
+            (window.Vex && (window.Vex.Flow || window.Vex))
+          ));
 
-        if (vex && typeof vex.render === "function") {
-          const VF = engineInstance ||
-            (typeof window !== "undefined" && (
-              window.VF ||
-              window.VexFlow ||
-              (window.Vex && (window.Vex.Flow || window.Vex))
-            ));
-
-          if (VF) {
-            // Temporarily mount to DOM if needed for VexFlow to work
-            let wasAttached = container.isConnected;
-            if (!wasAttached && document.body) {
-              container.style.position = "absolute";
-              container.style.left = "-10000px";
-              container.style.top = "-10000px";
-              container.style.visibility = "hidden";
-              document.body.appendChild(container);
-            }
-
-            vex.render(VF);
-
-            // Clean up temporary mounting
-            if (!wasAttached && container.parentNode) {
-              container.parentNode.removeChild(container);
-              container.style.position = "";
-              container.style.left = "";
-              container.style.top = "";
-              container.style.visibility = "";
-            }
-
-            return container;
-          }
+        if (!VF || !VF.Renderer) {
+          throw new Error("VexFlow not properly loaded");
         }
+
+        const width = options.width || 800;
+        const height = options.height || 200;
+
+        // Create renderer
+        const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
+        renderer.resize(width, height);
+        const context = renderer.getContext();
+
+        // Create stave
+        const stave = new VF.Stave(10, 40, width - 50);
+        stave.addClef('treble');
+
+        if (jmonObj.timeSignature) {
+          stave.addTimeSignature(jmonObj.timeSignature);
+        }
+        if (jmonObj.keySignature && jmonObj.keySignature !== 'C') {
+          stave.addKeySignature(jmonObj.keySignature);
+        }
+
+        stave.setContext(context).draw();
+
+        // Convert JMON notes to VexFlow notes
+        const notes = (jmonObj.notes || []).map(note => {
+          if (!note.pitch) return null;
+
+          const midiToVF = (midi) => {
+            const noteNames = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b'];
+            const octave = Math.floor(midi / 12) - 1;
+            const noteIndex = midi % 12;
+            return noteNames[noteIndex].replace('#', '#') + '/' + octave;
+          };
+
+          const durationToVF = (duration) => {
+            if (duration >= 4) return 'w';
+            if (duration >= 2) return 'h';
+            if (duration >= 1) return 'q';
+            if (duration >= 0.5) return '8';
+            return '16';
+          };
+
+          const keys = Array.isArray(note.pitch)
+            ? note.pitch.map(midiToVF)
+            : [midiToVF(note.pitch)];
+
+          return new VF.StaveNote({
+            keys: keys,
+            duration: durationToVF(note.duration || 1)
+          });
+        }).filter(Boolean);
+
+        if (notes.length > 0) {
+          // Create voice and format
+          const voice = new VF.Voice({
+            num_beats: 4,
+            beat_value: 4
+          }).addTickables(notes);
+
+          new VF.Formatter()
+            .joinVoices([voice])
+            .format([voice], width - 80);
+
+          voice.draw(context, stave);
+        }
+
+        return container;
+
       } catch (error) {
-        console.warn("VexFlow rendering failed:", error);
+        console.warn("Simple VexFlow rendering failed:", error);
         // Fall through to ABC fallback
       }
     } else {
