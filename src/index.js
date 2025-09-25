@@ -156,10 +156,28 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
             // Always return the container after rendering - Observable needs the div
             // The VexFlow converter ensures the div is visible and properly styled
 
-            // If options.returnSvg is true, return just the SVG for Observable compatibility
-            if (options.returnSvg) {
+            // Handle different return formats based on outputType option
+            if (options.outputType || options.returnSvg) {
               const svg = container.querySelector('svg');
-              return svg || container;
+              if (!svg) return container;
+
+              const outputType = options.outputType || options.returnSvg; // backward compatibility
+
+              if (outputType === 'svg') {
+                return svg;
+              } else if (outputType === 'clonedSvg') {
+                // Clone and style for Observable compatibility
+                const clonedSvg = svg.cloneNode(true);
+                clonedSvg.style.display = 'block';
+                clonedSvg.style.maxWidth = '100%';
+                clonedSvg.style.height = 'auto';
+                return clonedSvg;
+              } else if (outputType === 'div') {
+                return container;
+              } else if (outputType === true) {
+                // Backward compatibility - return raw SVG
+                return svg;
+              }
             }
 
             return container;
@@ -276,10 +294,28 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
           }
         }
 
-        // If options.returnSvg is true, return just the SVG for Observable compatibility
-        if (options.returnSvg) {
+        // Handle different return formats based on outputType option
+        if (options.outputType || options.returnSvg) {
           const svg = container.querySelector('svg');
-          return svg || container;
+          if (!svg) return container;
+
+          const outputType = options.outputType || options.returnSvg; // backward compatibility
+
+          if (outputType === 'svg') {
+            return svg;
+          } else if (outputType === 'clonedSvg') {
+            // Clone and style for Observable compatibility
+            const clonedSvg = svg.cloneNode(true);
+            clonedSvg.style.display = 'block';
+            clonedSvg.style.maxWidth = '100%';
+            clonedSvg.style.height = 'auto';
+            return clonedSvg;
+          } else if (outputType === 'div') {
+            return container;
+          } else if (outputType === true) {
+            // Backward compatibility - return raw SVG
+            return svg;
+          }
         }
 
         return container;
