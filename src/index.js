@@ -187,17 +187,28 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
         }).filter(Boolean);
 
         if (notes.length > 0) {
-          // Create voice and format
-          const voice = new VF.Voice({
-            num_beats: 4,
-            beat_value: 4
-          }).addTickables(notes);
+          // Create voice and format with error handling
+          try {
+            const voice = new VF.Voice({
+              num_beats: 4,
+              beat_value: 4
+            });
 
-          new VF.Formatter()
-            .joinVoices([voice])
-            .format([voice], width - 80);
+            if (typeof voice.addTickables === 'function') {
+              voice.addTickables(notes);
+            }
 
-          voice.draw(context, stave);
+            const formatter = new VF.Formatter();
+            if (typeof formatter.joinVoices === 'function' && typeof formatter.format === 'function') {
+              formatter.joinVoices([voice]).format([voice], width - 80);
+            }
+
+            if (typeof voice.draw === 'function') {
+              voice.draw(context, stave);
+            }
+          } catch (voiceError) {
+            console.warn('VexFlow voice/formatter error:', voiceError);
+          }
         }
 
         return container;
