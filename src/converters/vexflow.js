@@ -142,35 +142,65 @@ class VexFlowConverter {
               time: note.time ?? 0,
             };
 
-            // Add articulations if present (array-based)
-            if (Array.isArray(note.articulations) && note.articulations.length) {
-              const hints = deriveVisualFromArticulations(note.articulations);
-              if (hints && hints.vexflow) {
-                // Pre-resolved VexFlow articulation glyph codes
-                if (Array.isArray(hints.vexflow.articulations) && hints.vexflow.articulations.length) {
-                  vexFlowNote.vfArticulations = hints.vexflow.articulations.slice();
-                }
-                // Stroke (arpeggiate/strum) direction/style
-                if (hints.vexflow.stroke) {
-                  vexFlowNote.stroke = { ...hints.vexflow.stroke };
-                }
-                // Gliss/Portamento hint
-                if (hints.vexflow.gliss) {
-                  const g = hints.vexflow.gliss;
-                  try {
-                    vexFlowNote.gliss = {
-                      type: g.type,
-                      targetKey: (typeof g.target === "number")
-                        ? String(this.midiToVexFlow(g.target)).toLowerCase()
-                        : undefined,
-                      curve: g.curve || "linear",
-                      text: g.text || (g.type === "portamento" ? "port." : "gliss.")
-                    };
-                  } catch (_) {
-                    // safe fallback: omit gliss if conversion fails
+            // Add articulations if present (according to JMON schema)
+            if (note.articulation || (Array.isArray(note.articulations) && note.articulations.length)) {
+              // Handle single articulation (JMON schema format)
+              if (note.articulation && typeof note.articulation === 'string') {
+                vexFlowNote.articulations = [note.articulation];
+              }
+              // Handle legacy array-based articulations
+              else if (Array.isArray(note.articulations) && note.articulations.length) {
+                const hints = deriveVisualFromArticulations(note.articulations);
+                if (hints && hints.vexflow) {
+                  // Pre-resolved VexFlow articulation glyph codes
+                  if (Array.isArray(hints.vexflow.articulations) && hints.vexflow.articulations.length) {
+                    vexFlowNote.vfArticulations = hints.vexflow.articulations.slice();
+                  }
+                  // Stroke (arpeggiate/strum) direction/style
+                  if (hints.vexflow.stroke) {
+                    vexFlowNote.stroke = { ...hints.vexflow.stroke };
+                  }
+                  // Gliss/Portamento hint
+                  if (hints.vexflow.gliss) {
+                    const g = hints.vexflow.gliss;
+                    try {
+                      vexFlowNote.gliss = {
+                        type: g.type,
+                        targetKey: (typeof g.target === "number")
+                          ? String(this.midiToVexFlow(g.target)).toLowerCase()
+                          : undefined,
+                        curve: g.curve || "linear",
+                        text: g.text || (g.type === "portamento" ? "port." : "gliss.")
+                      };
+                    } catch (_) {
+                      // safe fallback: omit gliss if conversion fails
+                    }
                   }
                 }
               }
+            }
+
+            // Add ornaments if present (JMON schema)
+            if (Array.isArray(note.ornaments) && note.ornaments.length) {
+              vexFlowNote.ornaments = note.ornaments.map(ornament => {
+                const processedOrnament = { type: ornament.type };
+
+                if (ornament.parameters) {
+                  processedOrnament.parameters = { ...ornament.parameters };
+
+                  // Handle grace notes specifically
+                  if (ornament.type === 'grace_note' && ornament.parameters.gracePitches) {
+                    processedOrnament.parameters.gracePitches = ornament.parameters.gracePitches.map(pitch => {
+                      if (typeof pitch === 'number') {
+                        return this.midiToVexFlow(pitch);
+                      }
+                      return pitch; // assume it's already in proper format
+                    });
+                  }
+                }
+
+                return processedOrnament;
+              });
             }
 
             vexFlowNotes.push(vexFlowNote);
@@ -232,13 +262,12 @@ class VexFlowConverter {
         const root = (document.body || document.documentElement);
 
         if (!div) {
-          // No element provided: create a hidden container and attach it
+          // No element provided: create a visible container and attach it
           div = document.createElement("div");
           div.id = rendererConfig.elementId || `vexflow-${Date.now()}`;
-          div.style.position = "absolute";
-          div.style.left = "-10000px";
-          div.style.top = "-10000px";
-          div.style.visibility = "hidden";
+          div.style.position = "relative";
+          div.style.display = "block";
+          div.style.visibility = "visible";
           root.appendChild(div);
         } else {
           // Caller provided an element. Make sure it has an id and is attached to DOM.
@@ -246,11 +275,10 @@ class VexFlowConverter {
             div.id = rendererConfig.elementId || `vexflow-${Date.now()}`;
           }
           if (!root.contains(div)) {
-            // Attach off-screen so Factory can render into it
-            div.style.position = "absolute";
-            div.style.left = "-10000px";
-            div.style.top = "-10000px";
-            div.style.visibility = "hidden";
+            // Attach visibly to DOM
+            div.style.position = "relative";
+            div.style.display = "block";
+            div.style.visibility = "visible";
             root.appendChild(div);
           }
         }
@@ -665,6 +693,44 @@ class VexFlowConverter {
                   }
                 } catch {}
               }
+
+              // Handle JMON ornaments (like grace notes from ornaments array)
+              if (Array.isArray(noteData.ornaments) && noteData.ornaments.length && Flow.GraceNoteGroup && Flow.GraceNote) {
+                const graceNoteOrnaments = noteData.ornaments.filter(orn => orn.type === 'grace_note');
+
+                if (graceNoteOrnaments.length > 0) {
+                  try {
+                    const allGraceNotes = graceNoteOrnaments.flatMap(orn => {
+                      if (orn.parameters && orn.parameters.gracePitches) {
+                        return orn.parameters.gracePitches.map(pitch =>
+                          new Flow.GraceNote({
+                            keys: [String(pitch).toLowerCase()],
+                            duration: "16",
+                            slash: orn.parameters.graceNoteType === "acciaccatura",
+                          })
+                        );
+                      }
+                      return [];
+                    });
+
+                    if (allGraceNotes.length > 0) {
+                      const ggroup = new Flow.GraceNoteGroup(allGraceNotes, true);
+                      if (typeof ggroup.beamNotes === "function") {
+                        ggroup.beamNotes();
+                      }
+                      if (
+                        typeof ggroup.setContext === "function" &&
+                        typeof ggroup.attachToNote === "function"
+                      ) {
+                        ggroup.setContext(context);
+                        ggroup.attachToNote(note);
+                      }
+                    }
+                  } catch (e) {
+                    console.warn('Failed to render grace note ornaments:', e);
+                  }
+                }
+              }
               // Accidentals display (auto/always)
               if (Flow.Accidental) {
                 noteData.keys.forEach((origKey, idx2) => {
@@ -688,7 +754,16 @@ class VexFlowConverter {
                   }
                 });
               }
-              // Articulations glyphs: prefer precomputed VexFlow codes, fallback to simple mapping
+              // Articulations glyphs: handle both JMON schema and VexFlow codes
+              const articulationMap = {
+                staccato: "a.",
+                accent: "a>",
+                tenuto: "a-",
+                marcato: "a^",
+                legato: "a-", // similar to tenuto for VexFlow
+              };
+
+              // Handle precomputed VexFlow codes first
               if (Array.isArray(noteData.vfArticulations) && noteData.vfArticulations.length) {
                 noteData.vfArticulations.forEach((code) => {
                   if (
@@ -710,16 +785,13 @@ class VexFlowConverter {
                     }
                   }
                 });
-              } else if (Array.isArray(noteData.articulations)) {
-                const map = {
-                  staccato: "a.",
-                  accent: "a>",
-                  tenuto: "a-",
-                  marcato: "a^",
-                };
+              }
+
+              // Handle JMON schema articulations (from converted notes)
+              else if (Array.isArray(noteData.articulations)) {
                 noteData.articulations.forEach((a) => {
-                  const t = typeof a === "string" ? a : (a && a.type);
-                  const code = map[t] || null;
+                  const articulationType = typeof a === "string" ? a : (a && a.type);
+                  const code = articulationMap[articulationType] || null;
                   if (!code) return;
                   if (
                     Flow &&
@@ -842,6 +914,13 @@ class VexFlowConverter {
               } catch (_) {}
             });
           }
+          // Ensure the div is visible after all rendering is complete
+          div.style.position = "relative";
+          div.style.display = "block";
+          div.style.visibility = "visible";
+          div.style.left = "auto";
+          div.style.top = "auto";
+
           // Append collapsible VexFlow source block (like ABC)
           try {
             const details = document.createElement("details");
@@ -1033,6 +1112,11 @@ class VexFlowConverter {
             Renderer.Backends.SVG,
           );
           renderer.resize(rendererConfig.width, rendererConfig.height);
+
+          // Ensure the div is visible after rendering
+          div.style.position = "relative";
+          div.style.display = "block";
+          div.style.visibility = "visible";
 
           const context = renderer.getContext();
 
@@ -1323,6 +1407,44 @@ class VexFlowConverter {
                   }
                 } catch {}
               }
+
+              // Handle JMON ornaments (like grace notes from ornaments array)
+              if (Array.isArray(noteData.ornaments) && noteData.ornaments.length && Flow.GraceNoteGroup && Flow.GraceNote) {
+                const graceNoteOrnaments = noteData.ornaments.filter(orn => orn.type === 'grace_note');
+
+                if (graceNoteOrnaments.length > 0) {
+                  try {
+                    const allGraceNotes = graceNoteOrnaments.flatMap(orn => {
+                      if (orn.parameters && orn.parameters.gracePitches) {
+                        return orn.parameters.gracePitches.map(pitch =>
+                          new Flow.GraceNote({
+                            keys: [String(pitch).toLowerCase()],
+                            duration: "16",
+                            slash: orn.parameters.graceNoteType === "acciaccatura",
+                          })
+                        );
+                      }
+                      return [];
+                    });
+
+                    if (allGraceNotes.length > 0) {
+                      const ggroup = new Flow.GraceNoteGroup(allGraceNotes, true);
+                      if (typeof ggroup.beamNotes === "function") {
+                        ggroup.beamNotes();
+                      }
+                      if (
+                        typeof ggroup.setContext === "function" &&
+                        typeof ggroup.attachToNote === "function"
+                      ) {
+                        ggroup.setContext(context);
+                        ggroup.attachToNote(note);
+                      }
+                    }
+                  } catch (e) {
+                    console.warn('Failed to render grace note ornaments:', e);
+                  }
+                }
+              }
               // Accidentals display (auto/always)
               if (Flow.Accidental) {
                 noteData.keys.forEach((origKey, idx2) => {
@@ -1346,7 +1468,16 @@ class VexFlowConverter {
                   }
                 });
               }
-              // Articulations glyphs: prefer precomputed VexFlow codes, fallback to array-based mapping
+              // Articulations glyphs: handle both JMON schema and VexFlow codes
+              const articulationMap = {
+                staccato: "a.",
+                accent: "a>",
+                tenuto: "a-",
+                marcato: "a^",
+                legato: "a-", // similar to tenuto for VexFlow
+              };
+
+              // Handle precomputed VexFlow codes first
               if (Array.isArray(noteData.vfArticulations) && noteData.vfArticulations.length) {
                 noteData.vfArticulations.forEach((code) => {
                   if (
@@ -1368,16 +1499,13 @@ class VexFlowConverter {
                     }
                   }
                 });
-              } else if (Array.isArray(noteData.articulations)) {
-                const map = {
-                  staccato: "a.",
-                  accent: "a>",
-                  tenuto: "a-",
-                  marcato: "a^",
-                };
+              }
+
+              // Handle JMON schema articulations (from converted notes)
+              else if (Array.isArray(noteData.articulations)) {
                 noteData.articulations.forEach((a) => {
-                  const t = typeof a === "string" ? a : (a && a.type);
-                  const code = map[t] || null;
+                  const articulationType = typeof a === "string" ? a : (a && a.type);
+                  const code = articulationMap[articulationType] || null;
                   if (!code) return;
                   if (
                     Flow &&
@@ -1478,6 +1606,14 @@ class VexFlowConverter {
               } catch (_) {}
             });
           }
+
+          // Ensure the div is visible after all rendering is complete
+          div.style.position = "relative";
+          div.style.display = "block";
+          div.style.visibility = "visible";
+          div.style.left = "auto";
+          div.style.top = "auto";
+
           // Draw simple ties when requested (tie to next note)
           if (createdNotes.length && Flow.StaveTie) {
             for (let i = 0; i < createdNotes.length - 1; i++) {
