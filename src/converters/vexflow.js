@@ -1505,7 +1505,15 @@ function convertToVexFlow(composition, options = {}) {
   const converter = new VexFlowConverter();
   const vexFlowData = converter.convertToVexFlow(composition);
 
-  // Always return the data structure; rendering is handled by higher-level APIs
+  if (options.elementId) {
+    const rendererConfig = converter.createRenderer(
+      options.elementId,
+      options.width,
+      options.height,
+    );
+    return converter.generateRenderingInstructions(vexFlowData, rendererConfig);
+  }
+
   return vexFlowData;
 }
 

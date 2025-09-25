@@ -75,9 +75,78 @@ function play(jmonObj, options = {}) {
  * Consumers can use jm.converters.abc or jm.converters.vexflow directly.
  * Returned value is a simple object for future extensibility.
  */
-function score(jmonObj, options = {}) {
-  const asAbc = abc(jmonObj, options?.abc || {});
-  return { type: "abc", data: asAbc, options };
+function score(jmonObj, renderingEngine = {}, options = {}) {
+  let engineType = "unknown";
+  let engineInstance = null;
+
+  if (renderingEngine && typeof renderingEngine === "string") {
+    engineType = renderingEngine.toLowerCase();
+  } else if (renderingEngine && typeof renderingEngine === "object") {
+    if (renderingEngine.renderAbc) {
+      engineType = "abcjs";
+      engineInstance = renderingEngine;
+    } else if (renderingEngine.Renderer || renderingEngine.Flow || renderingEngine.VF) {
+      engineType = "vexflow";
+      engineInstance = renderingEngine;
+    }
+  } else if (typeof window !== "undefined") {
+    if (window.ABCJS) {
+      engineType = "abcjs";
+      engineInstance = window.ABCJS;
+    } else if (window.VF || window.VexFlow || (window.Vex && (window.Vex.Flow || window.Vex))) {
+      engineType = "vexflow";
+      engineInstance = window.VF || window.VexFlow || (window.Vex && (window.Vex.Flow || window.Vex));
+    }
+  }
+
+  // VexFlow path: render SVG to a container and return the element
+  if (engineType === "vexflow" && typeof document !== "undefined") {
+    const container = document.createElement("div");
+    const elementId = `vexflow-${Date.now()}`;
+    container.id = elementId;
+
+    const vex = convertToVexFlow(jmonObj, {
+      elementId,
+      width: options.width,
+      height: options.height,
+    });
+
+    if (vex && typeof vex.render === "function") {
+      try {
+        const VF =
+          engineInstance ||
+          (typeof window !== "undefined" && (window.VF || window.VexFlow || (window.Vex && (window.Vex.Flow || window.Vex))));
+        if (VF) vex.render(VF);
+      } catch {}
+    }
+    return container;
+  }
+
+  // ABCJS path: render into a container when engine provided/detected; fallback to text
+  if (engineType === "abcjs" && typeof document !== "undefined" && engineInstance && engineInstance.renderAbc) {
+    const container = document.createElement("div");
+    const notation = abc(jmonObj, options.abc || {});
+    try {
+      engineInstance.renderAbc(container, notation, {
+        responsive: options.responsive || "resize",
+        scale: options.scale || 1.0,
+        staffwidth: options.staffwidth,
+      });
+      return container;
+    } catch {}
+    const pre = document.createElement("pre");
+    pre.textContent = notation;
+    return pre;
+  }
+
+  // Fallback: return ABC text (works in non-DOM contexts)
+  const notation = abc(jmonObj, options.abc || {});
+  if (typeof document !== "undefined") {
+    const pre = document.createElement("pre");
+    pre.textContent = notation;
+    return pre;
+  }
+  return { type: "abc", data: notation, options };
 }
 
 // Compose the jm API object expected by build and tests
