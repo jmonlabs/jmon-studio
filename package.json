@@ -48,7 +48,6 @@
   "author": "jmonlabs",
   "license": "MIT",
   "peerDependencies": {
-    "abcjs": "^6.0.0",
     "plotly.js": "^2.0.0",
     "tone": "^14.0.0 || ^15.0.0"
   },

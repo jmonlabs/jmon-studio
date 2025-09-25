@@ -72,7 +72,7 @@ function play(jmonObj, options = {}) {
 
 /**
  * Score rendering function that prioritizes SVG output over text fallbacks.
- * Supports VexFlow (SVG), ABCJS, and ABC text fallback.
+ * Supports VexFlow (SVG) and ABC text fallback.
  * Returns DOM element or structured data depending on environment and engine.
  */
 function score(jmonObj, renderingEngine = {}, options = {}) {
@@ -83,10 +83,7 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
   if (renderingEngine && typeof renderingEngine === "string") {
     engineType = renderingEngine.toLowerCase();
   } else if (renderingEngine && typeof renderingEngine === "object") {
-    if (renderingEngine.renderAbc) {
-      engineType = "abcjs";
-      engineInstance = renderingEngine;
-    } else if (
+    if (
       renderingEngine.Renderer ||
       renderingEngine.Flow ||
       renderingEngine.VF ||
@@ -97,11 +94,7 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
       engineInstance = renderingEngine;
     }
   } else if (typeof window !== "undefined") {
-    // Check for ABCJS first to respect user preference if both are available
-    if (window.ABCJS && !renderingEngine.VF && !renderingEngine.VexFlow) {
-      engineType = "abcjs";
-      engineInstance = window.ABCJS;
-    } else if (
+    if (
       window.VF ||
       window.VexFlow ||
       (window.Vex && (window.Vex.Flow || window.Vex)) ||
@@ -193,22 +186,7 @@ function score(jmonObj, renderingEngine = {}, options = {}) {
     }
   }
 
-  // ABCJS path: render into a container when engine provided/detected
-  if (engineType === "abcjs" && typeof document !== "undefined" && engineInstance && engineInstance.renderAbc) {
-    const container = document.createElement("div");
-    const notation = abc(jmonObj, options.abc || {});
-    try {
-      engineInstance.renderAbc(container, notation, {
-        responsive: options.responsive || "resize",
-        scale: options.scale || 1.0,
-        staffwidth: options.staffwidth,
-      });
-      return container;
-    } catch (error) {
-      console.warn("ABCJS rendering failed:", error);
-      // Fall through to text fallback
-    }
-  }
+  // ABCJS support removed - VexFlow is stable and sufficient
 
   // ABC text fallback - works in all environments
   const notation = abc(jmonObj, options.abc || {});
