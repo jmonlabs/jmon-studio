@@ -4,6 +4,7 @@ import {
   quantize,
   quantizeEvents,
 } from "../utils/quantize.js";
+import { deriveVisualFromArticulations } from "../utils/notation/deriveVisualFromArticulations.js";
 /**
  * toAbc.js - Convert jmon format to ABC notation
  *
@@ -234,7 +235,7 @@ export class ToAbc {
             duration: typeof n.duration === "number" ? n.duration : 1,
             // Use mapped ABC pitch string directly in converter
             pitch: staffPitch,
-            articulation: n.articulation,
+            articulations: Array.isArray(n.articulations) ? n.articulations : [],
           });
         });
       });
@@ -458,12 +459,18 @@ export class ToAbc {
           let noteToken = token;
           noteToken += encodeDur(chunk);
 
-          // Articulations (only on first part)
+          // Articulations via ABC decorations (from deriveVisualFromArticulations) - only on first part
           if (isFirstPart && opts.showArticulations) {
-            if (note.articulation === "staccato") noteToken += ".";
-            if (note.articulation === "accent") noteToken += ">";
-            if (note.articulation === "tenuto") noteToken += "-";
-            if (note.articulation === "marcato") noteToken += "^";
+            const arr = Array.isArray(note.articulations) ? note.articulations : [];
+            if (arr.length) {
+              const hints = deriveVisualFromArticulations(arr);
+              const decorations = (hints && hints.abc && Array.isArray(hints.abc.decorations))
+                ? hints.abc.decorations.join("")
+                : "";
+              if (decorations) {
+                noteToken = decorations + noteToken;
+              }
+            }
           }
 
           // Add tie if this chunk doesn't complete the note (more parts coming)

@@ -94,7 +94,7 @@ export function createPlayer(composition, options = {}) {
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
         }
-        
+
         /* Button hover effects */
         .jmon-music-player-btn-vertical:hover {
             background-color: #555555 !important;
@@ -103,7 +103,7 @@ export function createPlayer(composition, options = {}) {
         .jmon-music-player-btn-vertical:active {
             transform: translateY(0px);
         }
-        
+
         /* Large screens: Show vertical downloads, hide horizontal ones, horizontal track layout */
         @media (min-width: 600px) {
             .jmon-music-player-downloads {
@@ -133,7 +133,7 @@ export function createPlayer(composition, options = {}) {
                 flex: 1 !important;
             }
         }
-        
+
         /* Medium screens: Compact layout with horizontal track selectors */
         @media (min-width: 481px) and (max-width: 799px) {
             .jmon-music-player-downloads {
@@ -164,7 +164,7 @@ export function createPlayer(composition, options = {}) {
                 flex: 1 !important;
             }
         }
-        
+
         /* Small screens: Mobile layout */
         @media (max-width: 480px) {
             .jmon-music-player-downloads {
@@ -563,10 +563,10 @@ export function createPlayer(composition, options = {}) {
   downloadWavButtonVertical.classList.add("jmon-music-player-btn-vertical");
 
   verticalDownloads.append(downloadMIDIButtonVertical, downloadWavButtonVertical);
-  
+
   // Hide vertical downloads by default - CSS will show them on larger screens
   verticalDownloads.style.display = 'none';
-  
+
   rightColumn.append(bpmContainer, verticalDownloads);
 
   // Timeline container
@@ -619,7 +619,7 @@ export function createPlayer(composition, options = {}) {
         overflow: visible;
         height: 8px;
     `;
-    
+
     // Add timeline track styling to ensure visibility across browsers
     const timelineStyle = document.createElement("style");
     timelineStyle.textContent = `
@@ -803,11 +803,11 @@ export function createPlayer(composition, options = {}) {
   buttonContainer.append(downloadMIDIButton, downloadWavButton);
 
   topContainer.append(leftColumn, rightColumn);
-  
+
   // Assemble main layout
   mainLayout.appendChild(topContainer);
   mainLayout.appendChild(timelineContainer);
-  
+
   // Keep original horizontal buttons for mobile
   container.append(
     mainLayout,
@@ -927,7 +927,7 @@ export function createPlayer(composition, options = {}) {
           if (!id || !map[id]) return;
 
           const currentNode = map[id];
-          
+
           // Skip Destination nodes (they're the final output)
           if (currentNode === Tone.Destination) return;
 
@@ -1090,12 +1090,12 @@ export function createPlayer(composition, options = {}) {
           "[PLAYER] Tone.js initialized, context state:",
           Tone.context ? Tone.context.state : "no context",
         );
-        
+
         // iOS-specific logging
         if (isIOS()) {
           console.log("[PLAYER] iOS device detected - audio context will start on user interaction");
         }
-        
+
         return true;
       }
     }
@@ -1372,15 +1372,18 @@ export function createPlayer(composition, options = {}) {
             synth.triggerAttackRelease(noteName, note.duration, time);
           });
         } else if (
-          note.articulation === "glissando" && note.glissTarget !== undefined
+          Array.isArray(note.modulations) &&
+          note.modulations.some((m) => m.type === "pitch" && (m.subtype === "glissando" || m.subtype === "portamento") && (m.to !== undefined || m.target !== undefined))
         ) {
           // Glissando: play both notes with slight overlap to simulate slide
           let noteName = typeof note.pitch === "number"
             ? Tone.Frequency(note.pitch, "midi").toNote()
             : note.pitch;
-          let targetName = typeof note.glissTarget === "number"
-            ? Tone.Frequency(note.glissTarget, "midi").toNote()
-            : note.glissTarget;
+          const gliss = note.modulations.find((m) => m.type === "pitch" && (m.subtype === "glissando" || m.subtype === "portamento") && (m.to !== undefined || m.target !== undefined));
+          const glissTarget = gliss && (gliss.to !== undefined ? gliss.to : gliss.target);
+          let targetName = typeof glissTarget === "number"
+            ? Tone.Frequency(glissTarget, "midi").toNote()
+            : glissTarget;
 
           console.log("[PLAYER] Glissando", {
             fromNote: noteName,
@@ -1463,15 +1466,19 @@ export function createPlayer(composition, options = {}) {
           }
           let noteDuration = note.duration;
           let noteVelocity = note.velocity || 0.8;
-          if (note.articulation === "staccato") {
-            noteDuration = note.duration * 0.5; // Raccourcir à 50%
+
+          const mods = Array.isArray(note.modulations) ? note.modulations : [];
+
+          // Apply duration scaling if present
+          const durScale = mods.find((m) => m.type === "durationScale" && typeof m.factor === "number");
+          if (durScale) {
+            noteDuration = note.duration * durScale.factor;
           }
-          if (note.articulation === "accent") {
-            noteVelocity = Math.min(noteVelocity * 2.0, 1.0); // Double la vélocité pour plus d'effet
-          }
-          if (note.articulation === "tenuto") {
-            noteDuration = note.duration * 1.5; // Allonger significativement (150%)
-            noteVelocity = Math.min(noteVelocity * 1.3, 1.0); // Augmenter aussi la vélocité
+
+          // Apply velocity boost if present
+          const velBoost = mods.find((m) => m.type === "velocityBoost" && typeof m.amountBoost === "number");
+          if (velBoost) {
+            noteVelocity = Math.min(noteVelocity + velBoost.amountBoost, 1.0);
           }
           synth.triggerAttackRelease(
             noteName,
@@ -1508,7 +1515,7 @@ export function createPlayer(composition, options = {}) {
   const updateTimeline = () => {
     const now = performance.now();
     const shouldUpdate = (now - lastTimelineUpdate) >= TIMELINE_UPDATE_INTERVAL;
-    
+
     if (Tone && isPlaying) {
       // Compute loop length in seconds (loopEnd is set in seconds)
       const loopSeconds = (typeof Tone.Transport.loopEnd === "number")
@@ -1536,7 +1543,7 @@ export function createPlayer(composition, options = {}) {
           currentTime.textContent = formatTime(elapsed);
           lastTimelineUpdate = now;
         }
-        
+
         if (Tone.Transport.state === "stopped") {
           // Only reset to beginning when actually stopped
           Tone.Transport.seconds = 0;
@@ -1579,7 +1586,7 @@ export function createPlayer(composition, options = {}) {
             "[PLAYER] Audio context started:",
             Tone.context ? Tone.context.state : "unknown",
           );
-          
+
           // Additional iOS-specific setup
           if (Tone.context && typeof Tone.context.resume === "function") {
             await Tone.context.resume();
@@ -1587,7 +1594,7 @@ export function createPlayer(composition, options = {}) {
           }
         } catch (error) {
           console.error("[PLAYER] Failed to start audio context:", error);
-          
+
           // More helpful error messages
           let errorMsg = "Failed to start audio. ";
           if (isIOS()) {
@@ -1595,7 +1602,7 @@ export function createPlayer(composition, options = {}) {
           } else {
             errorMsg += "Please check your audio settings and try again.";
           }
-          
+
           alert(errorMsg);
           return;
         }
@@ -1692,7 +1699,7 @@ export function createPlayer(composition, options = {}) {
     }
 
     console.log("[PLAYER] Stopping playback completely...");
-    
+
     // Stop transport and all parts with proper cleanup
     Tone.Transport.stop();
     Tone.Transport.cancel(); // Clear all scheduled events
@@ -1715,7 +1722,7 @@ export function createPlayer(composition, options = {}) {
     currentTime.textContent = formatTime(0);
     playButton.innerHTML =
       `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-play"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>`;
-    
+
     console.log("[PLAYER] Playback stopped completely");
   });
 
@@ -1723,16 +1730,16 @@ export function createPlayer(composition, options = {}) {
     if (Tone && totalDuration > 0) {
       const time = (timeline.value / 100) * totalDuration;
       const wasPlaying = isPlaying;
-      
+
       // If playing, pause temporarily for seeking
       if (wasPlaying) {
         Tone.Transport.pause();
       }
-      
+
       // Set the new position
       Tone.Transport.seconds = time;
       currentTime.textContent = formatTime(time);
-      
+
       // Resume if it was playing before
       if (wasPlaying) {
         setTimeout(() => {

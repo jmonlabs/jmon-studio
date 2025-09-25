@@ -21,6 +21,7 @@ import * as analysisModule from './analysis/index.js';
 
 // Utils imports
 import * as Utils from './utils.js';
+import audioNS from './audio/index.js';
 
 // Export namespaces
 export const theory = {
@@ -72,6 +73,7 @@ export const analysis = {
 export const utils = {
     ...Utils
 };
+export const audio = audioNS;
 
 // Export everything as default
 export default {
@@ -79,5 +81,6 @@ export default {
     constants,
     generative,
     analysis,
+    audio,
     utils
 };

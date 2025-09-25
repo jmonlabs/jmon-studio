@@ -7,7 +7,7 @@ const baseMelody = {
   tempo: 120,
   timeSignature: "4/4",
   keySignature: "C",
-  metadata: { 
+  metadata: {
     title: "Mary Had a Little Lamb",
     composer: "Traditional"
   },
@@ -23,7 +23,7 @@ const baseMelody = {
         {pitch: 64, duration: 1.0, time: 4.0},   // E - lamb (marcato)
         {pitch: 64, duration: 1.0, time: 5.0},   // E
         {pitch: 64, duration: 2.0, time: 6.0},   // E (long note)
-        
+
         // Little lamb, little lamb (complex articulations)
         {pitch: 62, duration: 1.0, time: 8.0},   // D - Little (vibrato)
         {pitch: 62, duration: 1.0, time: 9.0},   // D - lamb (tremolo)
@@ -31,7 +31,7 @@ const baseMelody = {
         {pitch: 64, duration: 1.0, time: 12.0},  // E - little (bend)
         {pitch: 67, duration: 1.0, time: 13.0},  // G - lamb (glissando down)
         {pitch: 67, duration: 2.0, time: 14.0},  // G (long note with diminuendo)
-        
+
         // Mary had a little lamb (more complex articulations)
         {pitch: 64, duration: 1.0, time: 16.0},  // E - Mary (portamento to D)
         {pitch: 62, duration: 1.0, time: 17.0},  // D - had (vibrato)
@@ -55,85 +55,85 @@ let articulatedNotes = [...baseMelody.tracks[0].notes];
 console.log('Applying articulations to Mary Had a Little Lamb...');
 
 // Simple articulations (first phrase)
-jm.theory.harmony.addArticulation(articulatedNotes, 'staccato', 0);
-jm.theory.harmony.addArticulation(articulatedNotes, 'accent', 1);
-jm.theory.harmony.addArticulation(articulatedNotes, 'tenuto', 2);
-jm.theory.harmony.addArticulation(articulatedNotes, 'legato', 3);
-jm.theory.harmony.addArticulation(articulatedNotes, 'marcato', 4);
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 0, 'staccato');
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 1, 'accent');
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 2, 'tenuto');
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 3, 'legato');
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 4, 'marcato');
 
 // Complex articulations (second phrase)
-jm.theory.harmony.addArticulation(articulatedNotes, 'vibrato', 7, {
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 7, 'vibrato', {
   rate: 6,    // Hz
   depth: 40,  // cents
   delay: 0.1  // seconds
 });
 
-jm.theory.harmony.addArticulation(articulatedNotes, 'tremolo', 8, {
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 8, 'tremolo', {
   rate: 10,   // Hz
   depth: 0.4  // 0-1
 });
 
-jm.theory.harmony.addArticulation(articulatedNotes, 'crescendo', 9, {
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 9, 'crescendo', {
   endVelocity: 0.9,
   curve: 'exponential'
 });
 
-jm.theory.harmony.addArticulation(articulatedNotes, 'bend', 11, {
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 11, 'bend', {
   amount: 100,        // cents (semitone up)
   curve: 'linear',
   returnToOriginal: true
 });
 
-jm.theory.harmony.addArticulation(articulatedNotes, 'glissando', 12, {
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 12, 'glissando', {
   target: 60,         // Glide down to C
   curve: 'linear'
 });
 
-jm.theory.harmony.addArticulation(articulatedNotes, 'diminuendo', 13, {
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 13, 'diminuendo', {
   endVelocity: 0.3,
   curve: 'linear'
 });
 
 // More complex articulations (third phrase)
-jm.theory.harmony.addArticulation(articulatedNotes, 'portamento', 14, {
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 14, 'portamento', {
   target: 62,         // Slide to D
   curve: 'exponential',
   speed: 0.5
 });
 
-jm.theory.harmony.addArticulation(articulatedNotes, 'vibrato', 15, {
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 15, 'vibrato', {
   rate: 5,
   depth: 30,
   delay: 0
 });
 
-jm.theory.harmony.addArticulation(articulatedNotes, 'bend', 16, {
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 16, 'bend', {
   amount: 50,         // Quarter tone up
   returnToOriginal: false
 });
 
-jm.theory.harmony.addArticulation(articulatedNotes, 'tremolo', 17, {
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 17, 'tremolo', {
   rate: 12,
   depth: 0.6
 });
 
-jm.theory.harmony.addArticulation(articulatedNotes, 'glissando', 18, {
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 18, 'glissando', {
   target: 69,         // Glide up to A
   curve: 'exponential'
 });
 
 // Final phrase with mixed articulations
-jm.theory.harmony.addArticulation(articulatedNotes, 'staccato', 19);
-jm.theory.harmony.addArticulation(articulatedNotes, 'accent', 20);
-jm.theory.harmony.addArticulation(articulatedNotes, 'tenuto', 21);
-jm.theory.harmony.addArticulation(articulatedNotes, 'vibrato', 22, {
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 19, 'staccato');
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 20, 'accent');
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 21, 'tenuto');
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 22, 'vibrato', {
   rate: 7,
   depth: 50
 });
-jm.theory.harmony.addArticulation(articulatedNotes, 'marcato', 23);
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 23, 'marcato');
 
 // Final note with complex dynamics
-jm.theory.harmony.addArticulation(articulatedNotes, 'crescendo', 24, {
+articulatedNotes = jm.theory.harmony.addArticulation(articulatedNotes, 24, 'crescendo', {
   endVelocity: 0.95,
   curve: 'exponential'
 });
@@ -156,13 +156,34 @@ const maryWithArticulations = {
 console.log('Articulated piece created with', articulatedNotes.length, 'notes');
 
 // Display the player
+const compiled = jm.audio.compileComposition(maryWithArticulations);
+const maryForPlayer = JSON.parse(JSON.stringify(maryWithArticulations));
+compiled.tracks.forEach((ct, ti) => {
+  (ct.modulations || []).forEach((m) => {
+    const n = maryForPlayer.tracks[ti].notes[m.index];
+    if (!n.modulations) n.modulations = [];
+    n.modulations.push({ ...m });
+  });
+});
+
 document.getElementById('player-container').appendChild(
-    jm.play(maryWithArticulations, { autoplay: false })
+    jm.play(maryForPlayer, { autoplay: false })
 );
 
 // Display the score
+const maryForScore = JSON.parse(JSON.stringify(maryForPlayer));
+const SIMPLE = new Set(['staccato','accent','tenuto','marcato']);
+maryForScore.tracks.forEach(t => {
+  t.notes.forEach(n => {
+    if (Array.isArray(n.articulations)) {
+      const firstSimple = n.articulations.find(a => (typeof a === 'string' ? SIMPLE.has(a) : SIMPLE.has(a.type)));
+      if (firstSimple) n.articulation = (typeof firstSimple === 'string') ? firstSimple : firstSimple.type;
+    }
+  });
+});
+
 document.getElementById('score-container').appendChild(
-    jm.score(maryWithArticulations)
+    jm.score(maryForScore)
 );
 
 // Log information about articulations applied
@@ -184,7 +205,7 @@ console.log('  - Crescendo: Gradual volume increase');
 console.log('  - Diminuendo: Gradual volume decrease');
 
 // Show the ABC notation with line breaks
-const abcNotation = jm.converters.abc(maryWithArticulations, {
+const abcNotation = jm.converters.abc(maryForScore, {
     measuresPerLine: 4,
     lineBreaks: [8, 16]
 });

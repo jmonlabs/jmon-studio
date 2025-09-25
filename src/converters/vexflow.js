@@ -1,7 +1,14 @@
 /**
  * VexFlow converter for JMON compositions
  * Converts JMON format to VexFlow notation objects
+ *
+ * Added features:
+ * - Title text (from composition.metadata.title)
+ * - Tempo text (from composition.tempo or composition.bpm)
+ * - Multiline wrapping of measures (rendererConfig.measuresPerLine)
  */
+
+import { deriveVisualFromArticulations } from "../utils/notation/deriveVisualFromArticulations.js";
 
 class VexFlowConverter {
   constructor() {
@@ -82,6 +89,8 @@ class VexFlowConverter {
       timeSignature: composition.timeSignature || "4/4",
       keySignature: composition.keySignature || "C",
       clef: composition.clef,
+      metadata: composition.metadata || {},
+      tempo: composition.tempo ?? composition.bpm ?? null,
       tracks: [],
     };
 
@@ -126,14 +135,42 @@ class VexFlowConverter {
               : []);
           if (pitches.length > 0) {
             const vexFlowNote = {
-              keys: pitches.map((p) => this.midiToVexFlow(p)),
+              keys: pitches.map((p) =>
+                String(this.midiToVexFlow(p)).toLowerCase()
+              ),
               duration: this.durationToVexFlow(note.duration || 1),
               time: note.time ?? 0,
             };
 
-            // Add articulations if present
-            if (note.articulation) {
-              vexFlowNote.articulation = note.articulation;
+            // Add articulations if present (array-based)
+            if (Array.isArray(note.articulations) && note.articulations.length) {
+              const hints = deriveVisualFromArticulations(note.articulations);
+              if (hints && hints.vexflow) {
+                // Pre-resolved VexFlow articulation glyph codes
+                if (Array.isArray(hints.vexflow.articulations) && hints.vexflow.articulations.length) {
+                  vexFlowNote.vfArticulations = hints.vexflow.articulations.slice();
+                }
+                // Stroke (arpeggiate/strum) direction/style
+                if (hints.vexflow.stroke) {
+                  vexFlowNote.stroke = { ...hints.vexflow.stroke };
+                }
+                // Gliss/Portamento hint
+                if (hints.vexflow.gliss) {
+                  const g = hints.vexflow.gliss;
+                  try {
+                    vexFlowNote.gliss = {
+                      type: g.type,
+                      targetKey: (typeof g.target === "number")
+                        ? String(this.midiToVexFlow(g.target)).toLowerCase()
+                        : undefined,
+                      curve: g.curve || "linear",
+                      text: g.text || (g.type === "portamento" ? "port." : "gliss.")
+                    };
+                  } catch (_) {
+                    // safe fallback: omit gliss if conversion fails
+                  }
+                }
+              }
             }
 
             vexFlowNotes.push(vexFlowNote);
@@ -421,29 +458,158 @@ class VexFlowConverter {
             : 60;
           const detectedClef = median < 60 ? "bass" : "treble";
 
-          // Single stave with internal barlines
-          const stave = new Flow.Stave(left, top, avail);
-          stave.addClef(
-            vexFlowData.clef ||
-              (vexFlowData.tracks &&
-                vexFlowData.tracks[0] &&
-                vexFlowData.tracks[0].clef) ||
-              (detectedClef || "treble"),
-          );
-          if (vexFlowData.timeSignature) {
-            stave.addTimeSignature(vexFlowData.timeSignature);
+          // Determine wrapping
+          const measuresPerLine =
+            rendererConfig.measuresPerLine && rendererConfig.measuresPerLine > 0
+              ? Math.max(1, Math.floor(rendererConfig.measuresPerLine))
+              : Math.max(
+                1,
+                Math.floor(
+                  avail /
+                    Math.max(120, Math.floor(avail / Math.max(1, mCount))),
+                ),
+              );
+
+          // Chunk measures into lines
+          const lines = [];
+          for (let i = 0; i < measures.length; i += measuresPerLine) {
+            lines.push(measures.slice(i, i + measuresPerLine));
           }
-          if (vexFlowData.keySignature && vexFlowData.keySignature !== "C") {
-            stave.addKeySignature(vexFlowData.keySignature);
-          }
-          stave.setContext(context).draw();
+
+          // Layout gap between systems
+          const systemGap = 80;
+
+          // Render each system (line)
+          const allBeams = [];
+          const createdNotes = [];
+          lines.forEach((lineMeasures, sysIndex) => {
+            const y = top + sysIndex * systemGap;
+
+            // One stave per system
+            const stave = new Flow.Stave(left, y, avail);
+
+            const normalizeClef = (c) => {
+              const m = (c || "").toString().toLowerCase();
+              const map = {
+                g: "treble",
+                treble: "treble",
+                f: "bass",
+                bass: "bass",
+                c: "alto",
+                alto: "alto",
+                tenor: "tenor",
+                "treble-8vb": "treble-8vb",
+                "treble-8va": "treble-8va",
+                "bass-8vb": "bass-8vb",
+              };
+              return map[m] || "treble";
+            };
+            const clefToUse = normalizeClef(
+              vexFlowData.clef ||
+                (vexFlowData.tracks &&
+                  vexFlowData.tracks[0] &&
+                  vexFlowData.tracks[0].clef) ||
+                detectedClef,
+            );
+            stave.addClef(clefToUse);
+            if (vexFlowData.timeSignature && sysIndex === 0) {
+              stave.addTimeSignature(vexFlowData.timeSignature);
+            }
+            if (
+              vexFlowData.keySignature && vexFlowData.keySignature !== "C" &&
+              sysIndex === 0
+            ) {
+              stave.addKeySignature(vexFlowData.keySignature);
+            }
+            stave.setContext(context).draw();
+
+            // Title and tempo (draw on first system)
+            if (sysIndex === 0) {
+              try {
+                const title = vexFlowData.metadata &&
+                  vexFlowData.metadata.title;
+                if (title) {
+                  context.save();
+                  context.setFont("bold 16px Arial");
+                  context.fillText(title, left, y - 20);
+                  context.restore();
+                }
+                if (vexFlowData.tempo) {
+                  context.save();
+                  context.setFont("12px Arial");
+                  const tempoText = `♩ = ${vexFlowData.tempo}`;
+                  context.fillText(tempoText, left + 200, y - 8);
+                  context.restore();
+                }
+              } catch {}
+            }
+
+            // Build tickables for the system (insert barlines between measures)
+            const tickables = [];
+            lineMeasures.forEach((mNotes, idxInLine) => {
+              const sorted = mNotes.slice().sort((a, b) =>
+                (a.time ?? 0) - (b.time ?? 0)
+              );
+              sorted.forEach((noteData) => {
+                if (noteData.isRest) {
+                  tickables.push(
+                    new Flow.StaveNote({
+                      keys: ["d/5"],
+                      duration: String(noteData.duration).replace(/r?$/, "r"),
+                    }),
+                  );
+                } else {
+                  const note = new Flow.StaveNote({
+                    keys: noteData.keys.map((k) => k.toLowerCase()),
+                    duration: noteData.duration,
+                  });
+                  tickables.push(note);
+                  createdNotes.push({ vf: note, data: noteData });
+                }
+              });
+              // Internal barline (skip after last in line)
+              if (
+                idxInLine < lineMeasures.length - 1 && Flow.BarNote &&
+                Flow.Barline && Flow.Barline.type
+              ) {
+                tickables.push(new Flow.BarNote(Flow.Barline.type.SINGLE));
+              }
+            });
+
+            // Voice and format for this system
+            const voice = new Flow.Voice({
+              num_beats: Math.max(1, lineMeasures.length) * measureCapacity,
+              beat_value: 32,
+            });
+            if (
+              voice.setMode && Flow.Voice && Flow.Voice.Mode &&
+              Flow.Voice.Mode.SOFT !== undefined
+            ) {
+              voice.setMode(Flow.Voice.Mode.SOFT);
+            } else if (typeof voice.setStrict === "function") {
+              voice.setStrict(false);
+            }
+            voice.addTickables(
+              tickables.filter((t) =>
+                typeof t.getTicks === "function"
+                  ? t.getTicks().value() > 0
+                  : true
+              ),
+            );
+
+            const formatter = new Flow.Formatter().joinVoices([voice]);
+            formatter.format([voice], avail - 20);
+            voice.draw(context, stave);
+          });
 
           // Build all tickables and beams per measure, insert BarNote between measures
           const allTickables = [];
-          const createdNotes = [];
-          const allBeams = [];
+          // createdNotes already declared earlier
+          // allBeams already declared earlier
           measures.forEach((mNotes, idx) => {
-            const tickables = mNotes.map((noteData) => {
+            const tickables = mNotes.slice().sort((a, b) =>
+              (a.time ?? 0) - (b.time ?? 0)
+            ).map((noteData) => {
               if (noteData.isRest) {
                 return new Flow.StaveNote({
                   keys: ["d/5"],
@@ -504,32 +670,78 @@ class VexFlowConverter {
                   }
                 });
               }
-              if (noteData.articulation) {
+              // Articulations glyphs: prefer precomputed VexFlow codes, fallback to simple mapping
+              if (Array.isArray(noteData.vfArticulations) && noteData.vfArticulations.length) {
+                noteData.vfArticulations.forEach((code) => {
+                  if (
+                    Flow &&
+                    Flow.Articulation &&
+                    Flow.Modifier &&
+                    Flow.Modifier.Position &&
+                    (typeof note.addArticulation === "function" ||
+                      typeof note.addModifier === "function")
+                  ) {
+                    const art = new Flow.Articulation(code);
+                    if (art && typeof art.setPosition === "function") {
+                      art.setPosition(Flow.Modifier.Position.ABOVE);
+                    }
+                    if (typeof note.addArticulation === "function") {
+                      note.addArticulation(0, art);
+                    } else if (typeof note.addModifier === "function") {
+                      note.addModifier(art, 0);
+                    }
+                  }
+                });
+              } else if (Array.isArray(noteData.articulations)) {
                 const map = {
                   staccato: "a.",
                   accent: "a>",
                   tenuto: "a-",
                   marcato: "a^",
                 };
-                const code = map[noteData.articulation] || null;
-                if (code) {
-                  if (typeof note.addArticulation === "function") {
-                    note.addArticulation(
-                      0,
-                      new Flow.Articulation(code).setPosition(
-                        Flow.Modifier.Position.ABOVE,
-                      ),
-                    );
-                  } else if (typeof note.addModifier === "function") {
-                    note.addModifier(
-                      new Flow.Articulation(code).setPosition(
-                        Flow.Modifier.Position.ABOVE,
-                      ),
-                      0,
-                    );
+                noteData.articulations.forEach((a) => {
+                  const t = typeof a === "string" ? a : (a && a.type);
+                  const code = map[t] || null;
+                  if (!code) return;
+                  if (
+                    Flow &&
+                    Flow.Articulation &&
+                    Flow.Modifier &&
+                    Flow.Modifier.Position &&
+                    (typeof note.addArticulation === "function" ||
+                      typeof note.addModifier === "function")
+                  ) {
+                    const art = new Flow.Articulation(code);
+                    if (art && typeof art.setPosition === "function") {
+                      art.setPosition(Flow.Modifier.Position.ABOVE);
+                    }
+                    if (typeof note.addArticulation === "function") {
+                      note.addArticulation(0, art);
+                    } else if (typeof note.addModifier === "function") {
+                      note.addModifier(art, 0);
+                    }
                   }
+                });
+              }
+
+              // Stroke (arpeggiate/strum) direction, if supported by VexFlow
+              if (noteData.stroke && Flow && Flow.Stroke) {
+                try {
+                  const dir = (noteData.stroke.direction || "up").toLowerCase();
+                  const style = (noteData.stroke.style || "roll").toLowerCase();
+                  const type =
+                    Flow.Stroke.Type &&
+                    (style === "brush"
+                      ? (dir === "down" ? Flow.Stroke.Type.BRUSH_DOWN : Flow.Stroke.Type.BRUSH_UP)
+                      : (dir === "down" ? Flow.Stroke.Type.ROLL_DOWN : Flow.Stroke.Type.ROLL_UP));
+                  if (type && typeof note.addStroke === "function") {
+                    note.addStroke(0, new Flow.Stroke(type));
+                  }
+                } catch (_) {
+                  // safe fallback: skip stroke if not supported
                 }
               }
+
               return note;
             });
 
@@ -583,10 +795,7 @@ class VexFlowConverter {
             }
           });
 
-          const totalTicks = vexFlowData.tracks[0].notes.reduce(
-            (s, n) => s + durToTicks(n.duration),
-            0,
-          );
+          const totalTicks = measures.length * measureCapacity;
           const voice = new Flow.Voice({
             num_beats: totalTicks,
             beat_value: 32,
@@ -621,7 +830,7 @@ class VexFlowConverter {
             const details = document.createElement("details");
             details.style.marginTop = "10px";
             const summary = document.createElement("summary");
-            summary.textContent = "VexFlow Source (click to expand)";
+            summary.textContent = "VexFlow Source";
             summary.style.cursor = "pointer";
             details.appendChild(summary);
             const pre = document.createElement("pre");
@@ -656,6 +865,53 @@ class VexFlowConverter {
                   }).setContext(context).draw();
                 } catch (_) {
                   // ignore tie errors
+                }
+              }
+            }
+          }
+
+          // Draw glissando/portamento when available (safe fallback if unsupported)
+          if (createdNotes.length && Flow && Flow.Glissando) {
+            for (let i = 0; i < createdNotes.length - 1; i++) {
+              const start = createdNotes[i];
+              if (!start || !start.data || !start.vf) continue;
+              const g = start.data.gliss;
+              if (!g) continue;
+
+              // Find target note by key match if provided, otherwise next note
+              let end = null;
+              if (g.targetKey) {
+                for (let j = i + 1; j < createdNotes.length; j++) {
+                  const cand = createdNotes[j];
+                  if (cand && cand.data && Array.isArray(cand.data.keys)) {
+                    const hasKey = cand.data.keys.some(
+                      (k) => String(k).toLowerCase() === String(g.targetKey).toLowerCase()
+                    );
+                    if (hasKey) {
+                      end = cand;
+                      break;
+                    }
+                  }
+                }
+              }
+              if (!end) {
+                for (let j = i + 1; j < createdNotes.length; j++) {
+                  if (createdNotes[j]) { end = createdNotes[j]; break; }
+                }
+              }
+
+              if (end && end.vf) {
+                try {
+                  const gl = new Flow.Glissando({
+                    from: start.vf,
+                    to: end.vf,
+                    text: g.text || (g.type === "portamento" ? "port." : "gliss."),
+                  });
+                  if (gl && typeof gl.setContext === "function") {
+                    gl.setContext(context).draw();
+                  }
+                } catch (_) {
+                  // safe fallback: skip gliss if not supported
                 }
               }
             }
@@ -868,28 +1124,151 @@ class VexFlowConverter {
             })()
             : 60;
           const detectedClef = fallbackMedian < 60 ? "bass" : "treble";
-          // Single stave with internal barlines (renderer fallback)
-          const stave = new Flow.Stave(left, top, avail);
-          stave.addClef(
-            vexFlowData.clef ||
-              (vexFlowData.tracks &&
-                vexFlowData.tracks[0] &&
-                vexFlowData.tracks[0].clef) ||
-              (detectedClef || "treble"),
-          );
-          if (vexFlowData.timeSignature) {
-            stave.addTimeSignature(vexFlowData.timeSignature);
+          // Fallback renderer: multiline systems
+          const measuresPerLine =
+            rendererConfig.measuresPerLine && rendererConfig.measuresPerLine > 0
+              ? Math.max(1, Math.floor(rendererConfig.measuresPerLine))
+              : Math.max(
+                1,
+                Math.floor(
+                  avail /
+                    Math.max(
+                      120,
+                      Math.floor(avail / Math.max(1, measures.length)),
+                    ),
+                ),
+              );
+          const lines = [];
+          for (let i = 0; i < measures.length; i += measuresPerLine) {
+            lines.push(measures.slice(i, i + measuresPerLine));
           }
-          if (vexFlowData.keySignature && vexFlowData.keySignature !== "C") {
-            stave.addKeySignature(vexFlowData.keySignature);
-          }
-          stave.setContext(context).draw();
+          const systemGap = 80;
+
+          const allBeams = [];
+          const createdNotes = [];
+
+          lines.forEach((lineMeasures, sysIndex) => {
+            const y = top + sysIndex * systemGap;
+
+            const stave = new Flow.Stave(left, y, avail);
+            const normalizeClef = (c) => {
+              const m = (c || "").toString().toLowerCase();
+              const map = {
+                g: "treble",
+                treble: "treble",
+                f: "bass",
+                bass: "bass",
+                c: "alto",
+                alto: "alto",
+                tenor: "tenor",
+                "treble-8vb": "treble-8vb",
+                "treble-8va": "treble-8va",
+                "bass-8vb": "bass-8vb",
+              };
+              return map[m] || "treble";
+            };
+            const clefToUse = normalizeClef(
+              vexFlowData.clef ||
+                (vexFlowData.tracks &&
+                  vexFlowData.tracks[0] &&
+                  vexFlowData.tracks[0].clef) ||
+                detectedClef,
+            );
+            stave.addClef(clefToUse);
+            if (vexFlowData.timeSignature && sysIndex === 0) {
+              stave.addTimeSignature(vexFlowData.timeSignature);
+            }
+            if (
+              vexFlowData.keySignature && vexFlowData.keySignature !== "C" &&
+              sysIndex === 0
+            ) {
+              stave.addKeySignature(vexFlowData.keySignature);
+            }
+            stave.setContext(context).draw();
+
+            // Title and tempo on first system
+            if (sysIndex === 0) {
+              try {
+                const title = vexFlowData.metadata &&
+                  vexFlowData.metadata.title;
+                if (title) {
+                  context.save();
+                  context.setFont("bold 16px Arial");
+                  context.fillText(title, left, y - 20);
+                  context.restore();
+                }
+                if (vexFlowData.tempo) {
+                  context.save();
+                  context.setFont("12px Arial");
+                  const tempoText = `♩ = ${vexFlowData.tempo}`;
+                  context.fillText(tempoText, left + 200, y - 8);
+                  context.restore();
+                }
+              } catch {}
+            }
+
+            const tickables = [];
+            lineMeasures.forEach((mNotes, idxInLine) => {
+              const sorted = mNotes.slice().sort((a, b) =>
+                (a.time ?? 0) - (b.time ?? 0)
+              );
+              sorted.forEach((noteData) => {
+                if (noteData.isRest) {
+                  tickables.push(
+                    new Flow.StaveNote({
+                      keys: ["d/5"],
+                      duration: String(noteData.duration).replace(/r?$/, "r"),
+                    }),
+                  );
+                } else {
+                  const note = new Flow.StaveNote({
+                    keys: noteData.keys.map((k) => k.toLowerCase()),
+                    duration: noteData.duration,
+                  });
+                  tickables.push(note);
+                  createdNotes.push({ vf: note, data: noteData });
+                }
+              });
+              if (
+                idxInLine < lineMeasures.length - 1 && Flow.BarNote &&
+                Flow.Barline && Flow.Barline.type
+              ) {
+                tickables.push(new Flow.BarNote(Flow.Barline.type.SINGLE));
+              }
+            });
+
+            const voice = new Flow.Voice({
+              num_beats: Math.max(1, lineMeasures.length) * measureCapacity,
+              beat_value: 32,
+            });
+            if (
+              voice.setMode && Flow.Voice && Flow.Voice.Mode &&
+              Flow.Voice.Mode.SOFT !== undefined
+            ) {
+              voice.setMode(Flow.Voice.Mode.SOFT);
+            } else if (typeof voice.setStrict === "function") {
+              voice.setStrict(false);
+            }
+            voice.addTickables(
+              tickables.filter((t) =>
+                typeof t.getTicks === "function"
+                  ? t.getTicks().value() > 0
+                  : true
+              ),
+            );
+
+            const formatter = new Flow.Formatter().joinVoices([voice]);
+            formatter.format([voice], avail - 20);
+            voice.draw(context, stave);
+          });
 
           const allTickables = [];
-          const createdNotes = [];
-          const allBeams = [];
+          // createdNotes already declared earlier
+          // allBeams already declared earlier
           measures.forEach((mNotes, idx) => {
-            const tickables = mNotes.map((noteData) => {
+            const tickables = mNotes.slice().sort((a, b) =>
+              (a.time ?? 0) - (b.time ?? 0)
+            ).map((noteData) => {
               if (noteData.isRest) {
                 return new Flow.StaveNote({
                   keys: ["d/5"],
@@ -950,31 +1329,58 @@ class VexFlowConverter {
                   }
                 });
               }
-              if (noteData.articulation) {
+              // Articulations glyphs: prefer precomputed VexFlow codes, fallback to array-based mapping
+              if (Array.isArray(noteData.vfArticulations) && noteData.vfArticulations.length) {
+                noteData.vfArticulations.forEach((code) => {
+                  if (
+                    Flow &&
+                    Flow.Articulation &&
+                    Flow.Modifier &&
+                    Flow.Modifier.Position &&
+                    (typeof note.addArticulation === "function" ||
+                      typeof note.addModifier === "function")
+                  ) {
+                    const art = new Flow.Articulation(code);
+                    if (art && typeof art.setPosition === "function") {
+                      art.setPosition(Flow.Modifier.Position.ABOVE);
+                    }
+                    if (typeof note.addArticulation === "function") {
+                      note.addArticulation(0, art);
+                    } else if (typeof note.addModifier === "function") {
+                      note.addModifier(art, 0);
+                    }
+                  }
+                });
+              } else if (Array.isArray(noteData.articulations)) {
                 const map = {
                   staccato: "a.",
                   accent: "a>",
                   tenuto: "a-",
                   marcato: "a^",
                 };
-                const code = map[noteData.articulation] || null;
-                if (code) {
-                  if (typeof note.addArticulation === "function") {
-                    note.addArticulation(
-                      0,
-                      new Flow.Articulation(code).setPosition(
-                        Flow.Modifier.Position.ABOVE,
-                      ),
-                    );
-                  } else if (typeof note.addModifier === "function") {
-                    note.addModifier(
-                      new Flow.Articulation(code).setPosition(
-                        Flow.Modifier.Position.ABOVE,
-                      ),
-                      0,
-                    );
+                noteData.articulations.forEach((a) => {
+                  const t = typeof a === "string" ? a : (a && a.type);
+                  const code = map[t] || null;
+                  if (!code) return;
+                  if (
+                    Flow &&
+                    Flow.Articulation &&
+                    Flow.Modifier &&
+                    Flow.Modifier.Position &&
+                    (typeof note.addArticulation === "function" ||
+                      typeof note.addModifier === "function")
+                  ) {
+                    const art = new Flow.Articulation(code);
+                    if (art && typeof art.setPosition === "function") {
+                      art.setPosition(Flow.Modifier.Position.ABOVE);
+                    }
+                    if (typeof note.addArticulation === "function") {
+                      note.addArticulation(0, art);
+                    } else if (typeof note.addModifier === "function") {
+                      note.addModifier(art, 0);
+                    }
                   }
-                }
+                });
               }
               return note;
             });
@@ -1026,10 +1432,7 @@ class VexFlowConverter {
             }
           });
 
-          const totalTicks = vexFlowData.tracks[0].notes.reduce(
-            (s, n) => s + durToTicks(n.duration),
-            0,
-          );
+          const totalTicks = measures.length * measureCapacity;
           const voice = new Flow.Voice({
             num_beats: totalTicks,
             beat_value: 32,
@@ -1102,15 +1505,7 @@ function convertToVexFlow(composition, options = {}) {
   const converter = new VexFlowConverter();
   const vexFlowData = converter.convertToVexFlow(composition);
 
-  if (options.elementId) {
-    const rendererConfig = converter.createRenderer(
-      options.elementId,
-      options.width,
-      options.height,
-    );
-    return converter.generateRenderingInstructions(vexFlowData, rendererConfig);
-  }
-
+  // Always return the data structure; rendering is handled by higher-level APIs
   return vexFlowData;
 }
 
