@@ -1,0 +1,156 @@
+{
+  "summary": {
+    "tests_run": 24,
+    "tests_passed": 24,
+    "success_rate": 100.0,
+    "timestamp": "2025-09-28T01:56:34.892899",
+    "test_user": "testuser_8548",
+    "api_url": "https://musicode-1.preview.emergentagent.com/api"
+  },
+  "results": [
+    {
+      "test_name": "Health Check",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"status\": \"healthy\",\n  \"timestamp\": \"2025-09-28T01:56:33.808Z\",\n  \"database\": \"connected\"\n}...",
+      "timestamp": "2025-09-28T01:56:33.811940"
+    },
+    {
+      "test_name": "API Info",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"message\": \"JMON Studio - Multi-User Music Platform API\",\n  \"version\": \"2.0.0\",\n  \"framework\": \"Express.js (FeathersJS-inspired)\",\n  \"features\": [\n    \"User Authentication\",\n    \"Project Folders\",\n    \"Usage Analytics\",\n    \"JMON Compilation\",\n    \"OpenDAW Integration\",\n    \"Service-oriented Arc...",
+      "timestamp": "2025-09-28T01:56:33.848129"
+    },
+    {
+      "test_name": "User Registration",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5MjU1YmY4OS0wNDE5LTRhZWItODU2ZC01YjBhZjU4YWJiYmYiLCJpYXQiOjE3NTkwMjQ1OTMsImV4cCI6MTc1OTExMDk5M30.fG9tm7kVQBSIw57YIJJvNfaR-v584DVE8sbC3a1Tghc\",\n  \"token_type\": \"bearer\",\n  \"user\": {\n    \"id\": \"9255bf89-0419-4aeb-856d-5b0af58abbb...",
+      "timestamp": "2025-09-28T01:56:33.960655"
+    },
+    {
+      "test_name": "User Login",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5MjU1YmY4OS0wNDE5LTRhZWItODU2ZC01YjBhZjU4YWJiYmYiLCJpYXQiOjE3NTkwMjQ1OTQsImV4cCI6MTc1OTExMDk5NH0.74LNbL0gyMpCWgJWS_nIFRSGOhlnexwI7lpdMRW-IE8\",\n  \"token_type\": \"bearer\",\n  \"user\": {\n    \"id\": \"9255bf89-0419-4aeb-856d-5b0af58abbb...",
+      "timestamp": "2025-09-28T01:56:34.071505"
+    },
+    {
+      "test_name": "Get User Profile",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"id\": \"9255bf89-0419-4aeb-856d-5b0af58abbbf\",\n  \"username\": \"testuser_8548\",\n  \"email\": \"test_9563@example.com\",\n  \"full_name\": \"Test User\",\n  \"created_at\": \"2025-09-28T01:56:33.954Z\",\n  \"last_login\": \"2025-09-28T01:56:34.065Z\"\n}...",
+      "timestamp": "2025-09-28T01:56:34.114373"
+    },
+    {
+      "test_name": "Invalid Login",
+      "success": true,
+      "details": "Status: 401, Response: {\n  \"detail\": \"Incorrect username or password\"\n}...",
+      "timestamp": "2025-09-28T01:56:34.150535"
+    },
+    {
+      "test_name": "Unauthorized Access",
+      "success": true,
+      "details": "Status: 401, Response: {\n  \"error\": \"Access token required\"\n}...",
+      "timestamp": "2025-09-28T01:56:34.190933"
+    },
+    {
+      "test_name": "Create Project",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"id\": \"a3aaf385-3080-4583-95c9-cf9fdf4f2260\",\n  \"userId\": \"9255bf89-0419-4aeb-856d-5b0af58abbbf\",\n  \"name\": \"Test Project 015634\",\n  \"description\": \"A test project for FeathersJS backend\",\n  \"jmon_code\": \"// Test JMON code\\nconst composition = { tracks: [], tempo: 120, timeSignature: '4/4', dura...",
+      "timestamp": "2025-09-28T01:56:34.233572"
+    },
+    {
+      "test_name": "List Projects",
+      "success": true,
+      "details": "Status: 200, Response: [\n  {\n    \"_id\": \"68d895d219e9cd5f0324ac6b\",\n    \"id\": \"a3aaf385-3080-4583-95c9-cf9fdf4f2260\",\n    \"userId\": \"9255bf89-0419-4aeb-856d-5b0af58abbbf\",\n    \"name\": \"Test Project 015634\",\n    \"description\": \"A test project for FeathersJS backend\",\n    \"jmon_code\": \"// Test JMON code\\nconst composition =...",
+      "timestamp": "2025-09-28T01:56:34.273744"
+    },
+    {
+      "test_name": "List Projects (Root Folder)",
+      "success": true,
+      "details": "Status: 200, Response: [\n  {\n    \"_id\": \"68d895d219e9cd5f0324ac6b\",\n    \"id\": \"a3aaf385-3080-4583-95c9-cf9fdf4f2260\",\n    \"userId\": \"9255bf89-0419-4aeb-856d-5b0af58abbbf\",\n    \"name\": \"Test Project 015634\",\n    \"description\": \"A test project for FeathersJS backend\",\n    \"jmon_code\": \"// Test JMON code\\nconst composition =...",
+      "timestamp": "2025-09-28T01:56:34.310960"
+    },
+    {
+      "test_name": "Get Single Project",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"_id\": \"68d895d219e9cd5f0324ac6b\",\n  \"id\": \"a3aaf385-3080-4583-95c9-cf9fdf4f2260\",\n  \"userId\": \"9255bf89-0419-4aeb-856d-5b0af58abbbf\",\n  \"name\": \"Test Project 015634\",\n  \"description\": \"A test project for FeathersJS backend\",\n  \"jmon_code\": \"// Test JMON code\\nconst composition = { tracks: [], t...",
+      "timestamp": "2025-09-28T01:56:34.348447"
+    },
+    {
+      "test_name": "Update Project",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"_id\": \"68d895d219e9cd5f0324ac6b\",\n  \"id\": \"a3aaf385-3080-4583-95c9-cf9fdf4f2260\",\n  \"userId\": \"9255bf89-0419-4aeb-856d-5b0af58abbbf\",\n  \"name\": \"Updated Test Project\",\n  \"description\": \"Updated description\",\n  \"jmon_code\": \"// Updated JMON code\\nconst newComposition = { tracks: [{ name: 'Test T...",
+      "timestamp": "2025-09-28T01:56:34.388322"
+    },
+    {
+      "test_name": "Create Folder",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"id\": \"6ed64d6e-607a-40ce-bb33-4058e9e46aee\",\n  \"userId\": \"9255bf89-0419-4aeb-856d-5b0af58abbbf\",\n  \"name\": \"Test Folder 015634\",\n  \"description\": \"A test folder for organizing projects\",\n  \"createdAt\": \"2025-09-28T01:56:34.421Z\",\n  \"updatedAt\": \"2025-09-28T01:56:34.421Z\",\n  \"_id\": \"68d895d219e9...",
+      "timestamp": "2025-09-28T01:56:34.425471"
+    },
+    {
+      "test_name": "List Folders",
+      "success": true,
+      "details": "Status: 200, Response: [\n  {\n    \"_id\": \"68d895d119e9cd5f0324ac68\",\n    \"id\": \"0b6fe112-592e-470f-baea-e231c2d12c35\",\n    \"name\": \"My Projects\",\n    \"description\": \"Default folder for your compositions\",\n    \"userId\": \"9255bf89-0419-4aeb-856d-5b0af58abbbf\",\n    \"createdAt\": \"2025-09-28T01:56:33.955Z\",\n    \"updatedAt\": \"20...",
+      "timestamp": "2025-09-28T01:56:34.463570"
+    },
+    {
+      "test_name": "Update Folder",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"_id\": \"68d895d219e9cd5f0324ac6e\",\n  \"id\": \"6ed64d6e-607a-40ce-bb33-4058e9e46aee\",\n  \"userId\": \"9255bf89-0419-4aeb-856d-5b0af58abbbf\",\n  \"name\": \"Updated Test Folder\",\n  \"description\": \"Updated folder description\",\n  \"createdAt\": \"2025-09-28T01:56:34.421Z\",\n  \"updatedAt\": \"2025-09-28T01:56:34.50...",
+      "timestamp": "2025-09-28T01:56:34.504041"
+    },
+    {
+      "test_name": "JMON Compile",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"compiled\": true,\n  \"object\": {\n    \"tracks\": [],\n    \"tempo\": 120,\n    \"timeSignature\": \"4/4\",\n    \"duration\": 0\n  },\n  \"errors\": []\n}...",
+      "timestamp": "2025-09-28T01:56:34.544910"
+    },
+    {
+      "test_name": "Project Play Tracking",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"message\": \"Play tracked\"\n}...",
+      "timestamp": "2025-09-28T01:56:34.588943"
+    },
+    {
+      "test_name": "Analytics Stats",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"total_users\": 5,\n  \"total_projects\": 1,\n  \"total_compilations\": 1,\n  \"total_plays\": 1,\n  \"active_users_today\": 2,\n  \"popular_projects\": [\n    {\n      \"_id\": \"68d895d219e9cd5f0324ac6b\",\n      \"name\": \"Updated Test Project\",\n      \"playCount\": 1,\n      \"lastPlayed\": \"2025-09-28T01:56:34.581Z\"\n   ...",
+      "timestamp": "2025-09-28T01:56:34.634616"
+    },
+    {
+      "test_name": "Analytics Activity",
+      "success": true,
+      "details": "Status: 200, Response: [\n  {\n    \"_id\": \"68d895d219e9cd5f0324ac71\",\n    \"id\": \"c80e56da-733a-4144-8436-9d31753e731f\",\n    \"userId\": \"9255bf89-0419-4aeb-856d-5b0af58abbbf\",\n    \"eventType\": \"project_play\",\n    \"projectId\": \"a3aaf385-3080-4583-95c9-cf9fdf4f2260\",\n    \"timestamp\": \"2025-09-28T01:56:34.581Z\"\n  },\n  {\n    \"_id...",
+      "timestamp": "2025-09-28T01:56:34.678228"
+    },
+    {
+      "test_name": "Analytics Activity (7 days)",
+      "success": true,
+      "details": "Status: 200, Response: [\n  {\n    \"_id\": \"68d895d219e9cd5f0324ac71\",\n    \"id\": \"c80e56da-733a-4144-8436-9d31753e731f\",\n    \"userId\": \"9255bf89-0419-4aeb-856d-5b0af58abbbf\",\n    \"eventType\": \"project_play\",\n    \"projectId\": \"a3aaf385-3080-4583-95c9-cf9fdf4f2260\",\n    \"timestamp\": \"2025-09-28T01:56:34.581Z\"\n  },\n  {\n    \"_id...",
+      "timestamp": "2025-09-28T01:56:34.718595"
+    },
+    {
+      "test_name": "Data Persistence - Project",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"_id\": \"68d895d219e9cd5f0324ac6b\",\n  \"id\": \"a3aaf385-3080-4583-95c9-cf9fdf4f2260\",\n  \"userId\": \"9255bf89-0419-4aeb-856d-5b0af58abbbf\",\n  \"name\": \"Updated Test Project\",\n  \"description\": \"Updated description\",\n  \"jmon_code\": \"// Updated JMON code\\nconst newComposition = { tracks: [{ name: 'Test T...",
+      "timestamp": "2025-09-28T01:56:34.755061"
+    },
+    {
+      "test_name": "Data Persistence - Folder",
+      "success": true,
+      "details": "Status: 200, Response: [\n  {\n    \"_id\": \"68d895d119e9cd5f0324ac68\",\n    \"id\": \"0b6fe112-592e-470f-baea-e231c2d12c35\",\n    \"name\": \"My Projects\",\n    \"description\": \"Default folder for your compositions\",\n    \"userId\": \"9255bf89-0419-4aeb-856d-5b0af58abbbf\",\n    \"createdAt\": \"2025-09-28T01:56:33.955Z\",\n    \"updatedAt\": \"20...",
+      "timestamp": "2025-09-28T01:56:34.817513"
+    },
+    {
+      "test_name": "Delete Folder",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"message\": \"Folder deleted successfully\"\n}...",
+      "timestamp": "2025-09-28T01:56:34.854733"
+    },
+    {
+      "test_name": "Delete Project",
+      "success": true,
+      "details": "Status: 200, Response: {\n  \"message\": \"Project deleted successfully\"\n}...",
+      "timestamp": "2025-09-28T01:56:34.892531"
+    }
+  ]
+}

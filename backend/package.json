@@ -1,0 +1,39 @@
+{
+  "name": "jmon-studio-backend",
+  "version": "1.0.0",
+  "description": "JMON Studio - Multi-User Music Platform Backend",
+  "main": "src/feathers-app.js",
+  "scripts": {
+    "start": "node src/feathers-app.js",
+    "dev": "nodemon src/feathers-app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "music",
+    "composition",
+    "jmon",
+    "feathers"
+  ],
+  "author": "JMON Studio",
+  "license": "MIT",
+  "dependencies": {
+    "@feathersjs/authentication": "^5.0.35",
+    "@feathersjs/authentication-local": "^5.0.35",
+    "@feathersjs/authentication-oauth": "^5.0.35",
+    "@feathersjs/configuration": "^5.0.35",
+    "@feathersjs/errors": "^5.0.35",
+    "@feathersjs/express": "^5.0.35",
+    "@feathersjs/feathers": "^5.0.35",
+    "@feathersjs/mongodb": "^5.0.24",
+    "@feathersjs/socketio": "^5.0.35",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^16.4.5",
+    "feathers-mongodb": "^6.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.8.1",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

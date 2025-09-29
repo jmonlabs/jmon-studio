@@ -1,0 +1,124 @@
+{
+  "summary": {
+    "tests_run": 19,
+    "tests_passed": 19,
+    "success_rate": 100.0,
+    "timestamp": "2025-09-27T21:57:42.840796"
+  },
+  "results": [
+    {
+      "test_name": "User 1 Registration",
+      "success": true,
+      "details": "User registered with ID: 3ccd4e49-318d-400c-a059-0cb68c96b02e",
+      "timestamp": "2025-09-27T21:57:42.079695"
+    },
+    {
+      "test_name": "User 2 Registration",
+      "success": true,
+      "details": "User registered with ID: b0df3b87-ba08-4c6a-9be7-c06cf0808b98",
+      "timestamp": "2025-09-27T21:57:42.144872"
+    },
+    {
+      "test_name": "Duplicate Registration Prevention",
+      "success": true,
+      "details": "Correctly prevented duplicate registration",
+      "timestamp": "2025-09-27T21:57:42.180941"
+    },
+    {
+      "test_name": "Get Current User Info",
+      "success": true,
+      "details": "Retrieved user info for testuser1_1759010261",
+      "timestamp": "2025-09-27T21:57:42.219370"
+    },
+    {
+      "test_name": "Invalid Token Rejection",
+      "success": true,
+      "details": "Correctly rejected invalid token",
+      "timestamp": "2025-09-27T21:57:42.254781"
+    },
+    {
+      "test_name": "User 1 Folder Creation",
+      "success": true,
+      "details": "Created folder with ID: 0c8b361d-6ba5-49b6-822f-d65f88cfa4d2",
+      "timestamp": "2025-09-27T21:57:42.293894"
+    },
+    {
+      "test_name": "User 2 Folder Creation",
+      "success": true,
+      "details": "Created folder with ID: bc183fc2-4130-4ee4-9278-811e52b2fdf4",
+      "timestamp": "2025-09-27T21:57:42.326912"
+    },
+    {
+      "test_name": "Folder Data Isolation",
+      "success": true,
+      "details": "User 1 can only see their own folders",
+      "timestamp": "2025-09-27T21:57:42.360899"
+    },
+    {
+      "test_name": "User 1 Project Creation",
+      "success": true,
+      "details": "Created project with ID: c4736930-365a-4f97-9623-4a47fa796bdb",
+      "timestamp": "2025-09-27T21:57:42.394310"
+    },
+    {
+      "test_name": "User 2 Project Creation",
+      "success": true,
+      "details": "Created project with ID: d02f536d-94cd-488c-a19f-3fd0f436efd2",
+      "timestamp": "2025-09-27T21:57:42.427650"
+    },
+    {
+      "test_name": "Project Data Isolation",
+      "success": true,
+      "details": "User 1 can only see their own projects",
+      "timestamp": "2025-09-27T21:57:42.502198"
+    },
+    {
+      "test_name": "Cross-User Project Access Prevention",
+      "success": true,
+      "details": "User 1 cannot access User 2's project",
+      "timestamp": "2025-09-27T21:57:42.541067"
+    },
+    {
+      "test_name": "JMON Code Compilation",
+      "success": true,
+      "details": "Code compiled successfully",
+      "timestamp": "2025-09-27T21:57:42.581769"
+    },
+    {
+      "test_name": "Project Play Tracking",
+      "success": true,
+      "details": "Play event tracked successfully",
+      "timestamp": "2025-09-27T21:57:42.616798"
+    },
+    {
+      "test_name": "Usage Statistics",
+      "success": true,
+      "details": "Retrieved stats: {'total_users': 6, 'total_projects': 1, 'total_compilations': 1, 'total_plays': 1, 'active_users_today': 0, 'popular_projects': [{'name': 'User 1 Test Project', 'play_count': 1, 'last_played': '2025-09-27T21:57:42.612000'}]}",
+      "timestamp": "2025-09-27T21:57:42.665000"
+    },
+    {
+      "test_name": "Activity Tracking",
+      "success": true,
+      "details": "Retrieved 5 activity events",
+      "timestamp": "2025-09-27T21:57:42.698872"
+    },
+    {
+      "test_name": "Project Update",
+      "success": true,
+      "details": "Project updated successfully",
+      "timestamp": "2025-09-27T21:57:42.731481"
+    },
+    {
+      "test_name": "Unauthorized Project Access",
+      "success": true,
+      "details": "Correctly rejected request without token",
+      "timestamp": "2025-09-27T21:57:42.808841"
+    },
+    {
+      "test_name": "Unauthorized Folder Access",
+      "success": true,
+      "details": "Correctly rejected request without token",
+      "timestamp": "2025-09-27T21:57:42.840495"
+    }
+  ]
+}
